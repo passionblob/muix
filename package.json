@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "workspaces": {
+    "packages": ["packages/muix-components"]
+  },
+  "scripts": {
+    "clean": "rimraf ./**/node_modules",
+    "storybook:web": "yarn workspace @muix/muix-storybook start -o web",
+    "storybook:android": "yarn workspace @muix/muix-storybook start -o android",
+    "storybook:ios": "yarn workspace @muix/muix-storybook start -o ios"
+  }
+}
