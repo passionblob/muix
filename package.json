@@ -1,12 +1,15 @@
 {
   "private": true,
   "workspaces": {
-    "packages": ["packages/muix-components"]
+    "packages": ["packages/*"],
+    "nohoist": ["**"]
   },
   "scripts": {
     "clean": "rimraf ./**/node_modules",
-    "storybook:web": "yarn workspace @muix/muix-storybook start -o web",
-    "storybook:android": "yarn workspace @muix/muix-storybook start -o android",
-    "storybook:ios": "yarn workspace @muix/muix-storybook start -o ios"
+    "storybook:watch": "yarn workspace @muix/muix-storybook watch-stories",
+    "storybook:reactnative": "yarn workspace @muix/muix-storybook start",
+    "storybook:web": "yarn workspace @muix/muix-storybook storybook-web",
+    "storybook:android": "yarn workspace @muix/muix-storybook android",
+    "storybook:ios": "yarn workspace @muix/muix-storybook ios"
   }
 }

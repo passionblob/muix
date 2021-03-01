@@ -25,6 +25,7 @@ module.exports = ({ config }) => {
     );
     config.resolve.extensions.push(".ts", ".tsx");
     config.resolve.alias = {
+        'core-js/modules': path.resolve(__dirname, '../../node_modules/core-js/modules'),
         'react': path.resolve(__dirname, '../../node_modules/react'),
         'react-dom': path.resolve(__dirname, '../../node_modules/react-dom'),
         'react-native$': path.resolve(__dirname, '../../node_modules/react-native-web'),
