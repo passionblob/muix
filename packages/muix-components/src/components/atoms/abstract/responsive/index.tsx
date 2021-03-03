@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-import {SupportedComponent, Props, ScreenSizeType} from '../../../types'
-import {ResponsiveContext, ResponsiveProvider} from '../../../providers/responsiveProvider'
+import {SupportedComponent, Props, ScreenSizeType} from '../../../../types'
+import {ResponsiveContext} from '../../../../providers/responsiveProvider'
 import Identity from '../identity';
 
 type PropsForScreens<C extends SupportedComponent> = {
@@ -14,10 +14,6 @@ type ResponsiveProps<C extends SupportedComponent> = {
 
 export class Responsive<C extends SupportedComponent> extends Component<ResponsiveProps<C>> {
     static contextType = ResponsiveContext;
-
-    componentDidMount() {
-        console.log(this.context);
-    }
 
     render() {
         const {renderForScreen} = this;
