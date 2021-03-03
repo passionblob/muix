@@ -5,7 +5,14 @@
       "packages/*"
     ],
     "nohoist": [
-      "**"
+      "**/react-native",
+      "**/react-native/**",
+      "**/react-native-web",
+      "**/react-native-web/**",
+      "**/@react-native-community",
+      "**/@react-native-community/**",
+      "**/@storybook",
+      "**/@storybook/**"
     ]
   },
   "scripts": {
@@ -17,6 +24,5 @@
     "storybook:web": "yarn storybook storybook-web",
     "storybook:android": "yarn storybook android",
     "storybook:ios": "yarn storybook ios"
-  },
-  "version": "1.22.10"
+  }
 }

@@ -2,7 +2,7 @@
     "compilerOptions": {
         "baseUrl": "./",
         "paths": {
-            "@muix/muix-components": ["./packages/muix-components/*"]
+            "@muix/muix-components/*": ["./packages/muix-components/*"],
         }
     }
   }
