@@ -18,5 +18,5 @@
     "storybook:android": "yarn storybook android",
     "storybook:ios": "yarn storybook ios"
   },
-  "version": "1.22.09"
+  "version": "1.22.10"
 }
