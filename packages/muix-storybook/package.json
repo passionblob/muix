@@ -11,11 +11,14 @@
     "watch-stories": "watch 'yarn run prestorybook' ./src/stories",
     "start-storybook-web": "node ./node_modules/@storybook/react/dist/server/index.js -p 2995 -c ./src/config_web",
     "storybook-web": "yarn run start-storybook-web",
-    "prestorybook": "rnstl"
+    "prestorybook": "rnstl",
+    "build:web": "yarn build-storybook -c ./src/config_web",
+    "chromatic": "npx chromatic build:web --project-token cb998b5d9bfa",
+    "deploy:web": "yarn chromatic -b build:web"
   },
   "dependencies": {
     "@muix/muix-components": "*",
-    "chroma-js": "^2.1.0",
+    "chroma-js": "^2.1.1",
     "react": "16.13.1",
     "react-native": "0.63.4",
     "react-native-web": "^0.15.0",
@@ -45,6 +48,7 @@
     "babel-loader": "^8.2.2",
     "babel-plugin-module-resolver": "^4.1.0",
     "babel-plugin-react-native-web": "^0.15.0",
+    "chromatic": "^5.6.3",
     "eslint": "^6.5.1",
     "html-webpack-plugin": "^5.2.0",
     "jest": "^25.1.0",

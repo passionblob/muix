@@ -4,6 +4,7 @@ import {loadStories} from "../storyLoader"
 import * as customDecorators from "../storybook/decorators"
 import {addDecorator} from "../storybook/utils"
 
+addons
 addons.setConfig({
     isFullscreen: false,
     showNav: true,
