@@ -1,2 +1,2 @@
-export * from './flexHorizontal'
+export * from './flex'
 export * from './padding'

@@ -12,7 +12,11 @@
       "**/@react-native-community",
       "**/@react-native-community/**",
       "**/@storybook",
-      "**/@storybook/**"
+      "**/@storybook/**",
+      "**/deepmerge",
+      "**/chroma-js",
+      "**/cross-env",
+      "**/lodash.clonedeep"
     ]
   },
   "scripts": {

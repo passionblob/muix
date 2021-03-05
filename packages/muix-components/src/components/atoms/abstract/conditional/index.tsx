@@ -1,6 +1,6 @@
 import React from 'react'
 import {IdentityProps, Identity} from '../identity';
-import {SupportedComponent} from '../../../types'
+import {SupportedComponent} from '../../../../types'
 
 interface ConditionalProps<C extends SupportedComponent> extends IdentityProps<C> {
 	shouldRender?: boolean;

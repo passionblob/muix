@@ -1,5 +1,5 @@
 import React, { RefObject } from 'react'
-import {Props, SupportedComponent} from '../../../types'
+import {Props, SupportedComponent} from '../../../../types'
 
 export interface IdentityProps<C extends SupportedComponent> {
 	component?: C;

@@ -1,18 +1,12 @@
 import React from 'react';
-import { Dimensions, Platform } from 'react-native';
+import { Dimensions, Platform, PlatformOSType } from 'react-native';
 
 import {screenSize} from '../constants';
 import {ScreenSizeType} from '../types';
 import {debounce} from '../utils';
 
-
 const getScreenInfo = (): ScreenInfo => {
     const {width, height} = Dimensions.get("window");
-    const os: ScreenInfo["os"] = (
-        Platform.OS === "macos"
-        || Platform.OS === "web"
-        || Platform.OS === "windows"
-    ) ? "web" : Platform.OS;
     
     let sizeType: ScreenSizeType = "md";
 
@@ -24,17 +18,14 @@ const getScreenInfo = (): ScreenInfo => {
     return {
         height,
         width,
-        os,
+        os: Platform.OS,
         sizeType,
     }
 }
 
 const defaultResponsiveInterface: ResponsiveInterface = {
-    actions: {
-        down: (screenSize: ScreenSizeType) => false,
-        up: (screenSize: ScreenSizeType) => false,
-    },
-    screen: getScreenInfo()
+    actions: undefined,
+    screen: undefined
 }
 
 export const ResponsiveContext = React.createContext<ResponsiveInterface>(defaultResponsiveInterface);
@@ -47,12 +38,17 @@ export class ResponsiveProvider extends React.Component<ResponsiveProviderProps,
 
     handleResize = (): void => {
         this.setState((state) => {
-            if (state === undefined) return state;
             return {
                 screen: getScreenInfo(),
                 actions: {
-                    down: (sizeType: ScreenSizeType) => state.screen.width <= screenSize[sizeType],
-                    up: (sizeType: ScreenSizeType) => state.screen.width > screenSize[sizeType],
+                    down: (sizeType: ScreenSizeType) => {
+                        if (!state.screen) return false
+                        return state.screen.width <= screenSize[sizeType]
+                    },
+                    up: (sizeType: ScreenSizeType) => {
+                        if (!state.screen) return false
+                        return state.screen.width > screenSize[sizeType]
+                    },
                 }
             }
         })
@@ -61,7 +57,7 @@ export class ResponsiveProvider extends React.Component<ResponsiveProviderProps,
     debouncedResizeHandler = debounce(this.handleResize, 100);
 
     componentDidMount(): void {
-        if (document !== undefined && window !== undefined) {
+        if (Platform.OS === "web" && document !== undefined && window !== undefined) {
             window.addEventListener("resize", this.debouncedResizeHandler)
         } else {
             Dimensions.addEventListener("change", this.debouncedResizeHandler)
@@ -69,7 +65,7 @@ export class ResponsiveProvider extends React.Component<ResponsiveProviderProps,
     }
 
     componentWillUnmount(): void {
-        if (document !== undefined && window !== undefined) {
+        if (Platform.OS === "web" && document !== undefined && window !== undefined) {
             window.removeEventListener("resize", this.debouncedResizeHandler)
         } else {
             Dimensions.removeEventListener("change", this.debouncedResizeHandler)
@@ -89,7 +85,7 @@ export class ResponsiveProvider extends React.Component<ResponsiveProviderProps,
 
 
 export interface ScreenInfo {
-    os: "android" | "ios" | "web";
+    os: PlatformOSType;
     sizeType: ScreenSizeType;
     width: number;
     height: number;
@@ -100,8 +96,8 @@ export interface ResponsiveAction {
 }
 
 export interface ResponsiveInterface {
-    screen: ScreenInfo;
-    actions: {
+    screen?: ScreenInfo;
+    actions?: {
         up: ResponsiveAction;
         down: ResponsiveAction;
     }
