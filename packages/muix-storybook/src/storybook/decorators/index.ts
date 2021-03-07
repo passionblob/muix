@@ -1,2 +1,2 @@
 
-export * from './decorateWithTitle'
+export * from '../../lib/storybook/decorators/decorateWithTitle'

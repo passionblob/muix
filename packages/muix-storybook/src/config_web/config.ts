@@ -1,10 +1,7 @@
 import {addons} from '@storybook/addons'
-import {configure} from "@storybook/react-native"
+import {configure, addDecorator} from "@storybook/react-native"
 import {loadStories} from "../storyLoader"
-import * as customDecorators from "../storybook/decorators"
-import {addDecorator} from "../storybook/utils"
 
-addons
 addons.setConfig({
     isFullscreen: false,
     showNav: true,
@@ -18,8 +15,5 @@ addons.setConfig({
     initialActive: 'sidebar',
     showRoots: false,
 })
-
-Object.values(customDecorators)
-    .forEach((decorator) => addDecorator(decorator))
 
 configure(loadStories, module)

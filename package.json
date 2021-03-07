@@ -1,5 +1,15 @@
 {
   "private": true,
+  "scripts": {
+    "clean": "rimraf ./**/node_modules",
+    "components": "yarn workspace @muix/muix-components",
+    "storybook": "yarn workspace @muix/muix-storybook",
+    "storybook:watch": "yarn storybook watch-stories",
+    "storybook:reactnative": "yarn storybook start",
+    "storybook:web": "yarn storybook storybook-web",
+    "storybook:android": "yarn storybook android",
+    "storybook:ios": "yarn storybook ios"
+  },
   "workspaces": {
     "packages": [
       "packages/*"
@@ -15,18 +25,7 @@
       "**/@storybook/**",
       "**/deepmerge",
       "**/chroma-js",
-      "**/cross-env",
-      "**/lodash.clonedeep"
+      "**/cross-env"
     ]
-  },
-  "scripts": {
-    "clean": "rimraf ./**/node_modules",
-    "components": "yarn workspace @muix/muix-components",
-    "storybook": "yarn workspace @muix/muix-storybook",
-    "storybook:watch": "yarn storybook watch-stories",
-    "storybook:reactnative": "yarn storybook start",
-    "storybook:web": "yarn storybook storybook-web",
-    "storybook:android": "yarn storybook android",
-    "storybook:ios": "yarn storybook ios"
   }
 }

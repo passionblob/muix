@@ -9,5 +9,6 @@ module.exports = {
         "@muix/muix-components": path.resolve(__dirname, "../muix-components"),
       }
     }],
+    ["@babel/plugin-proposal-decorators", { "legacy": true }]
   ],
 };
