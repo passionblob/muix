@@ -23,35 +23,32 @@ const getScreenInfo = (): ScreenInfo => {
     }
 }
 
-const defaultResponsiveInterface: ResponsiveInterface = {
-    actions: undefined,
-    screen: undefined
+const createResponsiveInterface = (): ResponsiveInterface => {
+    const screenInfo = getScreenInfo()
+    return {
+        screen: screenInfo,
+        actions: {
+            down: (sizeType: ScreenSizeType) => {
+                return screenInfo.width <= screenSize[sizeType]
+            },
+            up: (sizeType: ScreenSizeType) => {
+                return screenInfo.width > screenSize[sizeType]
+            },
+        }
+    }
 }
 
-export const ResponsiveContext = React.createContext<ResponsiveInterface>(defaultResponsiveInterface);
+export const ResponsiveContext = React.createContext<undefined | ResponsiveInterface>(undefined);
 
 export class ResponsiveProvider extends React.Component<ResponsiveProviderProps, ResponsiveInterface> {
     constructor(props: Readonly<ResponsiveProviderProps>) {
         super(props);
-        this.state = defaultResponsiveInterface;
+        this.state = createResponsiveInterface();
     }
 
     handleResize = (): void => {
-        this.setState((state) => {
-            return {
-                screen: getScreenInfo(),
-                actions: {
-                    down: (sizeType: ScreenSizeType) => {
-                        if (!state.screen) return false
-                        return state.screen.width <= screenSize[sizeType]
-                    },
-                    up: (sizeType: ScreenSizeType) => {
-                        if (!state.screen) return false
-                        return state.screen.width > screenSize[sizeType]
-                    },
-                }
-            }
-        })
+        const responsiveInterface = createResponsiveInterface();
+        this.setState(responsiveInterface)
     }
 
     debouncedResizeHandler = debounce(this.handleResize, 100);
@@ -96,8 +93,8 @@ export interface ResponsiveAction {
 }
 
 export interface ResponsiveInterface {
-    screen?: ScreenInfo;
-    actions?: {
+    screen: ScreenInfo;
+    actions: {
         up: ResponsiveAction;
         down: ResponsiveAction;
     }

@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import {SupportedComponent, Props, ScreenSizeType} from '../../../../types'
 import {ResponsiveContext, ResponsiveInterface} from '../../../../providers/responsiveProvider'
-import Identity from '../identity';
+import Identity from '../identity'
 import {anyOf} from "../../../../utils"
 import deepmerge from "deepmerge"
 
@@ -13,7 +13,7 @@ type ResponsiveProps<C extends SupportedComponent> = {
     component?: C;
     commonProps?: Props<C>;
     fallback?: ScreenSizeType;
-    render?: ((responsive: ResponsiveInterface) => any)
+    render?: ((responsive: ResponsiveInterface) => JSX.Element)
 } & PropsForScreens<C>;
 export class Responsive<C extends SupportedComponent> extends Component<ResponsiveProps<C>> {
     static contextType = ResponsiveContext;
@@ -23,10 +23,10 @@ export class Responsive<C extends SupportedComponent> extends Component<Responsi
     constructor(props: Readonly<ResponsiveProps<C>>) {
         super(props)
 
-        const {fallback} = props;
+        const {fallback, render} = props;
         const anyPropsForScreen = anyOf(props.lg, props.md, props.sm, props.xl, props.xs)
 
-        if (anyPropsForScreen === undefined) {
+        if (anyPropsForScreen === undefined && render === undefined) {
             throw new Error("Provide props for at least one screen size")
         }
 
@@ -35,7 +35,7 @@ export class Responsive<C extends SupportedComponent> extends Component<Responsi
             throw new Error("props.fallback should indicate screen size which is provided with props")
         }
 
-        this.fallbackProps = fallbackProps || anyPropsForScreen;
+        this.fallbackProps = fallbackProps || anyPropsForScreen || {};
     }
 
     render() {
@@ -47,19 +47,26 @@ export class Responsive<C extends SupportedComponent> extends Component<Responsi
         )
     }
 
-    renderForScreen = (responsiveInterface: ResponsiveInterface) => {
-        const sizeType = responsiveInterface.screen?.sizeType || "xs";
+    renderForScreen = (responsiveInterface?: ResponsiveInterface) => {
+        
         const {props, fallbackProps} = this;
         const {children, component, commonProps, render} = props;
 
+        // TODO: check if this would be okay for every devices.
+        // There could be a case where device cannot capture dimensions
+        if (responsiveInterface === undefined) return null
+
+        const sizeType = responsiveInterface.screen?.sizeType || "xs";
         const renderResult = render ? render(responsiveInterface) : null;
 
         if (renderResult && component) throw new Error("render and component conflicts each other")
 
-        const mergedProps = deepmerge(
-            props[sizeType] || fallbackProps || {},
-            commonProps || {}
-        ) as Props<C> | undefined;
+        if (renderResult) return renderResult
+
+        const target = props[sizeType] || fallbackProps || {}
+        const source = commonProps || {}
+        
+        const mergedProps = deepmerge(target, source) as Props<C>
 
         return (
             <Identity
