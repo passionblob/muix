@@ -1,20 +1,28 @@
 import { AppRegistry } from 'react-native'
 import { getStorybookUI, configure, addDecorator } from '@storybook/react-native'
+import { addons } from "@storybook/addons"
 import { name as appName } from '../../app.json'
 import { loadStories } from '../storyLoader'
 import * as customDecorators from "../lib/storybook/decorators"
-import CustomUI from "./CustomUI"
 import './rn-addons'
+import { ResponsiveProvider } from '@muix/muix-components/src'
 
 Object.values(customDecorators).forEach((decorator) => addDecorator(decorator))
 
 configure(loadStories, module)
 
-getStorybookUI({
+const StorybookUI = getStorybookUI({
   asyncStorage: null,
-  onDeviceUI: false,
+  onDeviceUI: true,
 })
 
-AppRegistry.registerComponent(appName, () => CustomUI)
+const channel = addons.getChannel();
+Object.assign(channel, {
+  isAsync: false
+})
 
-export default CustomUI
+//@ts-ignore
+AppRegistry.setWrapperComponentProvider(() => ResponsiveProvider)
+AppRegistry.registerComponent(appName, () => StorybookUI)
+
+export default StorybookUI
