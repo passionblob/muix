@@ -1,2 +1,1 @@
-export * from "./decorateWithTitle"
-export * from "./decorateWithPadding"
+export * from "./globalDecorator"
