@@ -25,7 +25,9 @@
       "**/@storybook/**",
       "**/deepmerge",
       "**/chroma-js",
-      "**/cross-env"
+      "**/cross-env",
+      "**/styled-components",
+      "**/styled-components/**"
     ]
   }
 }

@@ -1,22 +1,58 @@
 import React from 'react';
 import {storiesOf} from '@storybook/react-native';
-import { Text, View } from 'react-native';
+import {StoryFn} from "@storybook/addons"
+import { Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { Conditional } from '@muix/muix-components/src';
+import Styled from "styled-components"
+import chroma from 'chroma-js';
+import { withKnobs, object, boolean } from "@storybook/addon-knobs"
+
+const Dummy = Styled(View)`
+    width: 200px;
+    height: 100px;
+    background-color: ${chroma.random().hex()};
+`;
+
+const ConditionalStory: StoryFn<JSX.Element> = (p) => {
+    return (
+        <View>
+            <Conditional
+                shouldRender={true}
+                component={TouchableOpacity}
+                defaultProps={{
+                    style: {backgroundColor: "red"}
+                }}
+                commonProps={{
+                    onPress: () => {}
+                }}
+                cases={[
+                    [boolean("first condition", true), {
+                        style: {
+                            backgroundColor: "blue",
+                            width: 300,
+                            height: 100,
+                        }
+                    }],
+                    [boolean("second condition", true), {
+                        style: {
+                            backgroundColor: "green",
+                            width: 200,
+                            height: 200,
+                        }
+                    }],
+                    [boolean("third condition", true), {
+                        style: {
+                            backgroundColor: "yellow",
+                            width: 100,
+                            height: 300,
+                        }
+                    }],
+                ]}
+            />
+        </View>
+    )
+}
 
 storiesOf("Atoms/Abstract", module)
-    .add(
-        "Conditional",
-        (...args) => {
-            // console.log(args)
-            return (
-                <View>
-                    <Text>작성해야 함</Text>
-                </View>
-            )
-        },
-        {
-            component: View,
-            args: {
-                some: "string",
-            }
-        }
-    )
+    .addDecorator(withKnobs)
+    .add("Conditional", ConditionalStory)

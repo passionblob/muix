@@ -6,18 +6,22 @@ import {ScreenSizeType} from '../types';
 import {debounce} from '../utils';
 
 const getScreenInfo = (): ScreenInfo => {
-    const {width, height} = Dimensions.get("window");
+    const {width: curScreenWidth, height} = Dimensions.get("window");
     
     let sizeType: ScreenSizeType = "md";
+    let foundSize = false
 
     for (const key in screenSize) {
         const screenSizeType = key as ScreenSizeType;
-        if (screenSize[screenSizeType] <= width) sizeType = screenSizeType;
+        if (screenSize[screenSizeType] >= curScreenWidth && !foundSize) {
+            sizeType = screenSizeType;
+            foundSize = true;
+        }
     }
     
     return {
         height,
-        width,
+        width: curScreenWidth,
         os: Platform.OS,
         sizeType,
     }

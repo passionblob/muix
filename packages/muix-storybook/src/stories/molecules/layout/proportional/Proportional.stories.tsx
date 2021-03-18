@@ -1,5 +1,6 @@
 import React from 'react';
 import {storiesOf} from '@storybook/react-native';
+import {StoryFn} from "@storybook/addons"
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import {Box, Proportional, ProportionalProps} from '@muix/muix-components'
 import chroma from 'chroma-js';
@@ -58,36 +59,41 @@ const cases: Case[] = [
     },
 ]
 
+const ProportionalStory: StoryFn<JSX.Element> = (p) => {
+    return (
+        <ScrollView showsVerticalScrollIndicator={false}>
+            {cases.map((storyCase, i) => {
+                const {caseTitle, ...props} = storyCase
+                const {proportions} = props;
+                return (
+                    <View key={caseTitle}>
+                        <Text style={styles.caseTitle}>{i}) {caseTitle}</Text>
+                        <Proportional {...props}>
+                            {Array(proportions.length).fill(0).map((_, i) => (
+                                <View key={`${caseTitle}_${i}`} style={{
+                                    backgroundColor: chroma.random().hex(),
+                                    alignItems: "center",
+                                    justifyContent: "center"
+                                }}>
+                                    <View style={styles.proportionTextCircle}>
+                                        <Text style={styles.proportionText}>{proportions[i] || "undefined"}</Text>
+                                    </View>
+                                </View>
+                            ))}
+                        </Proportional>
+                        <Box height={20} />
+                    </View>
+                )
+            })}
+        </ScrollView>
+    )
+}
+
+
 storiesOf("Molecules/Layout", module)
     .add(
         "Proportional",
-        () => (
-            <ScrollView showsVerticalScrollIndicator={false}>
-                {cases.map((storyCase, i) => {
-                    const {caseTitle, ...props} = storyCase
-                    const {proportions} = props;
-                    return (
-                        <View key={caseTitle}>
-                            <Text style={styles.caseTitle}>{i}) {caseTitle}</Text>
-                            <Proportional {...props} >
-                                {Array(proportions.length).fill(0).map((_, i) => (
-                                    <View key={`${caseTitle}_${i}`} style={{
-                                        backgroundColor: chroma.random().hex(),
-                                        alignItems: "center",
-                                        justifyContent: "center"
-                                    }}>
-                                        <View style={styles.proportionTextCircle}>
-                                            <Text style={styles.proportionText}>{proportions[i] || "undefined"}</Text>
-                                        </View>
-                                    </View>
-                                ))}
-                            </Proportional>
-                            <Box height={20} />
-                        </View>
-                    )
-                })}
-            </ScrollView>
-        ),
+        ProportionalStory,
     )
 
 
