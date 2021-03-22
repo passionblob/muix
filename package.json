@@ -6,7 +6,7 @@
     "storybook": "yarn workspace @muix/muix-storybook",
     "storybook:watch": "yarn storybook watch-stories",
     "storybook:reactnative": "yarn storybook start",
-    "storybook:web": "yarn storybook storybook-web",
+    "storybook:web": "concurrently \"yarn storybook:watch\" \"yarn storybook storybook-web\"",
     "storybook:android": "yarn storybook android",
     "storybook:ios": "yarn storybook ios"
   },
