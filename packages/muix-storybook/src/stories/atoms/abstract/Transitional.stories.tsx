@@ -28,33 +28,36 @@ const TransitionalStory = () => {
                     height: 200,
                 }}
                 defaultStyle={{
+                    borderColor: "black",
                     backgroundColor: "yellow",
-                    margin: 100
+                    borderWidth: 0,
                 }}
                 cases={[
                     [conditions[0], {
-                        backgroundColor: "black",
+                        backgroundColor: "white",
                         width: 100,
                         height: 400,
-                        margin: 10,
+                        borderWidth: 10,
+                        borderColor: "blue",
                     }],
                     [conditions[1], {
                         backgroundColor: "red",
                         width: 200,
                         height: 300,
-                        margin: 20,
+                        borderWidth: 20,
                     }],
                     [conditions[2], {
                         backgroundColor: "blue",
                         width: 300,
                         height: 200,
-                        margin: 30,
+                        borderWidth: 30,
                     }],
                     [conditions[3], {
                         backgroundColor: "green",
                         width: 400,
                         height: 100,
-                        margin: 40
+                        borderWidth: 40,
+                        borderColor: "red",
                     }],
                 ]}
             />

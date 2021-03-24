@@ -11,9 +11,15 @@ export interface TransitionalProps<C extends TransitionalSupportedComponent> {
     cases: [boolean, StyleOf<C>, TransitionOption?][]
 }
 
-export type TransitionalSupportedComponent = typeof Animated.View | typeof Animated.Text
+export type TransitionalSupportedComponent =
+    typeof Animated.View
+    | typeof Animated.Text
+    | typeof Animated.Image
+    | typeof Animated.ScrollView
+    | typeof Animated.SectionList
+    | typeof Animated.FlatList
 
-export type TransitionalSupportedStyle = ViewStyle | TextStyle | ImageStyle
+export type TransitionalSupportedStyle = ViewStyle & TextStyle & ImageStyle
 
 export type StyleOf<C extends TransitionalSupportedComponent> = 
     C extends typeof Animated.View ? ViewStyle 
