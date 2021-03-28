@@ -34,23 +34,25 @@ const TransitionalStory = () => {
                 }}
                 cases={[
                     [conditions[0], {
-                        backgroundColor: "white",
+                        backgroundColor: "dodgerblue",
                         width: 100,
                         height: 400,
                         borderWidth: 10,
-                        borderColor: "blue",
+                        borderColor: "blue"
                     }],
                     [conditions[1], {
                         backgroundColor: "red",
                         width: 200,
                         height: 300,
-                        borderWidth: 20,
+                        borderColor: "green",
                     }],
                     [conditions[2], {
                         backgroundColor: "blue",
                         width: 300,
                         height: 200,
                         borderWidth: 30,
+                        borderColor: "skyblue",
+                        borderRadius: 100,
                     }],
                     [conditions[3], {
                         backgroundColor: "green",
@@ -58,6 +60,7 @@ const TransitionalStory = () => {
                         height: 100,
                         borderWidth: 40,
                         borderColor: "red",
+                        opacity: 0.5,
                     }],
                 ]}
             />

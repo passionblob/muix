@@ -19,9 +19,9 @@ export type TransitionalSupportedComponent =
     | typeof Animated.SectionList
     | typeof Animated.FlatList
 
-export type TransitionalSupportedStyle = ViewStyle & TextStyle & ImageStyle
-
+export type TransitionalSupportedStyle = Partial<ViewStyle & TextStyle & ImageStyle>
 export type StyleOf<C extends TransitionalSupportedComponent> = 
     C extends typeof Animated.View ? ViewStyle 
     : C extends typeof Animated.Text ? TextStyle
+    : C extends typeof Animated.Image ? ImageStyle
     : never;
