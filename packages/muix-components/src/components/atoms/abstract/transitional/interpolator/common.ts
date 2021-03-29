@@ -23,3 +23,5 @@ export const makeRecords = <Keys extends Readonly<string[]>, T>(
         return acc
     }, {} as Record<Keys[number], T>)
 }
+
+export const returnNext = <Prev, Next>(prev: Prev, next: Next): Next => next

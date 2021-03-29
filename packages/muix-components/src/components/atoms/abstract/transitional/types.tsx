@@ -1,6 +1,6 @@
-import { View, ViewStyle, TextStyle, Animated, ImageStyle } from "react-native"
+import { ViewStyle, TextStyle, Animated, ImageStyle, View, Image, StyleProp } from "react-native"
 
-export interface TransitionOption {
+export interface TransitionOption extends Omit<Animated.SpringAnimationConfig, "toValue" | "useNativeDriver"> {
     reset?: boolean
 }
 
@@ -11,17 +11,11 @@ export interface TransitionalProps<C extends TransitionalSupportedComponent> {
     cases: [boolean, StyleOf<C>, TransitionOption?][]
 }
 
-export type TransitionalSupportedComponent =
-    typeof Animated.View
-    | typeof Animated.Text
-    | typeof Animated.Image
-    | typeof Animated.ScrollView
-    | typeof Animated.SectionList
-    | typeof Animated.FlatList
+export type TransitionalSupportedComponent = typeof View | typeof Text | typeof Image
 
 export type TransitionalSupportedStyle = Partial<ViewStyle & TextStyle & ImageStyle>
 export type StyleOf<C extends TransitionalSupportedComponent> = 
-    C extends typeof Animated.View ? ViewStyle 
-    : C extends typeof Animated.Text ? TextStyle
-    : C extends typeof Animated.Image ? ImageStyle
+    C extends typeof View ? StyleProp<ViewStyle> 
+    : C extends typeof Text ? StyleProp<TextStyle>
+    : C extends typeof Image ? StyleProp<ImageStyle>
     : never;

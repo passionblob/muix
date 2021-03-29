@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import React, { Component } from 'react'
-import { Animated, StyleSheet } from 'react-native'
+import { Animated, FlatList, StyleSheet } from 'react-native'
 import { StyleOf, TransitionalProps, TransitionalSupportedComponent } from './types'
 import { getInterpolatedStyle, getTransitionalStyle } from "./interpolator"
 export class Transitional <C extends TransitionalSupportedComponent> extends Component<TransitionalProps<C>> {
@@ -17,11 +18,15 @@ export class Transitional <C extends TransitionalSupportedComponent> extends Com
     }
 
     componentDidUpdate(): void {
+        const {cases} = this.props
+        const satisfyingCase = cases.find((styleCase) => styleCase[0] === true)
+        const config = satisfyingCase && (satisfyingCase[2] || {})
         this.anim.stopAnimation()
         this.anim.setValue(0)
         Animated.spring(this.anim, {
             toValue: 1,
             useNativeDriver: false,
+            ...config,
         }).start()
     }
 
@@ -30,13 +35,15 @@ export class Transitional <C extends TransitionalSupportedComponent> extends Com
         const satisfyingCase = cases.find((styleCase) => styleCase[0] === true)
         const caseStyle = satisfyingCase ? satisfyingCase[1] : defaultStyle
         const mergedStyle = StyleSheet.flatten([commonStyle, caseStyle]) as StyleOf<C>
-        this.prevStyle = getInterpolatedStyle(this.prevStyle, this.nextStyle, this.progress) as StyleOf<C>
+        //@ts-ignore
+        this.prevStyle = getInterpolatedStyle(this.prevStyle, this.nextStyle, Math.min(this.progress, 1)) as StyleOf<C>
         this.nextStyle = mergedStyle
+        //@ts-ignore
         const transitionalStyle = getTransitionalStyle(this.prevStyle, this.nextStyle, this.anim)
         const flattened = StyleSheet.flatten([commonStyle, transitionalStyle])
-
         return React.createElement(
-            component,
+        // @ts-ignore
+            Animated.createAnimatedComponent(component),
             {style: flattened},
             children,
         )

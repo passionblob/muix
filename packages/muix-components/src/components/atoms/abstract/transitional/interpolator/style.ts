@@ -2,7 +2,7 @@ import { ColorValue, Animated } from "react-native"
 import { anyOf } from "../../../../../utils"
 import { TransitionalSupportedStyle } from "../types"
 import chroma from "chroma-js"
-import {interpolateNumber, mapNumberToAnimated, makeRecords} from "./common"
+import {interpolateNumber, mapNumberToAnimated, makeRecords, returnNext} from "./common"
 import {
     interpolateTransform,
     mapTransformToAnimated,
@@ -67,8 +67,6 @@ const interpolateLayout = (prev=defaultLayout, next=defaultLayout, ratio: number
     }
 }
 
-const returnNext = <Prev, Next>(prev: Prev, next: Next): Next => next
-
 const mapColorToAnimated = (
     prev: ColorValue = "rgba(255,255,255,0)",
     next: ColorValue = "rgba(255,255,255,0)",
@@ -108,7 +106,11 @@ const mapLengthToAnimated = (
     })
 }
 
-const mapLayoutToAnimated = (prev=defaultLayout, next=defaultLayout, animated: Animated.Value) => {
+const mapLayoutToAnimated = (
+    prev=defaultLayout,
+    next=defaultLayout,
+    animated: Animated.Value
+) => {
     return {
         width: animated.interpolate({
             inputRange: [0, 1],

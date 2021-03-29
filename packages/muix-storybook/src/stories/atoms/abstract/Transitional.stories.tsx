@@ -22,7 +22,7 @@ const TransitionalStory = () => {
             </View>
 
             <Transitional
-                component={Animated.View}
+                component={View}
                 commonStyle={{
                     width: 200,
                     height: 200,
@@ -33,18 +33,25 @@ const TransitionalStory = () => {
                     borderWidth: 0,
                 }}
                 cases={[
-                    [conditions[0], {
+                    [conditions[0], [{
                         backgroundColor: "dodgerblue",
                         width: 100,
                         height: 400,
                         borderWidth: 10,
                         borderColor: "blue"
+                    }, {
+                        transform: [{translateX: 100}]
+                    }], {
+                        speed: 10,
                     }],
                     [conditions[1], {
                         backgroundColor: "red",
                         width: 200,
                         height: 300,
                         borderColor: "green",
+                        transform: [{translateX: 200}]
+                    }, {
+                        bounciness: 100
                     }],
                     [conditions[2], {
                         backgroundColor: "blue",
@@ -53,6 +60,8 @@ const TransitionalStory = () => {
                         borderWidth: 30,
                         borderColor: "skyblue",
                         borderRadius: 100,
+                    }, {
+                        damping: 100
                     }],
                     [conditions[3], {
                         backgroundColor: "green",
@@ -61,6 +70,8 @@ const TransitionalStory = () => {
                         borderWidth: 40,
                         borderColor: "red",
                         opacity: 0.5,
+                    }, {
+                        mass: 10
                     }],
                 ]}
             />

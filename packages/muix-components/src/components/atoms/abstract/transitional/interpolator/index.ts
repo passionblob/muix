@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Animated } from "react-native"
 import { keysOf } from "../../../../../utils/object/keysOf"
 import { TransitionalSupportedStyle } from "../types"
@@ -16,11 +17,11 @@ export const getInterpolatedStyle = (
 ): TransitionalSupportedStyle => {
     return keysOf(prevStyle, nextStyle).reduce((acc, key) => {
         const assertedKey = key as keyof TransitionalSupportedStyle
-        const prevValue = prevStyle[assertedKey] || getDefaultValue(key)
-        const nextValue = nextStyle[assertedKey] || getDefaultValue(key)
-        const value = styleInterpolator[assertedKey](prevValue, nextValue, ratio)
-        acc[assertedKey] = value
-        return acc  
+        const prevValue = prevStyle[assertedKey] || getDefaultValue(assertedKey)
+        const nextValue = nextStyle[assertedKey] || getDefaultValue(assertedKey)
+        //@ts-ignore
+        acc[assertedKey] = styleInterpolator[assertedKey](prevValue, nextValue, ratio)
+        return acc
     }, {} as TransitionalSupportedStyle)
 }
 
@@ -33,6 +34,8 @@ export const getTransitionalStyle = (
         const assertedKey = key as keyof TransitionalSupportedStyle
         const prevValue = prevStyle[assertedKey] || getDefaultValue(key)
         const nextValue = nextStyle[assertedKey] || getDefaultValue(key)
+        if (assertedKey === "transform") console.log(prevValue, nextValue)
+        //@ts-ignore
         acc[assertedKey] = animatedStyleMappeer[assertedKey](prevValue, nextValue, anim)
         return acc
     }, {} as Animated.AnimatedProps<TransitionalSupportedStyle>)

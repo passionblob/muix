@@ -1,20 +1,7 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Animated, ViewStyle } from "react-native"
 import { keysOf } from "../../../../../utils/object/keysOf"
-import {mapNumberToAnimated, interpolateNumber, makeRecords} from "./common"
-
-const transformKeys = [
-    "matrix", "perspective", "rotate",
-    "rotateX", "rotateY", "rotateZ",
-    "scale", "scaleX", "scaleY",
-    "translateX", "translateY", "skewX", "skewY"
-] as const
-
-const defaultTransform: ViewStyle["transform"] = [
-    {matrix: [0, 0, 0, 0, 0, 0,]}, {perspective: 0},
-    {rotate: "0deg"}, {rotateX: "0deg"}, {rotateY: "0deg"}, {rotateZ: "0deg"},
-    {translateX: 0}, {translateY: 0}, {skewX: "0deg"}, {skewY: "0deg"},
-    {scale: 0}, {scaleX: 0}, {scaleY: 0},
-]
+import {mapNumberToAnimated, interpolateNumber, makeRecords, returnNext} from "./common"
 
 const flattenTransform = (arr: NonNullable<ViewStyle["transform"]>): Partial<FlatTransform> => {
     return arr.reduce((acc, obj) => {
@@ -37,7 +24,28 @@ const interpolateDegree = (prev="0deg", next="0deg", ratio: number) => {
     return interpolateNumber(prevNum, nextNum, ratio) + "deg"
 }
 
+const transformKeys = [
+    "matrix",
+    "perspective",
+    "rotate", "rotateX", "rotateY", "rotateZ",
+    "scale", "scaleX", "scaleY",
+    "translateX", "translateY",
+    "skewX", "skewY"
+] as const
+
+const defaultTransform: ViewStyle["transform"] = [
+    {matrix: [1, 0, 0, 1, 0, 0]},
+    {perspective: 0},
+    {rotate: "0deg"}, {rotateX: "0deg"}, {rotateY: "0deg"}, {rotateZ: "0deg"},
+    {scale: 1}, {scaleX: 1}, {scaleY: 1},
+    {translateX: 0}, {translateY: 0},
+    {skewX: "0deg"}, {skewY: "0deg"},
+]
+
+const defaultFlatTransform = flattenTransform(defaultTransform)
+
 const defaultMatrix = [0,0,0,0,0,0]
+
 export const interpolateMatrix = (prev=defaultMatrix, next=defaultMatrix, ratio: number): number[] => {
     return defaultMatrix.map((_, i) => interpolateNumber(prev[i], next[i], ratio))
 }
@@ -53,11 +61,11 @@ export const mapMatrixToAnimated = (
     prev=defaultMatrix,
     next=defaultMatrix,
     animated: Animated.Value
-): Animated.WithAnimatedValue<FlatTransform["matrix"]> => {
+): Animated.WithAnimatedArray<number> => {
     return defaultMatrix.map((_, i) => {
         return animated.interpolate({
             inputRange: [0, 1],
-            outputRange: [prev[i] || 0, next[i] || 0]
+            outputRange: [prev[i], next[i]]
         })
     })
 }
@@ -73,7 +81,8 @@ const numberProperties = [
 const transformInterpolator = {
     ...makeRecords(degreeProperties, interpolateDegree),
     ...makeRecords(numberProperties, interpolateNumber),
-    matrix: interpolateMatrix,
+    matrix: returnNext,
+    // matrix: interpolateMatrix,
 } as {
     [key in TransformKeys]: (
         prev?: FlatTransform[key],
@@ -85,7 +94,8 @@ const transformInterpolator = {
 const animatedTransformMappeer = {
     ...makeRecords(degreeProperties, mapDegreeToAnimated),
     ...makeRecords(numberProperties, mapNumberToAnimated),
-    matrix: mapMatrixToAnimated,
+    matrix: returnNext,
+    // matrix: mapMatrixToAnimated,
 } as {
     [key in TransformKeys]: (
         prev: FlatTransform[key],
@@ -99,14 +109,14 @@ export const interpolateTransform = (
     next=defaultTransform,
     ratio: number
 ): ViewStyle["transform"] => {
-    const flatPrev = flattenTransform(prev)
-    const flatNext = flattenTransform(next)
+    const flatPrev = {...defaultFlatTransform, ...flattenTransform(prev)}
+    const flatNext = {...defaultFlatTransform, ...flattenTransform(next)}
     const interpolated = keysOf(flatPrev, flatNext).reduce((acc, key) => {
         const assertedKey = key as TransformKeys
         const prevValue = flatPrev[assertedKey]
         const nextValue = flatNext[assertedKey]
-        const value = transformInterpolator[assertedKey](prevValue, nextValue, ratio)
-        acc[assertedKey] = value
+        //@ts-ignore
+        acc[assertedKey] = transformInterpolator[assertedKey](prevValue, nextValue, ratio)
         return acc
     }, {} as FlatTransform)
 
@@ -118,37 +128,13 @@ export const mapTransformToAnimated = (
     next=defaultTransform,
     animated: Animated.Value
 ): Animated.WithAnimatedValue<NonNullable<ViewStyle["transform"]>> => {
-    const flatPrev = flattenTransform(prev)
-    const flatNext = flattenTransform(next)
-    const mapped = transformKeys.reduce((acc, key) => {
+    const flatPrev = {...defaultFlatTransform, ...flattenTransform(prev)}
+    const flatNext = {...defaultFlatTransform, ...flattenTransform(next)}
+    const mapped = keysOf(flatPrev, flatNext).reduce((acc, key) => {
         const prevValue = flatPrev[key]
         const nextValue = flatNext[key]
-
-        if (key === "matrix") {
-            if (Array.isArray(prevValue) && Array.isArray(nextValue)) {
-                const value = animatedTransformMappeer[key](prevValue, nextValue, animated)
-                acc[key] = value
-            } else if (Array.isArray(nextValue)) {
-                acc[key] = nextValue
-            }
-        } else if (numberProperties.includes(key as NumberKeys)) {
-            const asserted = key as NumberKeys
-            if (typeof prevValue === "number" && typeof nextValue === "number") {
-                const value = animatedTransformMappeer[asserted](prevValue, nextValue, animated)
-                acc[asserted] = value            
-            } else if (typeof nextValue === "number") {
-                acc[asserted] = nextValue
-            }
-        } else if (degreeProperties.includes(key as StringKeys)) {
-            const asserted = key as StringKeys
-            if (typeof prevValue === "string" && typeof nextValue === "string") {
-                const value = animatedTransformMappeer[asserted](prevValue, nextValue, animated)
-                acc[asserted] = value
-            } else if (typeof nextValue === "string") {
-                acc[asserted] = nextValue
-            }
-        }
-
+        //@ts-ignore
+        acc[key] = animatedTransformMappeer[key](prevValue, nextValue, animated)
         return acc
     }, {} as Animated.WithAnimatedValue<FlatTransform>)
     return spreadFlattened(mapped)
