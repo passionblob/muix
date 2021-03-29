@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Animated, ViewStyle } from "react-native"
-import { keysOf } from "../../../muix-components/src/utils"
+import { keysOf } from "../../../muix-components/src/utils/object/keysOf"
 import {mapNumberToAnimated, interpolateNumber, makeRecords, returnNext} from "./common"
 
 const flattenTransform = (arr: NonNullable<ViewStyle["transform"]>): Partial<FlatTransform> => {

@@ -1,7 +1,7 @@
 import { ColorValue, Animated } from "react-native"
 import chroma from "chroma-js"
 
-import { anyOf } from "../../../muix-components/src/utils"
+import { anyOf } from "../../../muix-components/src/utils/array/anyOf"
 import {interpolateNumber, mapNumberToAnimated, makeRecords, returnNext} from "./common"
 import { TransitionalSupportedStyle } from "../types"
 import {
