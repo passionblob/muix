@@ -18,10 +18,13 @@ const spreadFlattened = (flat: FlatTransform | Animated.WithAnimatedValue<FlatTr
     }, [] as NonNullable<ViewStyle["transform"]>)
 }
 
-const interpolateDegree = (prev="0deg", next="0deg", ratio: number) => {
-    const prevNum = Number(prev.replace("deg", ""))
-    const nextNum = Number(next.replace("deg", ""))
-    return interpolateNumber(prevNum, nextNum, ratio) + "deg"
+const interpolateRotation = (prev="0deg", next="0deg", ratio: number) => {
+    const unit = "deg"
+    const prevNum = Number(prev.replace(/deg|rad/, ""))
+    const nextNum = Number(next.replace(/deg|rad/, ""))
+    const prevDegree = prev.match(/deg/) ? prevNum : prevNum * 180 / Math.PI
+    const nextDegree = next.match(/deg/) ? nextNum : nextNum * 180 / Math.PI
+    return interpolateNumber(prevDegree, nextDegree, ratio) + unit
 }
 
 const transformKeys = [
@@ -50,10 +53,15 @@ export const interpolateMatrix = (prev=defaultMatrix, next=defaultMatrix, ratio:
     return defaultMatrix.map((_, i) => interpolateNumber(prev[i], next[i], ratio))
 }
 
-const mapDegreeToAnimated = (prev="0deg", next="0deg", animated: Animated.Value) => {
+const mapRotationToAnimated = (prev="0deg", next="0deg", animated: Animated.Value) => {
+    const unit = "deg"
+    const prevNum = Number(prev.replace(/deg|rad/, ""))
+    const nextNum = Number(next.replace(/deg|rad/, ""))
+    const prevDegree = prev.match(/deg/) ? prevNum : prevNum * 180 / Math.PI
+    const nextDegree = next.match(/deg/) ? nextNum : nextNum * 180 / Math.PI
     return animated.interpolate({
         inputRange: [0, 1],
-        outputRange: [prev, next]
+        outputRange: [`${prevDegree}${unit}`, `${nextDegree}${unit}`]
     })
 }
 
@@ -79,7 +87,7 @@ const numberProperties = [
 ] as const
 
 const transformInterpolator = {
-    ...makeRecords(degreeProperties, interpolateDegree),
+    ...makeRecords(degreeProperties, interpolateRotation),
     ...makeRecords(numberProperties, interpolateNumber),
     matrix: returnNext,
     // matrix: interpolateMatrix,
@@ -92,7 +100,7 @@ const transformInterpolator = {
 }
 
 const animatedTransformMappeer = {
-    ...makeRecords(degreeProperties, mapDegreeToAnimated),
+    ...makeRecords(degreeProperties, mapRotationToAnimated),
     ...makeRecords(numberProperties, mapNumberToAnimated),
     matrix: returnNext,
     // matrix: mapMatrixToAnimated,

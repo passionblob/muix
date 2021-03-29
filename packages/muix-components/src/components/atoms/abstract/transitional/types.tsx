@@ -6,9 +6,11 @@ export interface TransitionOption extends Omit<Animated.SpringAnimationConfig, "
 
 export interface TransitionalProps<C extends TransitionalSupportedComponent> {
     component: C
+    props?: Omit<React.ComponentProps<C>, "style">
     commonStyle?: StyleOf<C>
     defaultStyle: StyleOf<C>
     cases: [boolean, StyleOf<C>, TransitionOption?][]
+    children?: React.ReactNode
 }
 
 export type TransitionalSupportedComponent = typeof View | typeof Text | typeof Image

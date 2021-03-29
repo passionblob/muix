@@ -34,7 +34,6 @@ export const getTransitionalStyle = (
         const assertedKey = key as keyof TransitionalSupportedStyle
         const prevValue = prevStyle[assertedKey] || getDefaultValue(key)
         const nextValue = nextStyle[assertedKey] || getDefaultValue(key)
-        if (assertedKey === "transform") console.log(prevValue, nextValue)
         //@ts-ignore
         acc[assertedKey] = animatedStyleMappeer[assertedKey](prevValue, nextValue, anim)
         return acc
