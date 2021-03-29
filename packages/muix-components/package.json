@@ -4,7 +4,8 @@
   "dependencies": {
     "chroma-js": "^2.1.0",
     "cross-env": "5.0.5",
-    "deepmerge": "^4.2.2"
+    "deepmerge": "^4.2.2",
+    "react-native-transitional": "^1.0.0"
   },
   "main": "index.ts",
   "description": "smart components for cleaner codes",
