@@ -1,6 +1,5 @@
 
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "resolveJsonModule": true,
     /* Basic Options */
@@ -47,6 +46,6 @@
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
   },
   "exclude": [
-    "**/babel.config.js"
-  ]
+      "node_modules", "babel.config.js", "metro.config.js", "jest.config.js"
+  ],
 }

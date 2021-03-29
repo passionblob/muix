@@ -1,6 +1,6 @@
 import React from 'react';
 import {storiesOf} from '@storybook/react-native';
-import {Responsive} from '@muix/muix-components'
+import {Responsive} from "@muix/muix-components"
 import { Text, View } from 'react-native';
 
 storiesOf("Atoms/Abstract", module)

@@ -1,7 +1,7 @@
 import React from 'react';
 import {storiesOf} from '@storybook/react-native';
 import { Text, View } from 'react-native';
-import { Grid, Responsive } from '@muix/muix-components';
+import { Grid, Responsive } from "@muix/muix-components";
 import chroma from 'chroma-js';
 
 storiesOf("Atoms/Layout", module)
