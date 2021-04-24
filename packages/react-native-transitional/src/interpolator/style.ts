@@ -2,21 +2,7 @@ import { ColorValue, Animated } from "react-native"
 import chroma from "chroma-js"
 
 import { anyOf } from "../../../muix-components/src/utils"
-import {interpolateNumber, mapNumberToAnimated, makeRecords, returnNext} from "./common"
-import { TransitionalSupportedStyle } from "../types"
-import {
-    interpolateTransform,
-    mapTransformToAnimated,
-    interpolateMatrix,
-    mapMatrixToAnimated
-} from "./transform"
-import {
-    numberProperties,
-    layoutProperties,
-    colorProperties,
-    lengthProperties,
-    nonInterpolatableProperties
-} from "./properties"
+import { interpolateNumber } from "./common"
 
 const getRgbaString = (color: ColorValue) => {
     return `rgba(${chroma(color as string).rgba().join(",")})`
@@ -27,9 +13,9 @@ const mapLengthToString = (length: string | number) => {
     return `${length}px`
 }
 
-const interpolateColor = (
-    prev: ColorValue="rgba(255,255,255,0)",
-    next: ColorValue="rgba(255,255,255,0)",
+export const interpolateColor = (
+    prev: ColorValue = "rgba(255,255,255,0)",
+    next: ColorValue = "rgba(255,255,255,0)",
     ratio: number
 ) => {
     const prevColor = getRgbaString(prev)
@@ -37,7 +23,7 @@ const interpolateColor = (
     return getRgbaString(chroma.scale([prevColor, nextColor])(ratio).hex())
 }
 
-const interpolateLength = (
+export const interpolateLength = (
     prev: string | number = 0,
     next: string | number = 0,
     ratio: number
@@ -48,11 +34,11 @@ const interpolateLength = (
     if (length1.match("%") && length2.match("%")) {
         unit = "%"
         start = Number(length1.replace(unit, "")),
-        end = Number(length2.replace(unit, ""))
+            end = Number(length2.replace(unit, ""))
     } else if (length1.match("px") && length2.match("px")) {
         unit = "px"
         start = Number(length1.replace(unit, "")),
-        end = Number(length2.replace(unit, ""))
+            end = Number(length2.replace(unit, ""))
     } else {
         return next
     }
@@ -60,15 +46,15 @@ const interpolateLength = (
     return `${start + (end - start) * ratio}${unit}`
 }
 
-const defaultLayout = {width: 0, height: 0}
-const interpolateLayout = (prev=defaultLayout, next=defaultLayout, ratio: number) => {
+const defaultLayout = { width: 0, height: 0 }
+export const interpolateLayout = (prev = defaultLayout, next = defaultLayout, ratio: number) => {
     return {
         width: interpolateNumber(prev.width, next.width, ratio),
         height: interpolateNumber(prev.height, next.height, ratio)
     }
 }
 
-const mapColorToAnimated = (
+export const mapColorToAnimated = (
     prev: ColorValue = "rgba(255,255,255,0)",
     next: ColorValue = "rgba(255,255,255,0)",
     animatedValue: Animated.Value
@@ -81,7 +67,7 @@ const mapColorToAnimated = (
     })
 }
 
-const mapLengthToAnimated = (
+export const mapLengthToAnimated = (
     prev: string | number = 0,
     next: string | number = 0,
     animatedValue: Animated.Value
@@ -107,9 +93,9 @@ const mapLengthToAnimated = (
     })
 }
 
-const mapLayoutToAnimated = (
-    prev=defaultLayout,
-    next=defaultLayout,
+export const mapLayoutToAnimated = (
+    prev = defaultLayout,
+    next = defaultLayout,
     animated: Animated.Value
 ) => {
     return {
@@ -122,36 +108,4 @@ const mapLayoutToAnimated = (
             outputRange: [prev.width, next.width]
         }),
     }
-}
-
-export const styleInterpolator = {
-    ...makeRecords(colorProperties, interpolateColor),
-    ...makeRecords(numberProperties, interpolateNumber),
-    ...makeRecords(lengthProperties, interpolateLength),
-    ...makeRecords(nonInterpolatableProperties, returnNext),
-    ...makeRecords(layoutProperties, interpolateLayout),
-    transform: interpolateTransform,
-    transformMatrix: interpolateMatrix,
-} as {
-    [key in NonNullable<keyof Animated.AnimatedProps<TransitionalSupportedStyle>>]: (
-        prev?: TransitionalSupportedStyle[key],
-        next?: TransitionalSupportedStyle[key],
-        ratio?: number
-    ) => TransitionalSupportedStyle[key]
-}
-
-export const animatedStyleMappeer = {
-    ...makeRecords(colorProperties, mapColorToAnimated),
-    ...makeRecords(numberProperties, mapNumberToAnimated),
-    ...makeRecords(lengthProperties, mapLengthToAnimated),
-    ...makeRecords(nonInterpolatableProperties, returnNext),
-    ...makeRecords(layoutProperties, mapLayoutToAnimated),
-    transform: mapTransformToAnimated,
-    transformMatrix: mapMatrixToAnimated,
-} as {
-    [key in NonNullable<keyof Animated.AnimatedProps<TransitionalSupportedStyle>>]: (
-        prev?: TransitionalSupportedStyle[key],
-        next?: TransitionalSupportedStyle[key],
-        animatedValue?: Animated.Value
-    ) => Animated.WithAnimatedValue<TransitionalSupportedStyle[key]> | TransitionalSupportedStyle[key]
 }

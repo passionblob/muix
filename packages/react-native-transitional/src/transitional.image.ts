@@ -1,18 +1,60 @@
 import React, { Component } from 'react'
 import { Animated, ImageProps, ImageStyle, StyleSheet } from 'react-native'
 import { TransitionConfig } from './types'
-import { getInterpolatedStyle, getTransitionalStyle } from "./image-interpolator"
+import { TransitionalInterpolator } from "./interpolator"
 
-export class TransitionalImage extends Component<ImageProps & {config?: TransitionConfig}> {
+const interpolator = new TransitionalInterpolator<ImageStyle>({
+  default: {
+    opacity: 1,
+  },
+  properties: {
+    color: [
+      "backgroundColor", "borderColor",
+      "overlayColor", "tintColor", "shadowColor",
+    ],
+    number: [
+      "borderRadius", "aspectRatio", "borderTopLeftRadius",
+      "borderTopRightRadius", "borderBottomLeftRadius",
+      "borderBottomRightRadius", "borderBottomWidth",
+      "borderRightWidth", "borderLeftWidth", "borderTopWidth",
+      "flex", "flexGrow", "flexShrink", "opacity", "rotation",
+      "scaleX", "scaleY", "borderWidth", "shadowOpacity",
+      "zIndex", "translateX", "translateY", "shadowRadius",
+    ],
+    length: [
+      "borderStartWidth", "borderEndWidth", "width",
+      "height", "margin", "marginBottom", "marginEnd",
+      "marginHorizontal", "marginLeft", "marginRight",
+      "marginStart", "marginTop", "marginVertical",
+      "maxHeight", "maxWidth", "minHeight", "minWidth",
+      "padding", "paddingBottom", "paddingEnd", "paddingHorizontal",
+      "paddingLeft", "paddingRight", "paddingStart", "paddingTop",
+      "paddingVertical", "top", "left", "right", "bottom", "flexBasis"
+    ],
+    nonInterpolable: [
+      "alignContent", "alignItems", "alignSelf", "backfaceVisibility",
+      "display", "direction", "flexDirection", "flexWrap",
+      "justifyContent", "overflow", "position",
+      "resizeMode", "end", "start",
+    ],
+    layout: [
+      "shadowOffset"
+    ]
+  }
+})
+
+
+export class TransitionalImage extends Component<ImageProps & { config?: TransitionConfig }> {
   private anim = new Animated.Value(1)
   private prevStyle?: ImageStyle
+  private curStyle?: ImageStyle
   private nextStyle?: ImageStyle
   private progress = 0
   constructor(props: Readonly<ImageProps>) {
-      super(props)
-      this.anim.addListener(({value}) => {
-          this.progress = value
-      })
+    super(props)
+    this.anim.addListener(({ value }) => {
+      this.progress = value
+    })
   }
 
   componentDidUpdate(): void {
@@ -20,25 +62,37 @@ export class TransitionalImage extends Component<ImageProps & {config?: Transiti
     this.anim.stopAnimation()
     this.anim.setValue(0)
     Animated.spring(this.anim, {
-        toValue: 1,
-        useNativeDriver: false,
-        ...config,
+      toValue: 1,
+      useNativeDriver: false,
+      ...config,
     }).start()
   }
 
   render(): React.ReactNode {
-    const {style, children, ..._props} = this.props
+    const { style, children, ..._props } = this.props
     const flattend = StyleSheet.flatten(style)
-    this.prevStyle = this.prevStyle
-    //@ts-ignore
-      ? getInterpolatedStyle(this.prevStyle, this.nextStyle, Math.min(this.progress, 1))
+
+    this.prevStyle = this.curStyle
+
+    this.curStyle = this.prevStyle
+      ? interpolator.getInterpolatedStyle(
+        this.prevStyle,
+        this.nextStyle || {},
+        Math.min(this.progress, 1)
+      )
       : flattend
+
     this.nextStyle = flattend
-    //@ts-ignore
-    const transitionalStyle = getTransitionalStyle(this.prevStyle, this.nextStyle, this.anim)
+
+    const transitionalStyle = interpolator.getTransitionalStyle(
+      this.curStyle,
+      this.nextStyle,
+      this.anim
+    )
+
     return React.createElement(
-      Animated.Image,
-      {style: transitionalStyle, ..._props},
+      Animated.View,
+      { style: transitionalStyle, ..._props },
       children,
     )
   }

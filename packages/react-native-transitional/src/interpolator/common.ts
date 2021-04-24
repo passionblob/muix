@@ -5,8 +5,8 @@ export const interpolateNumber = (prev = 0, next = 0, ratio: number): number => 
 }
 
 export const mapNumberToAnimated = (
-    prev=0,
-    next=0,
+    prev = 0,
+    next = 0,
     animated: Animated.Value
 ): Animated.AnimatedInterpolation => {
     return animated.interpolate({
