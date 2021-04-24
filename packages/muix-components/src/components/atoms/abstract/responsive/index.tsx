@@ -13,7 +13,7 @@ type ResponsiveProps<C extends SupportedComponent> = {
     component?: C;
     commonProps?: Partial<Props<C>>;
     fallback?: ScreenSizeType;
-    render?: ((responsive: ResponsiveInterface) => JSX.Element)
+    render?: ((responsive: ResponsiveInterface) => React.ReactNode)
 } & PropsForScreens<C>;
 export class Responsive<C extends SupportedComponent> extends Component<ResponsiveProps<C>> {
     static contextType = ResponsiveContext;
