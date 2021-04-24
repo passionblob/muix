@@ -1,68 +1,81 @@
-import React from 'react'
-import { View, StyleProp, ViewStyle, StyleSheet } from 'react-native'
+import React from "react"
+import { StyleProp, View, ViewStyle } from "react-native"
 
-export const Grid: React.FC<GridProps> = (props) => {
+export class GridBase<T> extends React.Component<GridBaseProps<T>> {
+  render(): JSX.Element {
     const {
-        columnCount = 4,
-        rowHeight = 100,
-        containerStyle,
-        marginBetweenHorizontal = 5,
-        marginBetweenVertical = 5,
-        rowStyle = {},
-        gridStyle = {},
-    } = props;
+      column: columnCount = 3,
+      shouldRenderEmpty = true,
+      cellStyle = {},
+      rowStyle = {},
+      items = [],
+      renderItem,
+      keyExtractor,
+      containerStyle
+    } = this.props
 
-    const children = React.Children.toArray(props.children)
+    const children = this.props.children
+        ? React.Children.toArray(this.props.children)
+        : renderItem && items.map(renderItem)
+      || []
+    
     const rowCount = Math.ceil(children.length / columnCount)
-    const rows = Array(rowCount).fill(0)
-        .map(() => Array(columnCount).fill(0))
+    const rows = Array(rowCount).fill(0).map((_, i) => {
+      const from = i * columnCount
+      const to = (i + 1) * columnCount
+      const rowItems = items?.slice(from, to)
+        .map((item, j) => ({
+          index: i * columnCount + j,
+          ...item,
+        }))
 
-    const grid = rows.map((row, i) => {
-        const marginTop = i > 0 ? marginBetweenVertical : undefined
-        const _rowStyle: ViewStyle = StyleSheet.flatten([rowStyle, {
-            height: rowHeight,
-            flex: 1,
-            marginTop,
-            flexDirection: "row"
-        }])
+      const _rowStyle = typeof rowStyle === "function"
+        ? items && rowStyle(rowItems, i)
+        : rowStyle
 
-        return (
-            <View key={i} style={_rowStyle}>
-                {row.map((_, j) => {
-                    const flatIndex = i * columnCount + j
-                    const child = children[flatIndex]
-                    const isLastColumn = (j + 1) % columnCount === 0
-                    const marginRight = isLastColumn ? undefined : marginBetweenHorizontal
-                    const flattenedGridStyleProp = StyleSheet.flatten(gridStyle)
-                    const {backgroundColor, ...gridStyleProp} = flattenedGridStyleProp
-                    const _gridStyle: ViewStyle = StyleSheet.flatten([gridStyleProp, {
-                        marginRight,
-                        backgroundColor: !!child ? backgroundColor : "transparent",
-                        flex: 1
-                    }])
+      return (
+        <View key={`grid_base_row_${i}`} style={_rowStyle}>
+          {Array(columnCount).fill(0).map((_, j) => {
+            const flatIndex = i * columnCount + j
+            const child = children[flatIndex]
+            const item = items && items[flatIndex]
+            const key = (item && keyExtractor)
+              ? keyExtractor(item, j)
+              : `gridbase_${flatIndex}`
+            const _cellStyle = typeof cellStyle === "function"
+              ? item && cellStyle(item, flatIndex)
+              : cellStyle
 
-                    return (
-                        <View key={flatIndex} style={_gridStyle}>
-                            {child}
-                        </View>
-                    )
-                })}
-            </View>
-        )
-    })
-    return (
-        <View style={containerStyle}>
-            {grid}
+            if (!child && !shouldRenderEmpty) return null
+
+            return (
+              <View
+                key={key}
+                style={_cellStyle}
+                children={child}
+              />
+            )
+          })}
         </View>
+      )
+    })
+
+    return (
+      <View
+        style={containerStyle}
+        children={rows}
+      />
     )
+  }
 }
 
-export interface GridProps {
-    columnCount: number
-    rowHeight: ViewStyle["height"]
-    containerStyle?: StyleProp<ViewStyle>
-    marginBetweenHorizontal?: number
-    marginBetweenVertical?: number
-    gridStyle?: StyleProp<Omit<ViewStyle, "marginRight" | "flex">>
-    rowStyle?: StyleProp<Omit<ViewStyle, "height" | "flex" | "marginTop" | "flexDirection">>
+type GridBaseProps<T> = {
+  items?: T[]
+  column?: number
+  renderItem?: (item: T, index: number) => React.ReactNode
+  keyExtractor?: (item: T, index: number) => string
+  cellStyle?: StyleProp<ViewStyle> | ((item: T, index: number) => StyleProp<ViewStyle>)
+  rowStyle?: StyleProp<ViewStyle> | ((row: (T & {index: number})[], rowIndex: number) => StyleProp<ViewStyle>)
+  containerStyle?: StyleProp<ViewStyle>
+  shouldRenderEmpty?: boolean
 }

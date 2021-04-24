@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import {SupportedComponent, Props, ScreenSizeType} from '../../../../types'
 import {ResponsiveContext, ResponsiveInterface} from '../../../../providers/responsiveProvider'
 import Identity from '../identity'
-import {anyOf} from "../../../../utils"
+import {getInitialValue} from "../../../../utils"
 import deepmerge from "deepmerge"
 
 type PropsForScreens<C extends SupportedComponent> = {
@@ -24,10 +24,10 @@ export class Responsive<C extends SupportedComponent> extends Component<Responsi
         super(props)
 
         const {fallback, render} = props;
-        const anyPropsForScreen = anyOf(
+        const anyPropsForScreen = getInitialValue([
             props.mxs, props.msm, props.mlg,
             props.tablet, props.md, props.lg, props.xl
-        )
+        ])
 
         if (anyPropsForScreen === undefined && render === undefined) {
             throw new Error("Provide props for at least one screen size")

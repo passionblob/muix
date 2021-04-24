@@ -1,6 +1,3 @@
-export function anyOf<T extends Exclude<any, any[]>>(...args: T[]): T | undefined {
-    for(let i = 0; i < args.length; i += 1) {
-        if (!!args[i]) return args[i];
-    }
-    return undefined;
+export function getInitialValue<T> (values: T[]): T | undefined {
+	return values.find((val) => val !== undefined)
 }
