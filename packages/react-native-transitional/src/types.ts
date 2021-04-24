@@ -1,6 +1,6 @@
 import { ViewStyle, TextStyle, Animated, ImageStyle, View, Image, StyleProp } from "react-native"
 
-export interface TransitionOption extends Omit<Animated.SpringAnimationConfig, "toValue" | "useNativeDriver"> {
+export interface TransitionConfig extends Omit<Animated.SpringAnimationConfig, "toValue" | "useNativeDriver"> {
     reset?: boolean
 }
 
@@ -10,7 +10,7 @@ export interface TransitionalProps<C extends TransitionalSupportedComponent> {
     props?: Omit<React.ComponentProps<C>, "style">
     commonStyle?: StyleOf<C>
     defaultStyle: StyleOf<C>
-    cases: [boolean, StyleOf<C>, TransitionOption?][]
+    cases: [boolean, StyleOf<C>, TransitionConfig?][]
     children?: React.ReactNode
 }
 

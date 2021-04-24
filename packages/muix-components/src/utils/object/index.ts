@@ -1,1 +1,1 @@
-export * from "./keysOf"
+export * from "./key-related"
