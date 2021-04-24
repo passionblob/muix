@@ -14,7 +14,7 @@ export const getInterpolatedStyle = (
     ratio: number
 ): ViewStyle => {
     return keysOf(prevStyle, nextStyle).reduce((acc, key) => {
-        const assertedKey = key as keyof ViewStyle
+        const assertedKey = key
         const prevValue = prevStyle[assertedKey] || getDefaultValue(assertedKey)
         const nextValue = nextStyle[assertedKey] || getDefaultValue(assertedKey)
         //@ts-ignore
@@ -29,7 +29,7 @@ export const getTransitionalStyle = (
     anim: Animated.Value,
 ): Animated.AnimatedProps<ViewStyle> => {
     return keysOf(prevStyle, nextStyle).reduce((acc, key) => {
-        const assertedKey = key as keyof ViewStyle
+        const assertedKey = key
         const prevValue = prevStyle[assertedKey] || getDefaultValue(key)
         const nextValue = nextStyle[assertedKey] || getDefaultValue(key)
         //@ts-ignore

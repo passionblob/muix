@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import {SupportedComponent, Props, ScreenSizeType} from '../../../../types'
 import {ResponsiveContext, ResponsiveInterface} from '../../../../providers/responsiveProvider'
 import Identity from '../identity'
-import {getInitialValue} from "../../../../utils"
+import {anyOf} from "../../../../utils"
 import deepmerge from "deepmerge"
 
 type PropsForScreens<C extends SupportedComponent> = {
@@ -24,7 +24,7 @@ export class Responsive<C extends SupportedComponent> extends Component<Responsi
         super(props)
 
         const {fallback, render} = props;
-        const anyPropsForScreen = getInitialValue([
+        const anyPropsForScreen = anyOf([
             props.mxs, props.msm, props.mlg,
             props.tablet, props.md, props.lg, props.xl
         ])

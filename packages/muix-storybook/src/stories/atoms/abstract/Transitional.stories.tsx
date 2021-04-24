@@ -21,32 +21,9 @@ const TransitionalStory = () => {
                 ))}
             </View>
 
-            <Transitional
-                component={Text}
-                props={{}}
-                commonStyle={{color: "black", fontWeight: "bold"}}
-                defaultStyle={{color: "black", fontSize: 20}}
-                cases={[
-                    [conditions[0], {fontSize: 15}, {speed: 10}],
-                    [conditions[1], {fontSize: 25}, {bounciness: 100}],
-                    [conditions[2], {fontSize: 35}, {damping: 100}],
-                    [conditions[3], {fontSize: 50}, {mass: 10}],
-                ]}
-            >
-                텍스트 애니메이션
-            </Transitional>
-
-            <Transitional
-                component={View}
-                commonStyle={styles.common}
-                defaultStyle={styles.default}
-                cases={[
-                    [conditions[0], styles.style1, {speed: 10}],
-                    [conditions[1], styles.style2, {bounciness: 100}],
-                    [conditions[2], styles.style3, {damping: 100}],
-                    [conditions[3], styles.style4, {mass: 10}],
-                ]}
-            />
+            <Transitional.View style={[styles.common, styles[`style${conditions.findIndex((val) => !!val)}`]]}>
+                <Transitional.Text/>
+            </Transitional.View>
         </View>
     )
 }
@@ -56,7 +33,7 @@ const styles = {
         width: 200,
         height: 200,
     },
-    default: {
+    style0: {
         borderColor: "black",
         backgroundColor: "yellow",
         borderWidth: 10,
