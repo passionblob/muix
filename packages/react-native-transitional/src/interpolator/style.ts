@@ -1,7 +1,7 @@
 import { ColorValue, Animated } from "react-native"
 import chroma from "chroma-js"
 
-import { anyOf } from "../../../muix-components/src/utils/array/anyOf"
+import { getInitialValue } from "../../../muix-components/src/utils"
 import {interpolateNumber, mapNumberToAnimated, makeRecords, returnNext} from "./common"
 import { TransitionalSupportedStyle } from "../types"
 import {
@@ -90,10 +90,10 @@ const mapLengthToAnimated = (
     const prevLength = mapLengthToString(prev)
     const nextLength = mapLengthToString(next)
 
-    const hasSameUnit = anyOf(
+    const hasSameUnit = getInitialValue([
         !!prevLength.match("%") && !!nextLength.match("%"),
         !!prevLength.match("px") && !!nextLength.match("px")
-    )
+    ])
 
     if (hasSameUnit) {
         output1 = prevLength, output2 = nextLength

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Animated } from "react-native"
-import { keysOf } from "../../../muix-components/src/utils/object/keysOf"
+import { keysOf } from "../../../muix-components/src/utils"
 import { TransitionalSupportedStyle } from "../types"
 import { styleInterpolator, animatedStyleMappeer } from "./style"
 
