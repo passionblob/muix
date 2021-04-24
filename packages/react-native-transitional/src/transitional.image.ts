@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import { Animated, ImageProps, ImageStyle, StyleSheet } from 'react-native'
-import { TransitionConfig } from './types'
-import { TransitionalInterpolator } from "./interpolator"
+import { Animated, Image, ImageProps, ImageStyle, StyleSheet } from 'react-native'
+import { StyleHolderOf, TransitionConfig } from './types'
+import { createStyleHolder, getTransitionalStyles, TransitionalInterpolator } from "./interpolator"
 
 const interpolator = new TransitionalInterpolator<ImageStyle>({
   default: {
@@ -46,9 +46,10 @@ const interpolator = new TransitionalInterpolator<ImageStyle>({
 
 export class TransitionalImage extends Component<ImageProps & { config?: TransitionConfig }> {
   private anim = new Animated.Value(1)
-  private prevStyle?: ImageStyle
-  private curStyle?: ImageStyle
-  private nextStyle?: ImageStyle
+  private styleHolder: StyleHolderOf<ImageProps> = {
+    capInsets: createStyleHolder(),
+    style: createStyleHolder(),
+  }
   private progress = 0
   constructor(props: Readonly<ImageProps>) {
     super(props)
@@ -69,30 +70,19 @@ export class TransitionalImage extends Component<ImageProps & { config?: Transit
   }
 
   render(): React.ReactNode {
-    const { style, children, ..._props } = this.props
-    const flattend = StyleSheet.flatten(style)
-
-    this.prevStyle = this.curStyle
-
-    this.curStyle = this.prevStyle
-      ? interpolator.getInterpolatedStyle(
-        this.prevStyle,
-        this.nextStyle || {},
-        Math.min(this.progress, 1)
-      )
-      : flattend
-
-    this.nextStyle = flattend
-
-    const transitionalStyle = interpolator.getTransitionalStyle(
-      this.curStyle,
-      this.nextStyle,
-      this.anim
-    )
+    const { children, ..._props } = this.props
+    const transitionalStyles = getTransitionalStyles<ImageProps>({
+      anim: this.anim,
+      interpolator,
+      progress: this.progress,
+      props: this.props,
+      styleHolder: this.styleHolder,
+      targets: ["style", "capInsets"]
+    })
 
     return React.createElement(
       Animated.View,
-      { style: transitionalStyle, ..._props },
+      { ..._props, ...transitionalStyles },
       children,
     )
   }

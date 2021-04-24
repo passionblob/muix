@@ -1,5 +1,6 @@
-import { Animated } from "react-native"
+import { Animated, StyleSheet } from "react-native"
 import { keysOf } from "../../../muix-components/src/utils"
+import { StyleHolder, StyleHolderOf, StyleInterpolator, AnimatedStyleMapper } from "../types"
 import {
 	interpolateNumber,
 	makeRecords,
@@ -36,22 +37,8 @@ type TransitionalInterpolatorProps<T> = {
 
 export class TransitionalInterpolator<T extends Record<any, any>> {
 	props: TransitionalInterpolatorProps<T>
-
-	styleInterpolator: {
-		[key in NonNullable<keyof Animated.AnimatedProps<T>>]: (
-			prev?: T[key],
-			next?: T[key],
-			ratio?: number
-		) => T[key]
-	}
-
-	animatedStyleMapper: {
-		[key in NonNullable<keyof Animated.AnimatedProps<T>>]: (
-			prev?: T[key],
-			next?: T[key],
-			animatedValue?: Animated.Value
-		) => Animated.WithAnimatedValue<T[key]> | T[key]
-	}
+	styleInterpolator: StyleInterpolator<T>
+	animatedStyleMapper: AnimatedStyleMapper<T>
 
 	constructor(props: TransitionalInterpolatorProps<T>) {
 		this.props = props
@@ -107,4 +94,58 @@ export class TransitionalInterpolator<T extends Record<any, any>> {
 			return acc
 		}, {} as Animated.AnimatedProps<T>)
 	}
+}
+
+export const createStyleHolder = <T>(): StyleHolder<T> => ({
+	prev: undefined,
+	cur: undefined,
+	next: undefined
+})
+
+
+export function getTransitionalStyles<OriginalProps>(params: {
+	styleHolder: StyleHolderOf<OriginalProps>,
+	targets: (keyof StyleHolderOf<OriginalProps>)[],
+	props: OriginalProps,
+	interpolator: TransitionalInterpolator<any>,
+	progress: number,
+	anim: Animated.Value,
+}) {
+	const {
+		anim,
+		interpolator,
+		progress,
+		props,
+		styleHolder,
+		targets
+	} = params
+
+	const transitionalStyles = {} as any;
+
+	targets.forEach((target) => {
+		const flattend = StyleSheet.flatten(props[target]);
+		const holder = styleHolder[target]
+
+		if (holder === undefined) return;
+
+		holder.prev = holder.cur
+
+		holder.cur = holder.prev
+			? interpolator.getInterpolatedStyle(
+				holder.prev,
+				holder.next,
+				Math.min(progress, 1)
+			)
+			: flattend
+
+		holder.next = flattend
+
+		transitionalStyles[target] = interpolator.getTransitionalStyle(
+			holder.cur,
+			holder.next,
+			anim
+		)
+	})
+
+	return transitionalStyles
 }

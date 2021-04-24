@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Animated, ViewProps, ViewStyle, View } from 'react-native'
+import { Animated, ViewProps, ViewStyle, StyleSheet, SectionListProps } from 'react-native'
 import { createStyleHolder, getTransitionalStyles, TransitionalInterpolator } from './interpolator'
 import { StyleHolderOf, TransitionConfig } from './types'
 
@@ -45,15 +45,17 @@ const interpolator = new TransitionalInterpolator<ViewStyle>({
   }
 })
 
-export class TransitionalView extends Component<ViewProps & { config?: TransitionConfig }> {
+export class TransitionalSectionList<Item> extends Component<SectionListProps<Item> & { config?: TransitionConfig }> {
   private anim = new Animated.Value(1)
-  private styleHolder: StyleHolderOf<ViewProps> = {
+  private styleHolder: StyleHolderOf<SectionListProps<Item>> = {
     style: createStyleHolder(),
+    contentContainerStyle: createStyleHolder(),
     hitSlop: createStyleHolder(),
+    contentInset: createStyleHolder(),
+    scrollIndicatorInsets: createStyleHolder(),
   }
-
   private progress = 0
-  constructor(props: Readonly<ViewProps>) {
+  constructor(props: Readonly<SectionListProps<Item>>) {
     super(props)
     this.anim.addListener(({ value }) => {
       this.progress = value
@@ -73,13 +75,19 @@ export class TransitionalView extends Component<ViewProps & { config?: Transitio
 
   render(): React.ReactNode {
     const { children, ..._props } = this.props
-    const transitionalStyles = getTransitionalStyles<ViewProps>({
+    const transitionalStyles = getTransitionalStyles<SectionListProps<Item>>({
       anim: this.anim,
       interpolator,
       progress: this.progress,
       props: this.props,
       styleHolder: this.styleHolder,
-      targets: ["style", "hitSlop"]
+      targets: [
+        "style",
+        "contentContainerStyle",
+        "hitSlop",
+        "contentInset",
+        "scrollIndicatorInsets",
+      ]
     })
 
     return React.createElement(
@@ -90,4 +98,4 @@ export class TransitionalView extends Component<ViewProps & { config?: Transitio
   }
 }
 
-export default TransitionalView
+export default TransitionalSectionList

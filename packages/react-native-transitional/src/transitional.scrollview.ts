@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Animated, ViewProps, ViewStyle, View } from 'react-native'
+import { Animated, ViewProps, ViewStyle, StyleSheet, ScrollViewProps } from 'react-native'
 import { createStyleHolder, getTransitionalStyles, TransitionalInterpolator } from './interpolator'
 import { StyleHolderOf, TransitionConfig } from './types'
 
@@ -45,13 +45,15 @@ const interpolator = new TransitionalInterpolator<ViewStyle>({
   }
 })
 
-export class TransitionalView extends Component<ViewProps & { config?: TransitionConfig }> {
+export class TransitionalScrollView extends Component<ViewProps & { config?: TransitionConfig }> {
   private anim = new Animated.Value(1)
-  private styleHolder: StyleHolderOf<ViewProps> = {
-    style: createStyleHolder(),
+  private styleHolder: StyleHolderOf<ScrollViewProps> = {
+    contentContainerStyle: createStyleHolder(),
+    contentInset: createStyleHolder(),
     hitSlop: createStyleHolder(),
+    scrollIndicatorInsets: createStyleHolder(),
+    style: createStyleHolder(),
   }
-
   private progress = 0
   constructor(props: Readonly<ViewProps>) {
     super(props)
@@ -73,21 +75,27 @@ export class TransitionalView extends Component<ViewProps & { config?: Transitio
 
   render(): React.ReactNode {
     const { children, ..._props } = this.props
-    const transitionalStyles = getTransitionalStyles<ViewProps>({
+    const transitionalStyles = getTransitionalStyles<ScrollViewProps>({
       anim: this.anim,
       interpolator,
       progress: this.progress,
       props: this.props,
       styleHolder: this.styleHolder,
-      targets: ["style", "hitSlop"]
+      targets: [
+        "style",
+        "hitSlop",
+        "contentContainerStyle",
+        "contentInset",
+        "scrollIndicatorInsets",
+      ]
     })
 
     return React.createElement(
       Animated.View,
-      { ..._props, ...transitionalStyles },
+      { ...transitionalStyles, ..._props },
       children,
     )
   }
 }
 
-export default TransitionalView
+export default TransitionalScrollView

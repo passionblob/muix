@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Animated, ViewProps, ViewStyle, View } from 'react-native'
+import { Animated, ViewProps, ViewStyle, StyleSheet, FlatList, FlatListProps } from 'react-native'
 import { createStyleHolder, getTransitionalStyles, TransitionalInterpolator } from './interpolator'
 import { StyleHolderOf, TransitionConfig } from './types'
 
@@ -45,15 +45,21 @@ const interpolator = new TransitionalInterpolator<ViewStyle>({
   }
 })
 
-export class TransitionalView extends Component<ViewProps & { config?: TransitionConfig }> {
+export class TransitionalFlatList<Item> extends Component<FlatListProps<Item> & { config?: TransitionConfig }> {
   private anim = new Animated.Value(1)
-  private styleHolder: StyleHolderOf<ViewProps> = {
-    style: createStyleHolder(),
+  private styleHolder: StyleHolderOf<FlatListProps<Item>> = {
+    ListFooterComponentStyle: createStyleHolder(),
+    ListHeaderComponentStyle: createStyleHolder(),
+    columnWrapperStyle: createStyleHolder(),
+    contentContainerStyle: createStyleHolder(),
+    contentInset: createStyleHolder(),
     hitSlop: createStyleHolder(),
+    style: createStyleHolder(),
+    scrollIndicatorInsets: createStyleHolder(),
   }
 
   private progress = 0
-  constructor(props: Readonly<ViewProps>) {
+  constructor(props: Readonly<FlatListProps<Item>>) {
     super(props)
     this.anim.addListener(({ value }) => {
       this.progress = value
@@ -73,13 +79,22 @@ export class TransitionalView extends Component<ViewProps & { config?: Transitio
 
   render(): React.ReactNode {
     const { children, ..._props } = this.props
-    const transitionalStyles = getTransitionalStyles<ViewProps>({
+    const transitionalStyles = getTransitionalStyles<FlatListProps<Item>>({
       anim: this.anim,
       interpolator,
       progress: this.progress,
       props: this.props,
       styleHolder: this.styleHolder,
-      targets: ["style", "hitSlop"]
+      targets: [
+        "ListFooterComponentStyle",
+        "ListHeaderComponentStyle",
+        "columnWrapperStyle",
+        "contentContainerStyle",
+        "contentInset",
+        "hitSlop",
+        "scrollIndicatorInsets",
+        "style"
+      ]
     })
 
     return React.createElement(
@@ -90,4 +105,4 @@ export class TransitionalView extends Component<ViewProps & { config?: Transitio
   }
 }
 
-export default TransitionalView
+export default TransitionalFlatList
