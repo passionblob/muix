@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Animated, ViewProps, ViewStyle, StyleSheet, FlatList, FlatListProps } from 'react-native'
 import { createStyleHolder, getTransitionalStyles, TransitionalInterpolator } from './interpolator'
-import { StyleHolderOf, TransitionConfig } from './types'
+import { SpringConfig, StyleHolderOf, TransitionConfig } from './types'
 
 const interpolator = new TransitionalInterpolator<ViewStyle>({
   default: {
@@ -59,7 +59,7 @@ export class TransitionalFlatList<Item> extends Component<FlatListProps<Item> & 
   }
 
   private progress = 0
-  constructor(props: Readonly<FlatListProps<Item>>) {
+  constructor(props: Readonly<FlatListProps<Item> & { config?: TransitionConfig }>) {
     super(props)
     this.anim.addListener(({ value }) => {
       this.progress = value
@@ -68,13 +68,22 @@ export class TransitionalFlatList<Item> extends Component<FlatListProps<Item> & 
 
   componentDidUpdate(): void {
     const { config } = this.props
+
     this.anim.stopAnimation()
     this.anim.setValue(0)
-    Animated.spring(this.anim, {
-      toValue: 1,
-      useNativeDriver: false,
-      ...config,
-    }).start()
+
+    if (config?.type === "timing") {
+      Animated.timing(this.anim, {
+        toValue: 1,
+        duration: 300,
+        ...config,
+      }).start()
+    } else {
+      Animated.spring(this.anim, {
+        toValue: 1,
+        ...config as SpringConfig,
+      }).start()
+    }
   }
 
   render(): React.ReactNode {

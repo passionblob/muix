@@ -1,8 +1,14 @@
 import { Animated, FlexStyle, StyleProp } from "react-native"
 
-export interface TransitionConfig extends Omit<Animated.SpringAnimationConfig, "toValue" | "useNativeDriver"> {
-    reset?: boolean
+export interface SpringConfig extends Omit<Animated.SpringAnimationConfig, "toValue"> {
+    type: "spring"
 }
+
+export interface TimingConfig extends Omit<Animated.TimingAnimationConfig, "toValue"> {
+    type: "timing"
+}
+
+export type TransitionConfig = SpringConfig | TimingConfig
 
 export type PickStylePropNames<T> = NonNullable<{
     [K in keyof T]: T[K] extends StyleProp<FlexStyle> | FlexStyle ? K : undefined

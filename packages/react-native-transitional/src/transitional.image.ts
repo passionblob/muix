@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Animated, Image, ImageProps, ImageStyle, StyleSheet } from 'react-native'
-import { StyleHolderOf, TransitionConfig } from './types'
+import { SpringConfig, StyleHolderOf, TransitionConfig } from './types'
 import { createStyleHolder, getTransitionalStyles, TransitionalInterpolator } from "./interpolator"
 
 const interpolator = new TransitionalInterpolator<ImageStyle>({
@@ -51,7 +51,7 @@ export class TransitionalImage extends Component<ImageProps & { config?: Transit
     style: createStyleHolder(),
   }
   private progress = 0
-  constructor(props: Readonly<ImageProps>) {
+  constructor(props: Readonly<ImageProps & { config?: TransitionConfig }>) {
     super(props)
     this.anim.addListener(({ value }) => {
       this.progress = value
@@ -60,15 +60,24 @@ export class TransitionalImage extends Component<ImageProps & { config?: Transit
 
   componentDidUpdate(): void {
     const { config } = this.props
+
     this.anim.stopAnimation()
     this.anim.setValue(0)
-    Animated.spring(this.anim, {
-      toValue: 1,
-      useNativeDriver: false,
-      ...config,
-    }).start()
-  }
 
+    if (config?.type === "timing") {
+      Animated.timing(this.anim, {
+        toValue: 1,
+        duration: 300,
+        ...config,
+      }).start()
+    } else {
+      Animated.spring(this.anim, {
+        toValue: 1,
+        ...config as SpringConfig,
+      }).start()
+    }
+  }
+  
   render(): React.ReactNode {
     const { children, ..._props } = this.props
     const transitionalStyles = getTransitionalStyles<ImageProps>({

@@ -1,7 +1,7 @@
 import {Transitional} from "@muix/muix-components"
 import {storiesOf} from "@storybook/react-native"
 import React from "react"
-import { Animated, Text, TouchableOpacity, View } from "react-native"
+import { Animated, Easing, Text, TouchableOpacity, View } from "react-native"
 
 const TransitionalStory = () => {
     const [conditions, setConditions] = React.useState([false, false, false, false]);
@@ -21,7 +21,10 @@ const TransitionalStory = () => {
                 ))}
             </View>
 
-            <Transitional.View style={[styles.common, styles[`style${conditions.findIndex((val) => !!val)}`]]}>
+            <Transitional.View
+                config={{type: "timing", useNativeDriver: false, duration: 1000, easing: Easing.elastic(3)}}
+                style={[styles.common, styles[`style${conditions.findIndex((val) => !!val)}`]]}
+            >
                 <Transitional.Text/>
             </Transitional.View>
         </View>

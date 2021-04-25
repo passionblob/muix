@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { Animated, TextProps, TextStyle, StyleSheet } from 'react-native'
 import { createStyleHolder, getTransitionalStyles, TransitionalInterpolator } from './interpolator'
-import { StyleHolderOf, TransitionConfig } from './types'
+import { SpringConfig, StyleHolderOf, TransitionConfig } from './types'
 
 const interpolator = new TransitionalInterpolator<TextStyle>({
   default: {
@@ -59,7 +59,7 @@ export class TransitionalText extends Component<TextProps & { config?: Transitio
   }
 
   private progress = 0
-  constructor(props: Readonly<TextProps>) {
+  constructor(props: Readonly<TextProps & { config?: TransitionConfig }>) {
     super(props)
     this.anim.addListener(({ value }) => {
       this.progress = value
@@ -68,13 +68,22 @@ export class TransitionalText extends Component<TextProps & { config?: Transitio
 
   componentDidUpdate(): void {
     const { config } = this.props
+
     this.anim.stopAnimation()
     this.anim.setValue(0)
-    Animated.spring(this.anim, {
-      toValue: 1,
-      useNativeDriver: false,
-      ...config,
-    }).start()
+
+    if (config?.type === "timing") {
+      Animated.timing(this.anim, {
+        toValue: 1,
+        duration: 300,
+        ...config,
+      }).start()
+    } else {
+      Animated.spring(this.anim, {
+        toValue: 1,
+        ...config as SpringConfig,
+      }).start()
+    }
   }
 
   render(): React.ReactNode {
