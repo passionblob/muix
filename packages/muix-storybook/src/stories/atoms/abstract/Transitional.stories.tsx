@@ -22,7 +22,6 @@ const TransitionalStory = () => {
             </View>
 
             <Transitional.View
-                config={{type: "timing", useNativeDriver: false, duration: 1000, easing: Easing.elastic(3)}}
                 style={[styles.common, styles[`style${conditions.findIndex((val) => !!val)}`]]}
             >
                 <Transitional.Text/>
