@@ -29,5 +29,8 @@
       "**/styled-components",
       "**/styled-components/**"
     ]
+  },
+  "devDependencies": {
+    "concurrently": "^6.0.2"
   }
 }
