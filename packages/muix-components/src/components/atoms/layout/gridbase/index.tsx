@@ -95,7 +95,7 @@ export class GridBase<T> extends React.Component<GridBaseProps<T>> {
   }
 }
 
-type GridBaseProps<T> = {
+export interface GridBaseProps<T> {
   items?: T[]
   column?: number
   renderItem?: (item: T, index: number) => React.ReactElement

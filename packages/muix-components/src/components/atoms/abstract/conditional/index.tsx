@@ -1,17 +1,8 @@
 import React from 'react'
-import {IdentityProps, Identity} from '../identity';
-import {Props, SupportedComponent} from '../../../../types'
+import {Identity} from '../identity';
 import deepmerge from 'deepmerge';
 
-interface ConditionalProps<C extends SupportedComponent> {
-	shouldRender?: boolean
-	component: C
-	defaultProps: Props<C>
-	commonProps?: Partial<Props<C>>
-	cases?: [boolean, Partial<Props<C>>][]
-}
-
-export class Conditional<C extends SupportedComponent> extends React.Component<ConditionalProps<C>> {
+export class Conditional<C extends React.ComponentType<any>> extends React.Component<ConditionalProps<C>> {
 	render(): React.ReactNode {
 		const {shouldRender, defaultProps, commonProps, cases, component, children} = this.props;
 		if (!shouldRender) return null;
@@ -27,4 +18,12 @@ export class Conditional<C extends SupportedComponent> extends React.Component<C
 			/>
 		)
 	}	
+}
+
+interface ConditionalProps<C extends React.ComponentType<any>> {
+	shouldRender?: boolean
+	component: C
+	defaultProps: React.ComponentProps<C>
+	commonProps?: Partial<React.ComponentProps<C>>
+	cases?: [boolean, Partial<React.ComponentProps<C>>][]
 }

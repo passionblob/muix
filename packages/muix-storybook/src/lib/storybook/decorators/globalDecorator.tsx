@@ -1,8 +1,9 @@
 import React from "react"
 import {makeDecorator} from '@storybook/addons'
-import {View, Text} from "react-native"
-import {Badge, Box, Flex, Responsive, ResponsiveProvider} from "@muix/muix-components"
+import {View, Text, TextProps} from "react-native"
+import {Badge, BadgeProps, Box, BoxProps, Flex, Responsive, ResponsiveProvider} from "@muix/muix-components"
 import chroma from "chroma-js"
+import { defineBreakpoints } from "../../responsive"
 
 const colorForKind: {[index: string]: string} = {
     abstract: "dodgerblue",
@@ -23,29 +24,28 @@ export const globalDecorator = makeDecorator({
                         <Responsive
                             component={Text}
                             commonProps={{style: {fontWeight: "bold"}}}
-                            mxs={{style: {fontSize: 30}}}
-                            mlg={{style: {fontSize: 50}}}
-                            tablet={{style: {fontSize: 50}}}
-                            lg={{style: {fontSize: 70}}}
-                            fallback={"mxs"}
+                            breakpoints={defineBreakpoints<TextProps>({
+                                "320px": {style: {fontSize: 30}},
+                                "720px": {style: {fontSize: 50}}
+                            })}
                             children={c.name}
                         />
                         <Box width={10} />
                         <Responsive
                             component={Badge}
                             commonProps={{color: chroma(color).alpha(0.2).hex(), verticalAlign: "top"}}
-                            mxs={{padding: 3}}
-                            mlg={{padding: 3}}
-                            tablet={{padding: 3}}
-                            lg={{padding: 5}}
+                            breakpoints={defineBreakpoints<BadgeProps>({
+                                "320px": {padding: 3},
+                                "720px": {padding: 5}
+                            })}
                             children={(
                                 <Responsive
                                     component={Text}
                                     commonProps={{style: {color}}}
-                                    mxs={{style: {fontSize: 10}}}
-                                    mlg={{style: {fontSize: 12}}}
-                                    tablet={{style: {fontSize: 13}}}
-                                    lg={{style: {fontSize: 15}}}
+                                    breakpoints={defineBreakpoints<TextProps>({
+                                        "320px": {style: {fontSize: 10}},
+                                        "720px": {style: {fontSize: 13}},
+                                    })}                 
                                     children={`${nearestKind}`}
                                 />
                             )}
@@ -57,10 +57,10 @@ export const globalDecorator = makeDecorator({
                             backgroundColor: "lightgrey",
                             height: 3, marginVertical: 10,
                         }}
-                        mxs={{width: 30}}
-                        mlg={{width: 40}}
-                        tablet={{width: 50, marginTop: 20, marginBottom: 20}}
-                        lg={{width: 100, height: 8, marginTop: 30, marginBottom: 30}}
+                        breakpoints={defineBreakpoints<BoxProps>({
+                            "320px": {width: 30},
+                            "720px": {width: 50, marginTop: 20, marginBottom: 20}
+                        })}
                     />
                     {getStory(c)}
                 </View>

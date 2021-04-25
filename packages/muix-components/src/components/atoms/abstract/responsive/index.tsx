@@ -1,85 +1,65 @@
 import React, { Component } from 'react'
-import {SupportedComponent, Props, ScreenSizeType} from '../../../../types'
-import {ResponsiveContext, ResponsiveInterface} from '../../../../providers/responsiveProvider'
-import Identity from '../identity'
-import {anyOf} from "../../../../utils"
-import deepmerge from "deepmerge"
+import { ResponsiveContext, ScreenInfo } from '@muix-components/providers'
+import deepmerge from 'deepmerge';
 
-type PropsForScreens<C extends SupportedComponent> = {
-    [key in ScreenSizeType]?: Partial<Props<C>>;
+export class Responsive<C extends React.ComponentType<any>> extends Component<ResponsiveProps<C>> {
+	static contextType = ResponsiveContext;
+
+	constructor(props: Readonly<ResponsiveProps<C>>) {
+		super(props)
+	}
+
+	render() {
+		const { breakpoints, component, children, commonProps = {} } = this.props
+		
+		return (
+			<ResponsiveContext.Consumer>
+				{(screenInfo) => {
+					const targetPoint = this.getTargetPoint(screenInfo)
+					const targetProps = breakpoints[targetPoint]
+					const _props = deepmerge(commonProps, targetProps)
+
+					return React.createElement(component, _props, children)
+				}}
+			</ResponsiveContext.Consumer>
+		)
+	}
+
+	getTargetPoint = (screenInfo: ScreenInfo) => {
+		const { breakpoints } = this.props
+		const keys = Object.keys(breakpoints || {})
+		const targetPoint = keys
+			.map((key) => {
+				return [key, Number(key.match(/\d/g)?.join("")) || 0] as const
+			})
+			.sort((a, b) => {
+				return b[1] - a[1]
+			})
+			.find((breakpoint) => {
+				return breakpoint[1] < screenInfo.width
+			})
+
+		if (!targetPoint) throw Error("Something is wrong with breakpoints")
+
+		return targetPoint[0]
+	}
 }
 
-type ResponsiveProps<C extends SupportedComponent> = {
-    component?: C;
-    commonProps?: Partial<Props<C>>;
-    fallback?: ScreenSizeType;
-    render?: ((responsive: ResponsiveInterface) => React.ReactNode)
-} & PropsForScreens<C>;
-export class Responsive<C extends SupportedComponent> extends Component<ResponsiveProps<C>> {
-    static contextType = ResponsiveContext;
-
-    private fallbackProps: Partial<Props<C>>;
-
-    constructor(props: Readonly<ResponsiveProps<C>>) {
-        super(props)
-
-        const {fallback, render} = props;
-        const anyPropsForScreen = anyOf([
-            props.mxs, props.msm, props.mlg,
-            props.tablet, props.md, props.lg, props.xl
-        ])
-
-        if (anyPropsForScreen === undefined && render === undefined) {
-            throw new Error("Provide props for at least one screen size")
-        }
-
-        const fallbackProps = fallback ? props[fallback] : null;
-        if (fallbackProps === undefined) {
-            throw new Error("props.fallback should indicate screen size which is provided with props")
-        }
-
-        this.fallbackProps = fallbackProps || anyPropsForScreen || {};
-    }
-
-    render() {
-        const {renderForScreen} = this;
-        return (
-            <ResponsiveContext.Consumer>
-                {(responsiveInterface) => renderForScreen(responsiveInterface)}
-            </ResponsiveContext.Consumer>
-        )
-    }
-
-    renderForScreen = (responsiveInterface?: ResponsiveInterface) => {
-        
-        const {props, fallbackProps} = this;
-        const {children, component, commonProps, render} = props;
-
-        // TODO: check if this would be okay for every devices.
-        // There could be a case where device cannot capture dimensions
-        if (responsiveInterface === undefined) return null
-
-        const sizeType = responsiveInterface.screen?.sizeType || "xs";
-        const renderResult = render ? render(responsiveInterface) : null;
-
-        if (renderResult && component) throw new Error("render and component conflicts each other")
-
-        if (renderResult) return renderResult
-
-        if (props[sizeType] === undefined) console.warn(`${props.component?.displayName} has no props for screen size: ${sizeType}`)
-        const target = props[sizeType] || fallbackProps || {}
-        const source = commonProps || {}
-        
-        const mergedProps = deepmerge(source, target) as Props<C>
-
-        return (
-            <Identity
-                component={component}
-                props={mergedProps}
-                children={children}
-            />
-        )
-    }
+type ResponsiveProps<C extends React.ComponentClass | React.FC> = {
+	component: C;
+	commonProps?: React.ComponentProps<C>
+	/**
+	 * @param breakpoints
+	 * define props for each breakpoint
+	 * based on max-width
+	 * example)
+	 * "360px": <props>
+	 * "540px": <props>
+	 * "720px": <props>
+	 */
+	breakpoints: {
+		[index: string]: React.ComponentProps<C>
+	}
 }
 
 export default Responsive

@@ -1,1 +1,1 @@
-export {ResponsiveProvider} from './responsiveProvider'
+export * from './responsiveProvider'

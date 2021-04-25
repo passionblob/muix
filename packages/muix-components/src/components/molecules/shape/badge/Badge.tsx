@@ -3,7 +3,7 @@ import { View, ViewStyle } from 'react-native'
 import chroma from 'chroma-js'
 import deepmerge from 'deepmerge'
 
-interface BadgeProps {
+export interface BadgeProps {
     padding?: number
     color?: string
     border?: "none" | string

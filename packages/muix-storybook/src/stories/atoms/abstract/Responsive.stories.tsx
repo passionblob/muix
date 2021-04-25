@@ -1,7 +1,8 @@
 import React from 'react';
 import {storiesOf} from '@storybook/react-native';
 import {Responsive} from "@muix/muix-components"
-import { Text, View } from 'react-native';
+import { Text, TextProps, View } from 'react-native';
+import { defineBreakpoints } from '../../../lib/responsive';
 
 storiesOf("Atoms/Abstract", module)
     .add(
@@ -11,7 +12,10 @@ storiesOf("Atoms/Abstract", module)
                 <Responsive
                     component={Text}
                     children={"이런이런"}
-                    mxs={{style: {fontSize: 30}}}
+                    breakpoints={defineBreakpoints<TextProps>({
+                        "320px": {style: {fontSize: 16}},
+                        "720px": {style: {fontSize: 20}}
+                    })}
                 />
             </View>
         ),

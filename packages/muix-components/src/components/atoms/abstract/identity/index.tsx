@@ -1,13 +1,12 @@
 import React, { RefObject } from 'react'
-import {Props, SupportedComponent} from '../../../../types'
 
-export interface IdentityProps<C extends SupportedComponent> {
+export interface IdentityProps<C extends React.ComponentType<any>> {
 	component?: C;
-	props?: Props<C>;
+	props?: React.ComponentProps<C>;
 	ref?: RefObject<C>;
 }
 
-export class Identity<C extends SupportedComponent> extends React.Component<IdentityProps<C>> {
+export class Identity<C extends React.ComponentType<any>> extends React.Component<IdentityProps<C>> {
 	render(): React.ReactNode {
 		const {props, component, children, ref} = this.props;
         if (component === undefined) return children;
