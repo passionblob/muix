@@ -3356,13 +3356,6 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react-native@^0.64.2":
-  version "0.64.2"
-  resolved "https://registry.yarnpkg.com/@types/react-native/-/react-native-0.64.2.tgz#2e344aeec0b4eb21fb9eaa0ed8973245c5601d56"
-  integrity sha512-w2y04h+GVLY+OMlFSmq4adPuS51XtEp1yUr83OvXf+moMQ4zDG1Q07HhyvYDXdc+BSS9ANHySBqVCz0hFxli9Q==
-  dependencies:
-    "@types/react" "*"
-
 "@types/react-syntax-highlighter@11.0.4":
   version "11.0.4"
   resolved "https://registry.yarnpkg.com/@types/react-syntax-highlighter/-/react-syntax-highlighter-11.0.4.tgz#d86d17697db62f98046874f62fdb3e53a0bbc4cd"
@@ -3399,7 +3392,7 @@
     "@types/prop-types" "*"
     csstype "^3.0.2"
 
-"@types/react@^17.0.2", "@types/react@^17.0.3":
+"@types/react@^17.0.2":
   version "17.0.3"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-17.0.3.tgz#ba6e215368501ac3826951eef2904574c262cc79"
   integrity sha512-wYOUxIgs2HZZ0ACNiIayItyluADNbONl7kt8lkLjVK8IitMH5QMyAh75Fwhmo37r1m7L2JaFj03sIfxBVDvRAg==
@@ -13039,6 +13032,13 @@ react-native-swipe-gestures@^1.0.4:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/react-native-swipe-gestures/-/react-native-swipe-gestures-1.0.5.tgz#a172cb0f3e7478ccd681fd36b8bfbcdd098bde7c"
   integrity sha512-Ns7Bn9H/Tyw278+5SQx9oAblDZ7JixyzeOczcBK8dipQk2pD7Djkcfnf1nB/8RErAmMLL9iXgW0QHqiII8AhKw==
+
+react-native-transitional@^1.0.0:
+  version "1.0.92"
+  resolved "https://registry.yarnpkg.com/react-native-transitional/-/react-native-transitional-1.0.92.tgz#df7f446f2db26ac8c6ee0003979205b5f4876e29"
+  integrity sha512-MV5i5wdnA+vNtJPkoyZZ9iWoI/k8V9L6Jf/0suNWVRHwduEAuc4O8OSYUKSl5kgx5Ut5i6KpAyzEi3CT1TI4nQ==
+  dependencies:
+    chroma-js "^2.1.1"
 
 react-native-web@^0.15.0:
   version "0.15.0"

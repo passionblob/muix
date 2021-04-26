@@ -1,5 +1,5 @@
 {
-  "name": "@muix/muix-storybook",
+  "name": "@montehm/muix-storybook",
   "version": "0.0.1",
   "scripts": {
     "start": "react-native start --reset-cache",
@@ -16,7 +16,7 @@
     "deploy:web": "yarn chromatic -b build:web"
   },
   "dependencies": {
-    "@muix/muix-components": "*",
+    "@monthem/muix": "*",
     "chroma-js": "^2.1.1",
     "react": "16.13.1",
     "react-native": "0.63.4",

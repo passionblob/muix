@@ -22,7 +22,8 @@
   "peerDependencies": {
     "chroma-js": "^2.1.1",
     "react": "16.13.1",
-    "react-native": "^0.63.4"
+    "react-native": "^0.63.4",
+    "react-native-transitional": "latest"
   },
   "devDependencies": {
     "@types/chroma-js": "^2.1.1",
