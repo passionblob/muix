@@ -1,5 +1,5 @@
 {
-  "name": "@montehm/muix-storybook",
+  "name": "@monthem/muix-storybook",
   "version": "0.0.1",
   "scripts": {
     "start": "react-native start --reset-cache",
