@@ -1,0 +1,10 @@
+{
+  "name": "@monthem/utils",
+  "version": "1.2.3",
+  "main": "index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "",
+  "description": ""
+}
