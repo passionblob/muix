@@ -1,18 +1,14 @@
 {
   "name": "@monthem/utils",
-  "version": "1.0.0",
+  "version": "1.21.7",
   "main": "index.ts",
   "license": "MIT",
   "scripts": {
     "build": "rm -rf dist && muix bundle -m index.js",
-    "publishDist": "yarn build && cd dist && yarn publish"
+    "deploy": "yarn build && cd dist && yarn publish --no-git-tag-version && cd .. && yarn muix sync-version -i ./dist/package.json"
   },
-  "devDependencies": {
-    "@monthem/muix-cli": "^0.0.0"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
+  "devDependencies": {"@monthem/muix-cli": "^0.0.0"},
+  "publishConfig": {"access": "public"},
   "author": "",
   "description": ""
 }
