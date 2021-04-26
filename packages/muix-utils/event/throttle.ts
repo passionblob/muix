@@ -1,4 +1,4 @@
-export function throttle(event: VoidFunction, interval: number): VoidFunction {
+export function throttle(event: () => void, interval: number): () => void {
     let lastExecutionTimestamp = Date.now();
     let triggered = false;
     return () => {

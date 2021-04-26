@@ -1,4 +1,4 @@
-export function debounce(event: VoidFunction, delay: number): VoidFunction {
+export function debounce(event: () => void, delay: number): () => void {
     let timeout = setTimeout(event, delay);
     return () => {
         if (timeout) clearTimeout(timeout);

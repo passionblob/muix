@@ -23,6 +23,10 @@ const TransitionalStory = () => {
 
             <Transitional.View
                 style={[styles.common, styles[`style${conditions.findIndex((val) => !!val)}`]]}
+                config={{
+                    
+                    onTransitionEnd: () => console.log("end")
+                }}
             >
                 <Transitional.Text/>
             </Transitional.View>

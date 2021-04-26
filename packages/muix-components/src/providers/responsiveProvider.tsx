@@ -1,7 +1,6 @@
 import React from 'react';
 import { Dimensions, Platform, PlatformOSType } from 'react-native';
-
-import {debounce} from '../utils';
+import {debounce} from '@monthem/utils';
 
 const getScreenInfo = (): ScreenInfo => {
     const {width: curScreenWidth, height} = Dimensions.get("window");

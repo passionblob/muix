@@ -10,7 +10,7 @@ const path = require("path");
 module.exports = {
   resolver: {
     extraNodeModules: {
-      '@monthem/muix': path.resolve(__dirname, "../muix-components"),
+      '@muix-components': path.resolve(__dirname, "../muix-components"),
     },
   },
   watchFolders: [
