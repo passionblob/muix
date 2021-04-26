@@ -11,8 +11,8 @@
   "main": "index.ts",
   "description": "smart components for clean codes",
   "scripts": {
-    "build": "rm -rf dist && yarn tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rm -rf dist && muix bundle -m index.js",
+    "publishDist": "yarn build && cd dist && yarn publish"
   },
   "keywords": [],
   "author": "monthem",

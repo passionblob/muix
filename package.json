@@ -33,6 +33,9 @@
     ]
   },
   "devDependencies": {
-    "concurrently": "^6.0.2"
+    "@rollup/plugin-typescript": "^8.2.1",
+    "concurrently": "^6.0.2",
+    "rollup": "^2.45.2",
+    "ts-node": "^9.1.1"
   }
 }
