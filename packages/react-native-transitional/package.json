@@ -1,11 +1,11 @@
 {
   "name": "react-native-transitional",
-  "version": "1.14.3",
+  "version": "1.14.4",
   "main": "index.ts",
   "license": "MIT",
   "scripts": {
     "build": "rm -rf ./dist && muix bundle -m index.js",
-    "deploy": "yarn build && cd dist && yarn publish --no-git-tag-version && cd .. && yarn muix sync-version -i ./dist/package.json"
+    "deploy": "yarn build && cp README.md dist && cd dist && yarn publish --no-git-tag-version && cd .. && yarn muix sync-version -i ./dist/package.json"
   },
   "dependencies": {
     "@monthem/utils": "^1.0.0",
