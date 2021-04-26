@@ -2,7 +2,7 @@ import React from 'react';
 import {storiesOf} from '@storybook/react-native';
 import {StoryFn} from "@storybook/addons"
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import {Box, Proportional, ProportionalProps} from '@muix/muix-components'
+import {Box, Proportional, ProportionalProps} from '@monthem/muix'
 import chroma from 'chroma-js';
 
 type Case = {

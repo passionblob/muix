@@ -29,7 +29,7 @@ module.exports = ({ config }) => {
         'react': path.resolve(__dirname, '../../node_modules/react'),
         'react-dom': path.resolve(__dirname, '../../node_modules/react-dom'),
         'react-native$': path.resolve(__dirname, '../../node_modules/react-native-web'),
-        "@muix-components": path.resolve(__dirname, "../../../muix-components/src"),
+        "@monthem/muix": path.resolve(__dirname, "../../../muix-components/src"),
         '@storybook/react-native': '@storybook/react',
         "styled-components/native": "styled-components",
     };

@@ -1,6 +1,6 @@
 import React from 'react';
 import {storiesOf} from '@storybook/react-native';
-import {Responsive} from "@muix/muix-components"
+import {Responsive} from "@monthem/muix"
 import { Text, TextProps, View } from 'react-native';
 import { defineBreakpoints } from '../../../lib/responsive';
 

@@ -1,6 +1,6 @@
 import React from "react"
 import {Animated, Text, View} from "react-native"
-import {Proportional} from "@muix/muix-components"
+import {Proportional} from "@monthem/muix"
 
 const App = () => {
     const anim = new Animated.Value(0)

@@ -1,7 +1,7 @@
 import React from 'react';
 import {storiesOf} from '@storybook/react-native';
 import { Text, View } from 'react-native';
-import { Responsive, GridBase, GridBaseProps } from "@muix/muix-components";
+import { Responsive, GridBase, GridBaseProps } from "@monthem/muix";
 import chroma from 'chroma-js';
 import { defineBreakpoints } from '../../../lib/responsive';
 

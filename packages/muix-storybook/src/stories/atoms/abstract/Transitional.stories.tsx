@@ -1,4 +1,4 @@
-import {Transitional} from "@muix/muix-components"
+import {Transitional} from "@monthem/muix"
 import {storiesOf} from "@storybook/react-native"
 import React from "react"
 import { Animated, Easing, Text, TouchableOpacity, View } from "react-native"

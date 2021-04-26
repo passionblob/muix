@@ -2,7 +2,7 @@ import React from 'react';
 import {storiesOf} from '@storybook/react-native';
 import {StoryFn} from "@storybook/addons"
 import { Pressable, Text, TouchableOpacity, View } from 'react-native';
-import { Conditional } from '@muix/muix-components/src';
+import { Conditional } from '@monthem/muix';
 import Styled from "styled-components"
 import chroma from 'chroma-js';
 import { withKnobs, object, boolean } from "@storybook/addon-knobs"

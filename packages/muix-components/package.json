@@ -5,12 +5,9 @@
     "chroma-js": "^2.1.0",
     "cross-env": "5.0.5",
     "deepmerge": "^4.2.2",
-    "react-native-transitional": "^1.0.0"
+    "react-native-transitional": "latest"
   },
-  "main": "dist/index.js",
-  "files": [
-    "dist/*"
-  ],
+  "main": "index.ts",
   "description": "smart components for clean codes",
   "scripts": {
     "build": "rm -rf dist && yarn tsc",
@@ -22,11 +19,11 @@
   "peerDependencies": {
     "chroma-js": "^2.1.1",
     "react": "16.13.1",
-    "react-native": "^0.63.4",
-    "react-native-transitional": "latest"
+    "react-native": "^0.63.4"
   },
   "devDependencies": {
     "@types/chroma-js": "^2.1.1",
+    "@types/deepmerge": "^2.2.0",
     "@types/react": "^17.0.2",
     "@types/react-native": "^0.63.50",
     "@typescript-eslint/eslint-plugin": "^4.16.1",

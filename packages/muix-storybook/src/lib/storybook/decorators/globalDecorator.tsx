@@ -1,7 +1,7 @@
 import React from "react"
-import {makeDecorator} from '@storybook/addons'
+import {makeDecorator} from "@storybook/addons"
 import {View, Text, TextProps} from "react-native"
-import {Badge, BadgeProps, Box, BoxProps, Flex, Responsive, ResponsiveProvider} from "@muix/muix-components"
+import {Badge, BadgeProps, Box, BoxProps, Flex, Responsive, ResponsiveProvider} from "@monthem/muix"
 import chroma from "chroma-js"
 import { defineBreakpoints } from "../../responsive"
 
