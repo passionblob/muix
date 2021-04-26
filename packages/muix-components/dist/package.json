@@ -1,0 +1,22 @@
+{
+  "name": "@monthem/muix",
+  "version": "1.0.3",
+  "dependencies": {
+    "@monthem/utils": "^1.0.0",
+    "chroma-js": "^2.1.0",
+    "cross-env": "5.0.5",
+    "deepmerge": "^4.2.2",
+    "react-native-transitional": "^1.10.3"
+  },
+  "main": "index.js",
+  "description": "smart components for clean codes",
+  "author": "monthem",
+  "peerDependencies": {
+    "chroma-js": "^2.1.1",
+    "react": "16.13.1",
+    "react-native": "^0.63.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
