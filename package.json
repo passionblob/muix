@@ -2,8 +2,8 @@
   "private": true,
   "scripts": {
     "clean": "rimraf ./**/node_modules",
-    "components": "yarn workspace @muix/muix-components",
-    "storybook": "yarn workspace @muix/muix-storybook",
+    "components": "yarn workspace @monthem/muix-components",
+    "storybook": "yarn workspace @monthem/muix-storybook",
     "storybook:watch": "yarn storybook watch-stories",
     "storybook:reactnative": "yarn storybook start",
     "storybook:web": "concurrently \"yarn storybook:watch\" \"yarn storybook storybook-web\"",

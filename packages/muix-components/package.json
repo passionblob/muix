@@ -1,22 +1,31 @@
 {
-  "name": "@muix/muix-components",
-  "version": "1.0.1",
+  "name": "@monthem/muix",
+  "version": "1.0.2",
   "dependencies": {
     "chroma-js": "^2.1.0",
     "cross-env": "5.0.5",
     "deepmerge": "^4.2.2",
     "react-native-transitional": "^1.0.0"
   },
-  "main": "index.ts",
-  "description": "smart components for cleaner codes",
+  "main": "dist/index.js",
+  "files": [
+    "dist/*"
+  ],
+  "description": "smart components for clean codes",
   "scripts": {
+    "build": "rm -rf dist && yarn tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "monthem",
   "license": "ISC",
+  "peerDependencies": {
+    "chroma-js": "^2.1.1",
+    "react": "16.13.1",
+    "react-native": "^0.63.4"
+  },
   "devDependencies": {
-    "@types/chroma-js": "^2.1.3",
+    "@types/chroma-js": "^2.1.1",
     "@types/react": "^17.0.2",
     "@types/react-native": "^0.63.50",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
@@ -30,5 +39,13 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/passionblob/muix.git"
+  },
+  "bugs": {
+    "url": "https://github.com/passionblob/muix/issues"
+  },
+  "homepage": "https://github.com/passionblob/muix#readme"
 }
