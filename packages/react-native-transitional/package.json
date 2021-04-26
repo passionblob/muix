@@ -1,7 +1,10 @@
 {
   "name": "react-native-transitional",
-  "version": "1.0.8",
+  "version": "1.0.91",
   "main": "dist/react-native-transitional/src/index.js",
+  "files": [
+    "dist/*"
+  ],
   "license": "MIT",
   "scripts": {
     "build": "rm -rf ./dist && yarn tsc"
@@ -18,8 +21,20 @@
     "react": "^17.0.2",
     "react-native": "^0.64.0"
   },
-  "author": {
-    "name": "monthem",
-    "email": "lpoeh01@gmail.com"
-  }
+  "author": "monthem <lpoeh01@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/passionblob/muix.git"
+  },
+  "keywords": [
+    "animation"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/passionblob/muix/issues"
+  },
+  "homepage": "https://github.com/passionblob/muix#readme",
+  "description": ""
 }
