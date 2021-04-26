@@ -1,6 +1,6 @@
 {
   "name": "@monthem/utils",
-  "version": "1.2.3",
+  "version": "1.21.6",
   "main": "index.js",
   "publishConfig": {
     "access": "public"
