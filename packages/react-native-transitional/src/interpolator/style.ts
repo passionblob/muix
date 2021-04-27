@@ -5,7 +5,8 @@ import { anyOf } from "@monthem/utils"
 import { interpolateNumber } from "./common"
 
 const getRgbaString = (color: ColorValue) => {
-    return `rgba(${chroma(color as string).rgba().join(",")})`
+    const modified = color === "transparent" ? "rgba(0,0,0,0)" : color
+    return `rgba(${chroma(modified as string).rgba().join(",")})`
 }
 
 const mapLengthToString = (length: string | number) => {
