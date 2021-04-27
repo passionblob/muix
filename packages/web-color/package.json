@@ -1,0 +1,14 @@
+{
+  "name": "@monthem/web-color",
+  "version": "1.0.3",
+  "main": "index.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "rm -rf dist && muix bundle -m index.js",
+    "deploy": "yarn build && cd dist && yarn publish --no-git-tag-version && cd .. && yarn muix sync-version -i ./dist/package.json"
+  },
+  "devDependencies": {"@monthem/muix-cli": "^0.0.0"},
+  "publishConfig": {"access": "public"},
+  "author": "monthem",
+  "description": ""
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@monthem/react-native-vector-icons",
+  "version": "1.0.3",
+  "main": "index.ts",
+  "license": "MIT",
+  "scripts": {
+    "build": "rm -rf ./dist && muix bundle -m index.js",
+    "deploy": "yarn build && cd dist && yarn publish --no-git-tag-version && cd .. && yarn muix sync-version -i ./dist/package.json"
+  },
+  "publishConfig": {"access": "public"},
+  "devDependencies": {"@types/react-native-vector-icons": "^6.4.6"},
+  "peerDependencies": {"react-native-vector-icons": "^8.1.0"}
+}
