@@ -1,17 +1,19 @@
 import React, { Component } from 'react'
-import { Animated, ViewProps, ViewStyle, View } from 'react-native'
+import { Animated, TextInput, TextInputProps, TextStyle } from 'react-native'
 import { createStyleHolder, getTransitionalStyles, TransitionalInterpolator } from './interpolator'
 import { SpringConfig, StyleHolderOf, TransitionConfig } from './types'
 
-const interpolator = new TransitionalInterpolator<ViewStyle>({
+const interpolator = new TransitionalInterpolator<TextStyle>({
   default: {
     opacity: 1,
+    fontSize: 10,
   },
   properties: {
     color: [
       "backgroundColor", "borderColor", "borderEndColor",
       "borderLeftColor", "borderRightColor", "borderStartColor",
-      "borderTopColor", "borderBottomColor", "shadowColor",
+      "borderTopColor", "color", "textDecorationColor",
+      "textShadowColor", "borderBottomColor", "shadowColor",
     ],
     number: [
       "borderRadius", "aspectRatio", "borderTopLeftRadius",
@@ -23,6 +25,7 @@ const interpolator = new TransitionalInterpolator<ViewStyle>({
       "zIndex", "translateX", "translateY", "shadowRadius",
       "borderBottomEndRadius", "borderBottomStartRadius",
       "borderTopStartRadius", "borderTopEndRadius", "elevation",
+      "fontSize", "lineHeight", "textShadowRadius", "letterSpacing",
     ],
     length: [
       "borderStartWidth", "borderEndWidth", "width",
@@ -36,23 +39,27 @@ const interpolator = new TransitionalInterpolator<ViewStyle>({
     ],
     nonInterpolable: [
       "alignContent", "alignItems", "alignSelf", "backfaceVisibility",
-      "display", "direction", "flexDirection", "flexWrap", "justifyContent", "overflow",
-      "position", "borderStyle", "end", "start", "testID",
+      "display", "direction", "flexDirection", "flexWrap", "fontFamily",
+      "fontStyle", "includeFontPadding", "justifyContent", "overflow",
+      "position", "textAlign", "textAlignVertical",
+      "textDecorationLine", "textDecorationStyle", "writingDirection",
+      "borderStyle", "end", "start", "testID", "fontVariant", "fontWeight",
+      "textTransform",
     ],
     layout: [
-      "shadowOffset"
+      "shadowOffset", "textShadowOffset"
     ]
   }
 })
 
-export class TransitionalView extends Component<ViewProps & { config?: TransitionConfig }> {
+export class TransitionalTextInput extends Component<TextInputProps & { config?: TransitionConfig }> {
   private anim = new Animated.Value(1)
-  private styleHolder: StyleHolderOf<ViewProps> = {
+  private styleHolder: StyleHolderOf<TextInputProps> = {
     style: createStyleHolder(),
   }
 
   private progress = 0
-  constructor(props: Readonly<ViewProps & { config?: TransitionConfig }>) {
+  constructor(props: Readonly<TextInputProps & { config?: TransitionConfig }>) {
     super(props)
     this.anim.addListener(({ value }) => {
       this.progress = value
@@ -83,7 +90,7 @@ export class TransitionalView extends Component<ViewProps & { config?: Transitio
 
   render(): React.ReactNode {
     const { children, ..._props } = this.props
-    const transitionalStyles = getTransitionalStyles<ViewProps>({
+    const transitionalStyles = getTransitionalStyles<TextInputProps>({
       anim: this.anim,
       interpolator,
       progress: this.progress,
@@ -93,11 +100,11 @@ export class TransitionalView extends Component<ViewProps & { config?: Transitio
     })
 
     return React.createElement(
-      Animated.View,
+      Animated.createAnimatedComponent(TextInput),
       { ..._props, ...transitionalStyles },
       children,
     )
   }
 }
 
-export default TransitionalView
+export default TransitionalTextInput

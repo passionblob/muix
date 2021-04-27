@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Animated, ViewProps, ViewStyle, View } from 'react-native'
+import { Animated, ViewStyle, TouchableWithoutFeedbackProps, TouchableWithoutFeedback } from 'react-native'
 import { createStyleHolder, getTransitionalStyles, TransitionalInterpolator } from './interpolator'
 import { SpringConfig, StyleHolderOf, TransitionConfig } from './types'
 
@@ -45,14 +45,14 @@ const interpolator = new TransitionalInterpolator<ViewStyle>({
   }
 })
 
-export class TransitionalView extends Component<ViewProps & { config?: TransitionConfig }> {
+export class TransitionalTouchableWithoutFeedback extends Component<TouchableWithoutFeedbackProps & { config?: TransitionConfig }> {
   private anim = new Animated.Value(1)
-  private styleHolder: StyleHolderOf<ViewProps> = {
+  private styleHolder: StyleHolderOf<TouchableWithoutFeedbackProps> = {
     style: createStyleHolder(),
   }
 
   private progress = 0
-  constructor(props: Readonly<ViewProps & { config?: TransitionConfig }>) {
+  constructor(props: Readonly<TouchableWithoutFeedbackProps & { config?: TransitionConfig }>) {
     super(props)
     this.anim.addListener(({ value }) => {
       this.progress = value
@@ -83,7 +83,7 @@ export class TransitionalView extends Component<ViewProps & { config?: Transitio
 
   render(): React.ReactNode {
     const { children, ..._props } = this.props
-    const transitionalStyles = getTransitionalStyles<ViewProps>({
+    const transitionalStyles = getTransitionalStyles<TouchableWithoutFeedbackProps>({
       anim: this.anim,
       interpolator,
       progress: this.progress,
@@ -93,11 +93,11 @@ export class TransitionalView extends Component<ViewProps & { config?: Transitio
     })
 
     return React.createElement(
-      Animated.View,
+      Animated.createAnimatedComponent(TouchableWithoutFeedback),
       { ..._props, ...transitionalStyles },
       children,
     )
   }
 }
 
-export default TransitionalView
+export default TransitionalTouchableWithoutFeedback

@@ -1,4 +1,4 @@
-import { Animated, FlexStyle, StyleProp } from "react-native"
+import { Animated, FlexStyle, PressableProps, PressableStateCallbackType, StyleProp, ViewStyle } from "react-native"
 
 export type CommonConfig = {
     onTransitionEnd?: Animated.EndCallback
@@ -22,7 +22,12 @@ Omit<Animated.TimingAnimationConfig, "toValue" | "useNativeDriver">
 export type TransitionConfig = SpringConfig | TimingConfig
 
 export type PickStylePropNames<T> = NonNullable<{
-    [K in keyof T]: T[K] extends StyleProp<FlexStyle> | FlexStyle ? K : undefined
+    [K in keyof T]: T[K] extends 
+        StyleProp<FlexStyle>
+        | FlexStyle
+        | ((state: PressableStateCallbackType) => StyleProp<FlexStyle>)
+            ? K
+            : undefined
 }[keyof T]>
 
 export type StyleHolder<T> = {

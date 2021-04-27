@@ -8,7 +8,7 @@
     "deploy": "yarn build && cp README.md dist && cd dist && yarn publish --no-git-tag-version && cd .. && yarn muix sync-version -i ./dist/package.json"
   },
   "dependencies": {
-    "@monthem/utils": "^1.0.0",
+    "@monthem/utils": "^1.21.7",
     "@types/node": "^14.14.41",
     "chroma-js": "^2.1.1"
   },
@@ -23,9 +23,16 @@
     "json-to-ts": "^1.7.0",
     "typescript": "^4.2.4"
   },
-  "peerDependencies": {"react": "^17.0.2", "react-native": "^0.64.0"},
+  "peerDependencies": {
+    "react": "^17.0.2",
+    "react-native": "^0.64.0"
+  },
   "author": "monthem <lpoeh01@gmail.com>",
-  "keywords": ["animation"],
-  "publishConfig": {"access": "public"},
+  "keywords": [
+    "animation"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "description": ""
 }
