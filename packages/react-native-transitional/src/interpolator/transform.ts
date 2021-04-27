@@ -37,8 +37,13 @@ const transformKeys = [
 ] as const
 
 const defaultTransform: ViewStyle["transform"] = [
-    { matrix: [1, 0, 0, 1, 0, 0] },
-    { perspective: 0 },
+    { matrix: [
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1,
+    ] },
+    { perspective: 1000 },
     { rotate: "0deg" }, { rotateX: "0deg" }, { rotateY: "0deg" }, { rotateZ: "0deg" },
     { scale: 1 }, { scaleX: 1 }, { scaleY: 1 },
     { translateX: 0 }, { translateY: 0 },
@@ -47,7 +52,12 @@ const defaultTransform: ViewStyle["transform"] = [
 
 const defaultFlatTransform = flattenTransform(defaultTransform)
 
-const defaultMatrix = [0, 0, 0, 0, 0, 0]
+const defaultMatrix = [
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1,
+]
 
 export const interpolateMatrix = (prev = defaultMatrix, next = defaultMatrix, ratio: number): number[] => {
     return defaultMatrix.map((_, i) => interpolateNumber(prev[i], next[i], ratio))
