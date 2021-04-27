@@ -6,8 +6,6 @@ import {
     TransitionalSectionList,
     TransitionalScrollView,
     TransitionalTextInput,
-    TransitionalTouchableOpacity,
-    TransitionalTouchableWithoutFeedback,
     
 } from "./src"
 
@@ -19,8 +17,6 @@ export class Transitional {
     static SectionList = TransitionalSectionList
     static ScrollView = TransitionalScrollView
     static TextInput = TransitionalTextInput
-    static TouchableOpacity = TransitionalTouchableOpacity
-    static TouchableWithoutFeedback = TransitionalTouchableWithoutFeedback
 }
 
 export default Transitional

@@ -1,6 +1,6 @@
 {
   "name": "react-native-transitional",
-  "version": "1.14.4",
+  "version": "1.14.6",
   "main": "index.ts",
   "license": "MIT",
   "scripts": {
@@ -23,16 +23,9 @@
     "json-to-ts": "^1.7.0",
     "typescript": "^4.2.4"
   },
-  "peerDependencies": {
-    "react": "^17.0.2",
-    "react-native": "^0.64.0"
-  },
+  "peerDependencies": {"react": "^17.0.2", "react-native": "^0.64.0"},
   "author": "monthem <lpoeh01@gmail.com>",
-  "keywords": [
-    "animation"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
+  "keywords": ["animation"],
+  "publishConfig": {"access": "public"},
   "description": ""
 }
