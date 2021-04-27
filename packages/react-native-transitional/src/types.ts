@@ -23,12 +23,11 @@ export type TransitionConfig = SpringConfig | TimingConfig
 
 export type PickStylePropNames<T> = NonNullable<{
     [K in keyof T]: T[K] extends 
-        StyleProp<FlexStyle>
-        | FlexStyle
-        | ((state: PressableStateCallbackType) => StyleProp<FlexStyle>)
+        StyleProp<FlexStyle> | FlexStyle
             ? K
             : undefined
-}[keyof T]>
+    }[keyof T]
+>
 
 export type StyleHolder<T> = {
     prev?: T
