@@ -9,7 +9,7 @@ const getRgbaString = (color: ColorValue) => {
 }
 
 const mapLengthToString = (length: string | number) => {
-    if (typeof length === "number") length
+    if (typeof length === "string") return length
     return `${length}px`
 }
 
@@ -44,7 +44,6 @@ export const interpolateLength = (
     }
 
     const interpolated = start + (end - start) * ratio
-
     return unit === "%"
         ? `${interpolated}${unit}`
         : interpolated
@@ -76,24 +75,34 @@ export const mapLengthToAnimated = (
     next: string | number = 0,
     animatedValue: Animated.Value
 ) => {
-    let output1, output2
     const prevLength = mapLengthToString(prev)
     const nextLength = mapLengthToString(next)
-
+    let output1: string | number = nextLength,
+        output2: string | number = nextLength
+    
     const hasSameUnit = anyOf([
         !!prevLength.match("%") && !!nextLength.match("%"),
         !!prevLength.match("px") && !!nextLength.match("px")
     ])
 
-    if (hasSameUnit) {
+    if (hasSameUnit && prevLength.match("%")) {
         output1 = prevLength, output2 = nextLength
-    } else {
+    }
+
+    if (!hasSameUnit && prevLength.match("%") || nextLength.match("%")) {
         output1 = nextLength, output2 = nextLength
     }
 
+    if (!prevLength.match("%") && !nextLength.match("%")) {
+        output1 = Number(prevLength.replace(/\D.+/g, ""))
+        output2 = Number(nextLength.replace(/\D.+/g, ""))
+    }
+
+    const outputRange = [output1, output2] as number[] | string[]
+
     return animatedValue.interpolate({
         inputRange: [0, 1],
-        outputRange: [output1, output2]
+        outputRange: outputRange
     })
 }
 

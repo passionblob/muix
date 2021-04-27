@@ -28,7 +28,6 @@ const TransitionalStory = () => {
                     onTransitionEnd: (finished) => {
                         if (finished.finished && !transitioned) {
                             setTransitioned(true)
-                            console.log("??")
                         }
                     }
                 }}
