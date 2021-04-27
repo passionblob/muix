@@ -12,6 +12,7 @@ const TransitionalStory = () => {
         setConditions(toggled)
     }
 
+    console.log(`style${conditions.findIndex((val) => !!val)}`)
     return (
         <View style={{flex: 1}}>
             <View>
@@ -58,7 +59,8 @@ const styles = {
         borderColor: "blue",
         transform: [
             {translateX: 100},
-        ]
+        ],
+        opacity: 0,
     },
     style2: {
         backgroundColor: "red",

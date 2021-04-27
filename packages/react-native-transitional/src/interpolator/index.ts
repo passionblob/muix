@@ -88,8 +88,8 @@ export class TransitionalInterpolator<T extends Record<any, any>> {
 	): Animated.AnimatedProps<T> => {
 		const { getDefaultValue } = this
 		return keysOf(prevStyle, nextStyle).reduce((acc, key) => {
-			const prevValue = prevStyle[key] || getDefaultValue(key)
-			const nextValue = nextStyle[key] || getDefaultValue(key)
+			const prevValue = prevStyle[key] === undefined ? getDefaultValue(key) : prevStyle[key]
+			const nextValue = nextStyle[key] === undefined ? getDefaultValue(key) : nextStyle[key]
 			acc[key] = (this.animatedStyleMapper as any)[key](prevValue, nextValue, anim)
 			return acc
 		}, {} as Animated.AnimatedProps<T>)
