@@ -9,7 +9,7 @@ const getRgbaString = (color: ColorValue) => {
 }
 
 const mapLengthToString = (length: string | number) => {
-    if (typeof length === "string") return length
+    if (typeof length === "number") length
     return `${length}px`
 }
 
@@ -33,17 +33,21 @@ export const interpolateLength = (
     const length2 = mapLengthToString(next)
     if (length1.match("%") && length2.match("%")) {
         unit = "%"
-        start = Number(length1.replace(unit, "")),
-            end = Number(length2.replace(unit, ""))
+        start = Number(length1.replace(unit, ""))
+        end = Number(length2.replace(unit, ""))
     } else if (length1.match("px") && length2.match("px")) {
         unit = "px"
-        start = Number(length1.replace(unit, "")),
-            end = Number(length2.replace(unit, ""))
+        start = Number(length1.replace(unit, ""))
+        end = Number(length2.replace(unit, ""))
     } else {
         return next
     }
 
-    return `${start + (end - start) * ratio}${unit}`
+    const interpolated = start + (end - start) * ratio
+
+    return unit === "%"
+        ? `${interpolated}${unit}`
+        : interpolated
 }
 
 const defaultLayout = { width: 0, height: 0 }
