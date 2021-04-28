@@ -6,7 +6,7 @@ module.exports = {
     ['module-resolver', {
       "extensions": [".js", ".jsx", ".ts", ".tsx"],
       "alias": {
-        "@muix": path.resolve(__dirname, "../muix/src"),
+        "@monthem/muix": path.resolve(__dirname, "../muix/src"),
       }
     }],
     ["@babel/plugin-proposal-decorators", { "legacy": true }]
