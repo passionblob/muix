@@ -7,6 +7,7 @@
     "chroma-js": "^2.1.0",
     "cross-env": "5.0.5",
     "deepmerge": "^4.2.2",
+    "react-dom": "^17.0.2",
     "react-native-transitional": "^1.10.3"
   },
   "main": "index.ts",
@@ -27,6 +28,7 @@
     "@types/chroma-js": "^2.1.1",
     "@types/deepmerge": "^2.2.0",
     "@types/react": "^17.0.2",
+    "@types/react-dom": "^17.0.3",
     "@types/react-native": "^0.63.50",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
