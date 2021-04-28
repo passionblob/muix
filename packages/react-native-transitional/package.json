@@ -1,16 +1,13 @@
 {
   "name": "react-native-transitional",
-  "version": "1.15.6",
+  "version": "1.15.7",
   "main": "index.ts",
   "license": "MIT",
   "scripts": {
     "build": "rm -rf ./dist && muix bundle -m index.js",
     "deploy": "yarn build && cp README.md dist && cd dist && yarn publish --no-git-tag-version && cd .. && yarn muix sync-version -i ./dist/package.json"
   },
-  "dependencies": {
-    "@monthem/utils": "^1.21.7",
-    "chroma-js": "^2.1.1"
-  },
+  "dependencies": {"@monthem/utils": "^1.21.7", "chroma-js": "^2.1.1"},
   "devDependencies": {
     "@types/node": "^14.14.41",
     "@monthem/muix-cli": "^0.0.0",
