@@ -2,73 +2,56 @@ import React from 'react'
 import {
   View,
   Animated,
-  LayoutRectangle
+  LayoutRectangle,
+  LayoutChangeEvent
 } from 'react-native'
 
-export class Collapsible extends React.Component<CollapsibleProps, {collapsed?: boolean}> {
+type CollapsibleState = {
+  collapsed: boolean,
+  capturedLayout?: LayoutRectangle
+}
+
+/**
+ * Implemented Animated API.
+ * Advantage: Compatibility
+ * Disadvantage: It waits until initial content rendered for capturing content Layout.
+ */
+export class Collapsible extends React.Component<CollapsibleProps, CollapsibleState> {
   contentContainerHeight = new Animated.Value(0)
   $container = React.createRef<View>()
 
-  get _collapsed(): boolean {
-    return this.props.collapsed === undefined
-      ? this.state.collapsed
-      : this.props.collapsed
+  constructor(props: CollapsibleProps) {
+    super(props)
+    
+    if (this._collapsed) {
+      this.contentContainerHeight.setValue(0)
+    }
   }
 
-  state = {
+  state: CollapsibleState = {
     collapsed: (() => {
       if (this.props.initialState === "collapsed") return true
       if (this.props.initialState === "open") return false
       if (this.props.collapsed !== undefined) return this.props.collapsed
       return true
-    })()
-  }
-
-  async componentDidMount() {
-    this.contentContainerHeight.setValue(0)
-    if (this._collapsed) {
-      this.contentContainerHeight.setValue(0)
-    } else {
-      const layout = await this._measure()
-      this.contentContainerHeight.setValue(layout.height)
-    }
+    })(),
+    capturedLayout: undefined
   }
 
   componentDidUpdate() {
-    this.animate()
-  }
-
-  async animate(config?: Omit<Animated.TimingAnimationConfig, "toValue" | "useNativeDriver">) {
+    const { onEnd } = this.props
     this.contentContainerHeight.stopAnimation()
     if (this._collapsed) {
       Animated.timing(this.contentContainerHeight, {
         toValue: 0,
         useNativeDriver: false,
-        ...config,
-      }).start()
-    } else {
-      const layout = await this._measure()
+      }).start(onEnd?.bind(null, {collapsed: false}))
+    } else if (this.state.capturedLayout) {
       Animated.timing(this.contentContainerHeight, {
-        toValue: layout.height,
+        toValue: this.state.capturedLayout.height,
         useNativeDriver: false,
-        ...config,
-      }).start()
+      }).start(onEnd?.bind(null, {collapsed: true}))
     }
-  }
-  
-  async _measure() {
-    return new Promise<LayoutRectangle & {pageX: number, pageY: number}>((resolve) => {
-      this.$container.current?.measure((x, y, width, height, pageX, pageY) => {
-        resolve({x, y, width, height, pageX, pageY})
-      })
-    })
-  }
-
-  _toggleCollapsed() {
-    if (this.props.collapsed !== undefined) return;
-    this.setState({
-      collapsed: !!!this._collapsed
-    })
   }
 
   render() {
@@ -82,15 +65,37 @@ export class Collapsible extends React.Component<CollapsibleProps, {collapsed?: 
           toggleCollapsed: this._toggleCollapsed.bind(this)
         })}
         <Animated.View style={{
-          height: this.contentContainerHeight,
+          height: this.state.capturedLayout ? this.contentContainerHeight : undefined,
           overflow: "hidden"
         }}>
-          <Animated.View ref={this.$container}>
+          <View onLayout={this._onLayout.bind(this)} ref={this.$container}>
             {children}
-          </Animated.View>
+          </View>
         </Animated.View>
       </View>
     )
+  }
+
+  get _collapsed(): boolean {
+    return this.props.collapsed === undefined
+      ? this.state.collapsed
+      : this.props.collapsed
+  }
+
+  _toggleCollapsed() {
+    if (this.props.collapsed !== undefined) return;
+    this.setState({
+      collapsed: !!!this._collapsed
+    })
+  }
+  
+  _onLayout(e: LayoutChangeEvent) {
+    const {layout} = e.nativeEvent
+    if (layout.height !== 0 && this.state.capturedLayout?.height !== layout.height) {
+      this.setState({
+        capturedLayout: layout
+      })
+    }
   }
 }
 
@@ -103,6 +108,7 @@ export interface CollapsibleProps {
   /** override internal state */
   collapsed?: boolean
   initialState?: "collapsed" | "open"
+  onEnd?: (state: {collapsed: boolean}) => void
   header: React.ComponentType<CollapsibleHeaderProps>
 }
 

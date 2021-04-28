@@ -6,7 +6,7 @@ import { Collapsible, CollapsibleHeaderProps } from '@monthem/muix';
 const ExampleHeader = (props: CollapsibleHeaderProps) => {
   const {collapsed, toggleCollapsed} = props
   return (
-    <TouchableOpacity style={styles.header}>
+    <View style={styles.header}>
       <Text>I'm collapsible</Text>
       <TouchableOpacity
         onPress={toggleCollapsed}
@@ -14,7 +14,7 @@ const ExampleHeader = (props: CollapsibleHeaderProps) => {
       >
         <Text>{collapsed ? "Collapsed" : "Openned"}</Text>
       </TouchableOpacity>
-    </TouchableOpacity>
+    </View>
   )
 }
 
