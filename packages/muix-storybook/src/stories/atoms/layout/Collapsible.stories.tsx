@@ -1,10 +1,10 @@
 import React from 'react';
-import {storiesOf} from '@storybook/react-native';
+import { storiesOf } from '@storybook/react-native';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Collapsible, CollapsibleHeaderProps } from '@monthem/muix';
 
 const ExampleHeader = (props: CollapsibleHeaderProps) => {
-  const {collapsed, toggleCollapsed} = props
+  const { collapsed, toggleCollapsed } = props
   return (
     <View style={styles.header}>
       <Text>I'm collapsible</Text>
@@ -19,22 +19,18 @@ const ExampleHeader = (props: CollapsibleHeaderProps) => {
 }
 
 storiesOf("Atoms/Layout", module)
-    .add(
-        "Collapsible",
-        () => (
-            <View>
-              <Collapsible header={ExampleHeader}>
-                <View style={styles.dummyContent} />
-              </Collapsible>
-              <Collapsible header={ExampleHeader}>
-                <View style={styles.dummyContent} />
-              </Collapsible>
-              <Collapsible header={ExampleHeader}>
-                <View style={styles.dummyContent} />
-              </Collapsible>
-            </View>
-        ),
-    )
+  .add("Collapsible(Animated)", () => (
+      <View>
+        {Array(20).fill(0).map((_, i) => {
+          return (
+            <Collapsible header={ExampleHeader}>
+              <View style={styles.dummyContent} />
+            </Collapsible>
+          )
+        })}
+      </View>
+    ),
+  )
 
 const styles = StyleSheet.create({
   dummyContent: {
