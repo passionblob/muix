@@ -16,7 +16,14 @@ export class Responsive<C extends React.ComponentType<any>> extends Component<Re
 			<ResponsiveContext.Consumer>
 				{(screenInfo) => {
 					const targetPoint = this.getTargetPoint(screenInfo)
-					const targetProps = breakpoints[targetPoint]
+					const targetProps = (() => {
+						const _targetProps = breakpoints[targetPoint]
+						if (typeof _targetProps === "function") {
+							const getProps = _targetProps as (() => React.ComponentProps<C>)
+							return getProps() 
+						}
+						return _targetProps
+					})()
 					const _props = deepmerge(commonProps, targetProps)
 
 					return React.createElement(component, _props, children)
@@ -53,12 +60,12 @@ export type ResponsiveProps<C extends React.ComponentClass | React.FC> = {
 	 * define props for each breakpoint
 	 * based on max-width
 	 * example)
-	 * "360px": <props>
-	 * "540px": <props>
-	 * "720px": <props>
+	 * "360px": props
+	 * "540px": props
+	 * "720px": props
 	 */
 	breakpoints: {
-		[index: string]: React.ComponentProps<C>
+		[index: string]: React.ComponentProps<C> | (() => React.ComponentProps<C>)
 	}
 }
 
