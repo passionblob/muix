@@ -1,6 +1,6 @@
+import React from "react"
 import {Transitional} from "@monthem/muix"
 import {storiesOf} from "@storybook/react-native"
-import React from "react"
 import { Animated, Easing, FlatList, ScrollView, SectionList, StatusBar, Text, TouchableOpacity, View } from "react-native"
 
 const TransitionalStory = () => {
@@ -12,7 +12,6 @@ const TransitionalStory = () => {
         setConditions(toggled)
     }
 
-    console.log(`style${conditions.findIndex((val) => !!val)}`)
     return (
         <View style={{flex: 1}}>
             <View>
@@ -60,7 +59,6 @@ const styles = {
         transform: [
             {translateX: 100},
         ],
-        opacity: 0,
     },
     style2: {
         backgroundColor: "red",
@@ -109,4 +107,4 @@ const styles = {
 }
 
 storiesOf("Atoms/Abstract", module)
-    .add("Transitional", TransitionalStory)
+    .add("Transitional", () => <TransitionalStory/>)

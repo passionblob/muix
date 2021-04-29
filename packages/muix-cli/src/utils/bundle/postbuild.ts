@@ -17,6 +17,7 @@ export const createSlimPackage = async(input: string, main: string) => {
     "version",
     "main",
     "dependencies",
+    "devDependencies",
     "peerDependencies",
     "publishConfig",
     "description",

@@ -1,7 +1,7 @@
 const path = require('path')
 const tsLoader = [require.resolve("ts-loader")];
 
-if(process.env.USE_DOCGEN === "TRUE") tsLoader.push({
+if (process.env.USE_DOCGEN === "TRUE") tsLoader.push({
     loader: require.resolve("react-docgen-typescript-loader"),
     options: {
         tsconfigPath: "tsconfig.json"
@@ -25,12 +25,12 @@ module.exports = ({ config }) => {
     );
     config.resolve.extensions.push(".ts", ".tsx");
     config.resolve.alias = {
-        'core-js/modules': path.resolve(__dirname, '../../node_modules/core-js/modules'),
-        'react': path.resolve(__dirname, '../../node_modules/react'),
-        'react-dom': path.resolve(__dirname, '../../node_modules/react-dom'),
-        'react-native$': path.resolve(__dirname, '../../node_modules/react-native-web'),
-        "@monthem/muix": path.resolve(__dirname, "../../../muix-components/src"),
-        '@storybook/react-native': '@storybook/react',
+        'core-js/modules': path.resolve(__dirname, '../../../../node_modules/core-js/modules'),
+        'react': path.resolve(__dirname, '../../../../node_modules/react'),
+        'react-dom': path.resolve(__dirname, '../../../../node_modules/react-dom'),
+        'react-native$': path.resolve(__dirname, '../../../../node_modules/react-native-web'),
+        '@storybook/react-native': path.resolve(__dirname, '../../../../node_modules/@storybook/react'),
+        "@monthem/muix": path.resolve(__dirname, "../../../muix/src"),
         "styled-components/native": "styled-components",
     };
     config.node = {

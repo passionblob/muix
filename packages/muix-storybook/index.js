@@ -3,9 +3,14 @@
  */
 
 // import App from './App';
-// import { AppRegistry } from 'react-native';
-// import {name as appName} from './app.json';
+import React from "react"
+import { AppRegistry, View, Text } from 'react-native';
+import {name as appName} from './app.json';
 
-// AppRegistry.registerComponent(appName, () => App);
+// AppRegistry.registerComponent(appName, () => () => (
+//   <View>
+//     <Text>Sibal</Text>
+//   </View>
+// ));
 
 export {default} from './src/config_app/config'
