@@ -3,7 +3,7 @@ import { StyleProp, StyleSheet, View, ViewStyle } from "react-native"
 
 
 export class GridBase<T> extends React.Component<GridBaseProps<T>> {
-  render(): JSX.Element {
+  render(): React.ReactNode {
     const {
       column: columnCount = 3,
       shouldRenderEmpty,
@@ -68,7 +68,6 @@ export class GridBase<T> extends React.Component<GridBaseProps<T>> {
             ])
 
             if (!child && !_shouldRenderEmpty) return null
-
             return (
               <View
                 key={key}
@@ -112,11 +111,9 @@ export interface GridBaseProps<T> {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
   },
   row: {
-    flex: 1,
-    flexDirection: "row"
+    flexDirection: "row",
   },
   cell: {
     flex: 1,

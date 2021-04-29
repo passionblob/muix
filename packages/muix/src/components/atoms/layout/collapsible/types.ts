@@ -18,4 +18,6 @@ export interface CollapsibleProps {
   header: React.ComponentType<CollapsibleHeaderProps>
   style?: StyleProp<ViewStyle>
   // engine?: "animated" | "reanimated"
+  /** if provided, initial render doesn't flicker */
+  contentHeight?: number
 }

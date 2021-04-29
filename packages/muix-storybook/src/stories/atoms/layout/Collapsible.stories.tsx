@@ -1,7 +1,10 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react-native';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Collapsible, CollapsibleHeaderProps } from '@monthem/muix';
+
+const indices = Array(10).fill(0).map((_, i) => i)
+
 
 const ExampleHeader = (props: CollapsibleHeaderProps) => {
   const { collapsed, toggleCollapsed } = props
@@ -20,16 +23,20 @@ const ExampleHeader = (props: CollapsibleHeaderProps) => {
 
 storiesOf("Atoms/Layout", module)
   .add("Collapsible(Animated)", () => (
-      <View>
-        {Array(20).fill(0).map((_, i) => {
-          return (
-            <Collapsible header={ExampleHeader}>
-              <View style={styles.dummyContent} />
-            </Collapsible>
-          )
-        })}
-      </View>
-    ),
+    <FlatList
+      data={indices}
+      removeClippedSubviews
+      maxToRenderPerBatch={1}
+      renderItem={() => (
+        <Collapsible header={ExampleHeader}>
+          <View style={styles.dummyContent} />
+        </Collapsible>
+      )}
+      fadingEdgeLength={200}
+      pagingEnabled
+      keyExtractor={(_, i) => `${i}`}
+    />
+  ),
   )
 
 const styles = StyleSheet.create({
@@ -38,7 +45,6 @@ const styles = StyleSheet.create({
     backgroundColor: "lightgrey"
   },
   header: {
-    flex: 1,
     padding: 10,
     alignItems: "center",
     flexDirection: "row",
