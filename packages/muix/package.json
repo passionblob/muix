@@ -1,8 +1,8 @@
 {
   "name": "@monthem/muix",
-  "version": "1.0.9",
+  "version": "1.10.3",
   "dependencies": {
-    "@monthem/utils": "^1.0.0",
+    "@monthem/utils": "^1.21.7",
     "@monthem/web-color": "^1.0.3",
     "chroma-js": "^2.1.1",
     "deepmerge": "^4.2.2",
@@ -13,13 +13,22 @@
   "main": "index.ts",
   "description": "smart components for clean codes",
   "scripts": {
-    "build": "rm -rf dist && muix bundle -m index.js",
+    "build": "rm -rf ./dist && yarn transpile && yarn prettier && yarn emit-types && yarn copy-package",
+    "transpile": "babel ./src -d ./dist -x .tsx,.ts,.js",
+    "emit-types": "yarn tsc --declaration --emitDeclarationOnly --outDir dist",
+    "copy-package": "yarn muix slim-package -m index.js",
+    "prettier": "prettier dist/* -w",
     "deploy": "yarn build && cd dist && yarn publish --no-git-tag-version && cd .. && yarn muix sync-version -i ./dist/package.json"
   },
   "keywords": [],
   "author": "monthem",
   "license": "ISC",
   "devDependencies": {
+    "@babel/cli": "^7.13.16",
+    "@babel/core": "^7.14.0",
+    "@babel/preset-env": "^7.14.0",
+    "@babel/preset-react": "^7.13.13",
+    "@babel/preset-typescript": "^7.13.0",
     "@types/chroma-js": "^2.1.1",
     "@types/deepmerge": "^2.2.0",
     "@types/react": "^17.0.2",
@@ -27,15 +36,17 @@
     "@types/react-native": "^0.63.50",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
+    "babel-plugin-module-resolver": "^4.1.0",
     "eslint": "^7.21.0",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-native": "^3.10.0",
+    "prettier": "^2.2.1",
     "typescript": "^4.2.2"
   },
   "peerDependencies": {
-    "react-native": "^0.64.0",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "react-native": "^0.64.0"
   },
   "publishConfig": {
     "access": "public"
