@@ -1,4 +1,4 @@
-import { anyOf } from '@monthem/muix/../../utils'
+import { anyOf } from '@monthem/utils'
 import React from 'react'
 import {
   View,

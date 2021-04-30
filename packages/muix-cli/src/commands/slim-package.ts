@@ -7,8 +7,8 @@ import {exec} from "child_process"
 
 import {createSlimPackage} from "../utils/bundle"
 
-export default class Bundle extends Command {
-  static description = 'bundle single package'
+export default class SlimPackage extends Command {
+  static description = 'rollup single package'
 
   static flags = {
     help: flags.help({char: 'h'}),
@@ -20,8 +20,7 @@ export default class Bundle extends Command {
   }
 
   async run() {
-    const {flags} = this.parse(Bundle)
-    const spinner = ora(`started bundling`).start();
+    const {flags} = this.parse(SlimPackage)
     const cwd = process.cwd()
 
     const tsconfig = await promisify(fs.readFile)(path.resolve(cwd, "tsconfig.json"), {encoding: "utf-8"})
@@ -35,12 +34,9 @@ export default class Bundle extends Command {
 
     if (!tsconfig.compilerOptions.outDir) throw Error("plz specify outDir")
 
-    await promisify(exec)("yarn tsc")
-
     const packageInput = path.resolve(cwd, "package.json")
     const packageOutput = path.resolve(cwd, `${tsconfig.compilerOptions.outDir}/package.json`)
     const slimPackage = await createSlimPackage(packageInput, flags.main)
     fs.writeFileSync(packageOutput, slimPackage)
-    spinner.succeed("bundling success")
   }
 }

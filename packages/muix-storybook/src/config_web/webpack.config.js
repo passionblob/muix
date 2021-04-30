@@ -30,7 +30,7 @@ module.exports = ({ config }) => {
         'react-dom': path.resolve(__dirname, '../../../../node_modules/react-dom'),
         'react-native$': path.resolve(__dirname, '../../../../node_modules/react-native-web'),
         '@storybook/react-native': path.resolve(__dirname, '../../../../node_modules/@storybook/react'),
-        "@monthem/muix": path.resolve(__dirname, "../../../muix/src"),
+        "@monthem/muix": path.resolve(__dirname, "../../../muix/dist"),
         "styled-components/native": "styled-components",
     };
     config.node = {

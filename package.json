@@ -4,7 +4,7 @@
     "clean": "rimraf ./**/node_modules",
     "components": "yarn workspace @monthem/muix",
     "utils": "yarn workspace @monthem/utils",
-    "transitional": "yarn workspace react-native-transitional",
+    "rnt": "yarn workspace react-native-transitional",
     "storybook": "yarn workspace @monthem/muix-storybook",
     "storybook:watch": "yarn storybook watch-stories",
     "storybook:reactnative": "yarn storybook start",
