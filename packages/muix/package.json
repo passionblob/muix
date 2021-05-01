@@ -1,11 +1,12 @@
 {
   "name": "@monthem/muix",
-  "version": "1.11.4",
+  "version": "1.11.6",
   "dependencies": {
     "@monthem/utils": "^1.21.7",
     "@monthem/web-color": "^1.0.3",
     "chroma-js": "^2.1.1",
     "deepmerge": "^4.2.2",
+    "gl-react-native": "^5.0.0",
     "react-native-transitional": "^1.15.9",
     "react-native-web": "^0.16.1",
     "styled-components": "^5.2.3"
@@ -18,7 +19,9 @@
     "emit-types": "yarn tsc --declaration --emitDeclarationOnly --outDir dist",
     "copy-package": "yarn muix slim-package -m index.js",
     "prettier": "prettier dist/* -w",
-    "deploy": "yarn build && cd dist && yarn publish --no-git-tag-version && cd .. && yarn muix sync-version -i ./dist/package.json"
+    "publish-dist": "cd dist && yarn publish --no-git-tag-version",
+    "sync-to-dist-package": "yarn muix sync-version -i ./dist/package.json",
+    "deploy": "yarn build && yarn publish-dist && yarn sync-to-dist-package && rm -rf dist/"
   },
   "keywords": [],
   "author": "monthem",

@@ -9,7 +9,9 @@
     "emit-types": "yarn tsc --declaration --emitDeclarationOnly --outDir dist",
     "copy-package": "yarn muix slim-package -m index.js",
     "prettier": "prettier dist/* -w",
-    "deploy": "yarn build && cp README.md dist && cd dist && yarn publish --no-git-tag-version && cd .. && yarn muix sync-version -i ./dist/package.json"
+    "publish-dist": "cd dist && yarn publish --no-git-tag-version",
+    "sync-to-dist-package": "yarn muix sync-version -i ./dist/package.json",
+    "deploy": "yarn build && yarn publish-dist && yarn sync-to-dist-package && rm -rf dist/"
   },
   "dependencies": {"@monthem/utils": "^1.21.7", "chroma-js": "^2.1.1"},
   "devDependencies": {

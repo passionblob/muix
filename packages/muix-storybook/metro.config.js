@@ -8,11 +8,6 @@ const path = require("path");
  */
 
 module.exports = {
-  resolver: {
-    extraNodeModules: {
-      // '@muix-components': path.resolve(__dirname, "../muix"),
-    },
-  },
   watchFolders: [
     path.resolve(__dirname, "./node_modules"),
     path.resolve(__dirname, "../../node_modules"),

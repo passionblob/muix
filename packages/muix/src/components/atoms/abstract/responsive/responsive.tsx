@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-import { ResponsiveContext, ScreenInfo } from "@src/providers"
 import deepmerge from 'deepmerge';
+import { ResponsiveContext, ScreenInfo } from "@monthem/muix/src/providers"
 
 export class Responsive<C extends React.ComponentType<any>> extends Component<ResponsiveProps<C>> {
 	static contextType = ResponsiveContext;

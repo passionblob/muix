@@ -9,7 +9,7 @@ module.exports = {
       "extensions": [".js", ".jsx", ".ts", ".tsx"],
       "alias": {
         "react": path.resolve(__dirname, "../../node_modules/react"),
-        "@monthem/muix": path.resolve(__dirname, "../muix/dist"),
+        "@monthem/muix": path.resolve(__dirname, "../muix"),
         '@monthem/utils': path.resolve(__dirname, "../utils"),
         '@monthem/web-color': path.resolve(__dirname, "../web-color"),
         '@monthem/react-native-vector-icons': path.resolve(__dirname, "../react-native-vector-icons"),

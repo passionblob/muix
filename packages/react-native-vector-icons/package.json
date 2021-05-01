@@ -5,7 +5,9 @@
   "license": "MIT",
   "scripts": {
     "build": "rm -rf ./dist && muix bundle -m index.js",
-    "deploy": "yarn build && cd dist && yarn publish --no-git-tag-version && cd .. && yarn muix sync-version -i ./dist/package.json"
+    "publish-dist": "cd dist && yarn publish --no-git-tag-version",
+    "sync-to-dist-package": "yarn muix sync-version -i ./dist/package.json",
+    "deploy": "yarn build && yarn publish-dist && yarn sync-to-dist-package && rm -rf dist/"
   },
   "publishConfig": {"access": "public"},
   "devDependencies": {"@types/react-native-vector-icons": "^6.4.6"},
