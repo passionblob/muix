@@ -20,7 +20,8 @@ const SimpleGLStory = () => {
             <GLView
                 style={{
                     width: 300,
-                    height: 300
+                    height: 300,
+                    backgroundColor: "lightgrey"
                 }}
                 onContextCreate={onContextCreate}
             />
@@ -30,36 +31,38 @@ const SimpleGLStory = () => {
 
 function onContextCreate(gl: ExpoWebGLRenderingContext) {
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    gl.clearColor(0.5, 0.5, 0.5, 1);
 
     const vertSource = `
-    attribute vec4 a_position;
-    void main(void) {     
-        gl_Position = a_position;
-        gl_PointSize = 100.0;
+    attribute vec2 a_position;
+    uniform vec2 u_resolution;
+
+    void main(void) {
+        vec2 zeroToOne = a_position / u_resolution;
+        vec2 zeroToTwo = zeroToOne * 2.0;
+        vec2 clipSpace = zeroToTwo - 1.0;
+        vec2 inversed = clipSpace * vec2(1, -1);
+        gl_Position = vec4(inversed, 0, 1);
     }
     `
     const fragSource = `
     precision mediump float;
+    uniform vec4 u_color;
     void main(void) {
-        gl_FragColor = vec4(1, 0, 0.5, 1);
+        gl_FragColor = u_color;
     }
     `
     const vert = createShader(gl.VERTEX_SHADER, vertSource);
     const frag = createShader(gl.FRAGMENT_SHADER, fragSource);
     const program = createProgram(vert, frag)
-    const positionAttributeLocation = gl.getAttribLocation(program, "a_position")
-    const positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
-    const positions = [
-        0, 0,
-        0, 0.5,
-        0.7, 0,
-    ]
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
     gl.useProgram(program);
 
+    const resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution")
+    const colorUniformLocation = gl.getUniformLocation(program, "u_color");
+    const positionAttributeLocation = gl.getAttribLocation(program, "a_position")
     gl.enableVertexAttribArray(positionAttributeLocation);
+
+    const positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
     const size = 2;
     const type = gl.FLOAT;
@@ -77,8 +80,14 @@ function onContextCreate(gl: ExpoWebGLRenderingContext) {
 
     const primitiveType = gl.TRIANGLES;
     const offset = 0;
-    const count = 3;
-    gl.drawArrays(primitiveType, offset, count);
+    const count = 6;
+
+    gl.uniform2f(resolutionUniformLocation, 300, 300)
+    for (let i = 0; i < 50; i += 1) {
+        setRectangle(gl, randomInt(300), randomInt(300), randomInt(50), randomInt(50))
+        gl.uniform4f(colorUniformLocation, Math.random(), Math.random(), Math.random(), 1)
+        gl.drawArrays(primitiveType, offset, count);
+    }    
 
     function createShader(type: number, source: string) {
         const shader = gl.createShader(type)
@@ -94,7 +103,7 @@ function onContextCreate(gl: ExpoWebGLRenderingContext) {
         gl.deleteShader(shader);
     }
 
-    function createProgram(vert: WebGLShader, fragmentShader: WebGLShader) {
+    function createProgram(vert: WebGLShader, frag: WebGLShader) {
         const program = gl.createProgram();
         gl.attachShader(program, vert);
         gl.attachShader(program, frag);
@@ -107,6 +116,25 @@ function onContextCreate(gl: ExpoWebGLRenderingContext) {
         
         console.log(gl.getProgramInfoLog(program));
         gl.deleteProgram(program);
+    }
+
+    function randomInt(range) {
+        return Math.floor(Math.random() * range);
+    }
+
+    function setRectangle(gl: ExpoWebGLRenderingContext, x: number, y: number, width: number, height: number) {
+        const x1 = x;
+        const x2 = x + width;
+        const y1 = y;
+        const y2 = y + height;
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+            x1, y1,
+            x2, y1,
+            x1, y2,
+            x1, y2,
+            x2, y1,
+            x2, y2
+        ]), gl.STATIC_DRAW);
     }
 
     gl.flush();
