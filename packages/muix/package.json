@@ -1,6 +1,6 @@
 {
   "name": "@monthem/muix",
-  "version": "1.11.7",
+  "version": "1.11.8",
   "dependencies": {
     "@monthem/utils": "^1.21.7",
     "@monthem/web-color": "^1.0.3",
@@ -31,7 +31,6 @@
     "@babel/cli": "^7.13.16",
     "@babel/core": "^7.14.0",
     "@babel/preset-env": "^7.14.0",
-    "@babel/preset-react": "^7.13.13",
     "@babel/preset-typescript": "^7.13.0",
     "@types/chroma-js": "^2.1.1",
     "@types/deepmerge": "^2.2.0",
@@ -41,9 +40,11 @@
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
     "babel-plugin-module-resolver": "^4.1.0",
+    "babel-plugin-react-native-web": "^0.16.1",
     "eslint": "^7.21.0",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-native": "^3.10.0",
+    "metro-react-native-babel-preset": "^0.66.0",
     "prettier": "^2.2.1",
     "typescript": "^4.2.2"
   },
