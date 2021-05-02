@@ -1,6 +1,5 @@
 import React from 'react'
 import { Platform } from "react-native"
-import ReactDOMServer from "react-dom/server"
 
 const triggerMouseEvent = (node: Node, eventType: string) => {
   const mouseEvent = document.createEvent("MouseEvent")
@@ -28,7 +27,8 @@ export class Hoverable extends React.Component<HoverableProps> {
 
     const getHoverNode = () => {
       if (!style) return null
-
+      
+      const ReactDOMServer = require("react-dom/server")
       const _tempEle = React.createElement("div", { style: style })
       const _rendered = ReactDOMServer.renderToStaticMarkup(_tempEle)
       const _hoverContainer = document.createElement("div")
@@ -45,6 +45,8 @@ export class Hoverable extends React.Component<HoverableProps> {
       
       _hoverNode.style.cssText = `
         position: relative;
+        width: 100%;
+        height: 100%;
         ${_hoverNode.style.cssText}
       `
 
