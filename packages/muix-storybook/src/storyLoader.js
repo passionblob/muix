@@ -15,6 +15,7 @@ function loadStories() {
   require('./stories/atoms/layout/Proportional.stories');
   require('./stories/atoms/shape/Box.stories');
   require('./stories/molecules/shape/badge/Badge.stories');
+  require('./stories/test/gl.stories');
 }
 
 const stories = [
@@ -29,6 +30,7 @@ const stories = [
   './stories/atoms/layout/Proportional.stories',
   './stories/atoms/shape/Box.stories',
   './stories/molecules/shape/badge/Badge.stories',
+  './stories/test/gl.stories',
 ];
 
 module.exports = {

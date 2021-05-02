@@ -15,7 +15,9 @@ export const globalDecorator = makeDecorator({
     name: "TitleDecorator",
     parameterName: "none",
     wrapper: (getStory, c, settings) => {
-        const nearestKind = c.kind.match(/[a-zA-Z]+$/g)?.join("") || "";
+        let nearestKind = c.kind.match(/[a-zA-Z]+$/g)?.join("") || "";
+        nearestKind = nearestKind.toLowerCase()
+        if (!(nearestKind in colorForKind)) throw Error(`No color exists for ${nearestKind}`)
         const color = colorForKind[nearestKind?.toLowerCase()]
         return (
             <ResponsiveProvider>

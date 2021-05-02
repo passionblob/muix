@@ -3,6 +3,9 @@ import {Transitional} from "@monthem/muix"
 import {storiesOf} from "@storybook/react-native"
 import { Animated, Easing, FlatList, ScrollView, SectionList, StatusBar, Text, TouchableOpacity, View } from "react-native"
 
+storiesOf("Atoms/Abstract", module)
+    .add("Transitional", () => <TransitionalStory/>)
+
 const TransitionalStory = () => {
     const [conditions, setConditions] = React.useState([false, false, false, false]);
     const [transitioned, setTransitioned] = React.useState(false)
@@ -91,20 +94,17 @@ const styles = {
         flex: 1,
         paddingTop: StatusBar.currentHeight,
         marginHorizontal: 16
-      },
-      item: {
+        },
+        item: {
         backgroundColor: "#f9c2ff",
         padding: 20,
         marginVertical: 8
-      },
-      header: {
+        },
+        header: {
         fontSize: 32,
         backgroundColor: "#fff"
-      },
-      title: {
+        },
+        title: {
         fontSize: 24
-      }
+        }
 }
-
-storiesOf("Atoms/Abstract", module)
-    .add("Transitional", () => <TransitionalStory/>)

@@ -7,10 +7,9 @@
     "ios": "react-native run-ios",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "watch-stories": "watch 'yarn run prestorybook' ./src/stories",
+    "watch-stories": "watch 'npx rnstl' ./src/stories",
     "start-storybook-web": "node ../../node_modules/@storybook/react/dist/cjs/server/index.js -p 2995 -c ./src/config_web",
     "storybook-web": "yarn run start-storybook-web",
-    "prestorybook": "rnstl",
     "build:web": "yarn build-storybook -c ./src/config_web",
     "chromatic": "npx chromatic build:web --project-token cb998b5d9bfa",
     "deploy:web": "yarn chromatic -b build:web"
@@ -18,6 +17,7 @@
   "dependencies": {
     "@monthem/muix": "*",
     "chroma-js": "^2.1.1",
+    "expo-gl": "^10.2.0",
     "react-native": "^0.64.0",
     "react-native-unimodules": "^0.13.3",
     "react-native-web": "^0.15.0",
