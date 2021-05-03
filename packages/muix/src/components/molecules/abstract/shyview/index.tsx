@@ -6,6 +6,8 @@ import {
   StyleProp,
   ViewStyle,
   PanResponder,
+  GestureResponderEvent,
+  Pressable,
 } from 'react-native'
 
 export class ShyView extends React.Component<ShyViewProps> {
@@ -17,27 +19,22 @@ export class ShyView extends React.Component<ShyViewProps> {
   private percentageX = Animated.divide(this.locationX, this.layout.width)
   private percentageY = Animated.divide(this.locationY, this.layout.height)
 
-  private get panResponder() {
+  private onPressIn = (e: GestureResponderEvent) => {
     const {touchAnim, locationY, locationX} = this;
+    Animated.timing(touchAnim, {toValue: 1, useNativeDriver: false}).start()
+    Animated.parallel([
+      Animated.spring(locationX, {toValue: e.nativeEvent.locationX, useNativeDriver: false}),
+      Animated.spring(locationY, {toValue: e.nativeEvent.locationY, useNativeDriver: false}),
+    ]).start()
+  }
 
-    return PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onPanResponderStart: (e) => {
-        Animated.timing(touchAnim, {toValue: 1, useNativeDriver: false}).start()
-        Animated.parallel([
-          Animated.spring(locationX, {toValue: e.nativeEvent.locationX, useNativeDriver: false}),
-          Animated.spring(locationY, {toValue: e.nativeEvent.locationY, useNativeDriver: false}),
-        ]).start()
-        console.log(e)
-      },
-      onPanResponderRelease: () => {
-        Animated.timing(touchAnim, {toValue: 0, useNativeDriver: false}).start()
-        Animated.parallel([
-          Animated.spring(locationX, {toValue: this.staticLayout.width / 2, useNativeDriver: false}),
-          Animated.spring(locationY, {toValue: this.staticLayout.height / 2, useNativeDriver: false}),
-        ]).start()
-      }
-    })
+  private onPressOut = () => {
+    const {touchAnim, locationY, locationX} = this;    
+    Animated.timing(touchAnim, {toValue: 0, useNativeDriver: false}).start()
+    Animated.parallel([
+      Animated.spring(locationX, {toValue: this.staticLayout.width / 2, useNativeDriver: false}),
+      Animated.spring(locationY, {toValue: this.staticLayout.height / 2, useNativeDriver: false}),
+    ]).start()
   }
 
   private captureLayout = (e: LayoutChangeEvent) => {
@@ -50,7 +47,7 @@ export class ShyView extends React.Component<ShyViewProps> {
   }
 
   render() {
-    const {touchAnim, percentageX, percentageY, panResponder, captureLayout} = this;
+    const {touchAnim, percentageX, percentageY, onPressIn, onPressOut, captureLayout} = this;
     const {children, style, activeStyleOutput, ..._props} = this.props;
 
     const bindInterpolateInput = (anim: Animated.Value, inputRange: Animated.InterpolationConfigType["inputRange"]) => {
@@ -100,11 +97,12 @@ export class ShyView extends React.Component<ShyViewProps> {
     return (
       <Animated.View
         {..._props}
-        {...panResponder.panHandlers}
         style={[ animatedStyle, style]}
         onLayout={captureLayout}
       >
-        {children}
+        <Pressable onPressIn={onPressIn} onPress={this.props.onPress} onPressOut={onPressOut}>
+          {children}
+        </Pressable>
       </Animated.View>
     )
   }
@@ -119,5 +117,6 @@ interface ShyViewProps extends ViewProps {
     rotateY?: [string, string]
   }
   style?: StyleProp<ViewStyle>
+  onPress?: () => void
 }
 
