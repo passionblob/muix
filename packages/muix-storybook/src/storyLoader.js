@@ -5,6 +5,7 @@
 
 function loadStories() {
   require('./stories/atoms/abstract/Conditional.stories');
+  require('./stories/atoms/abstract/Hoverable.stories');
   require('./stories/atoms/abstract/Identity.stories');
   require('./stories/atoms/abstract/Responsive.stories');
   require('./stories/atoms/abstract/Transitional.stories');
@@ -14,12 +15,14 @@ function loadStories() {
   require('./stories/atoms/layout/Padding.stories');
   require('./stories/atoms/layout/Proportional.stories');
   require('./stories/atoms/shape/Box.stories');
+  require('./stories/molecules/abstract/ShyView.stories');
   require('./stories/molecules/shape/badge/Badge.stories');
   require('./stories/test/gl.stories');
 }
 
 const stories = [
   './stories/atoms/abstract/Conditional.stories',
+  './stories/atoms/abstract/Hoverable.stories',
   './stories/atoms/abstract/Identity.stories',
   './stories/atoms/abstract/Responsive.stories',
   './stories/atoms/abstract/Transitional.stories',
@@ -29,6 +32,7 @@ const stories = [
   './stories/atoms/layout/Padding.stories',
   './stories/atoms/layout/Proportional.stories',
   './stories/atoms/shape/Box.stories',
+  './stories/molecules/abstract/ShyView.stories',
   './stories/molecules/shape/badge/Badge.stories',
   './stories/test/gl.stories',
 ];

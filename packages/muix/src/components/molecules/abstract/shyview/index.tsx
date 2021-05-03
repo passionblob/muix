@@ -5,89 +5,93 @@ import {
   ViewProps,
   StyleProp,
   ViewStyle,
-  StyleSheet,
-  PanResponder
+  PanResponder,
 } from 'react-native'
 
 export class ShyView extends React.Component<ShyViewProps> {
-  touchAnim = new Animated.Value(0)
-  layout = {width: 300, height: 300}
-  locationX = new Animated.Value(0)
-  locationY = new Animated.Value(0)
+  private touchAnim = new Animated.Value(0)
+  private staticLayout = {width: 0, height: 0}
+  private layout = {width: new Animated.Value(1), height: new Animated.Value(1)}
+  private locationX = new Animated.Value(0)
+  private locationY = new Animated.Value(0)
+  private center = {
+    x: Animated.divide(this.layout.width, 2),
+    y: Animated.divide(this.layout.height, 2),
+  }
+  private percentageX = Animated.divide(this.locationX, this.layout.width)
+  private percentageY = Animated.divide(this.locationY, this.layout.height)
 
-  private panResponder = (() => {
-    const {touchAnim, locationY, locationX, layout} = this;
+  private get panResponder() {
+    const {touchAnim, locationY, locationX} = this;
+
     return PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderStart: (e) => {
-        locationX.setValue(layout.width / 2)
-        locationY.setValue(layout.height / 2)
+        Animated.timing(touchAnim, {toValue: 1, useNativeDriver: false}).start()
         Animated.parallel([
-          Animated.timing(touchAnim, {toValue: 1, useNativeDriver: false}),
           Animated.spring(locationX, {toValue: e.nativeEvent.locationX, useNativeDriver: false}),
           Animated.spring(locationY, {toValue: e.nativeEvent.locationY, useNativeDriver: false}),
         ]).start()
       },
       onPanResponderMove: (e) => {
-        locationX.setValue(e.nativeEvent.locationX)
-        locationY.setValue(e.nativeEvent.locationY)
+        const {
+          locationX: _locationX,
+          locationY: _locationY
+        } = e.nativeEvent
+
+        locationX.setValue(_locationX)
+        locationY.setValue(_locationY)
       },
-      onPanResponderRelease: (e) => {
+      onPanResponderRelease: () => {
+        Animated.timing(touchAnim, {toValue: 0, useNativeDriver: false}).start()
         Animated.parallel([
-          Animated.timing(touchAnim, {toValue: 0, useNativeDriver: false}),
-          Animated.spring(locationX, {toValue: layout.width / 2, useNativeDriver: false}),
-          Animated.spring(locationY, {toValue: layout.height / 2, useNativeDriver: false}),
+          Animated.spring(locationX, {toValue: this.staticLayout.width / 2, useNativeDriver: false}),
+          Animated.spring(locationY, {toValue: this.staticLayout.height / 2, useNativeDriver: false}),
         ]).start()
       }
     })
-  })()
+  }
 
   private captureLayout = (e: LayoutChangeEvent) => {
-    this.layout = e.nativeEvent.layout
-    this.locationX.setValue(this.layout.width / 2)
-    this.locationY.setValue(this.layout.height / 2)
+    const {width, height} = e.nativeEvent.layout
+    this.staticLayout = e.nativeEvent.layout
+    this.layout.width.setValue(width)
+    this.layout.height.setValue(height)
+    this.locationX.setValue(width / 2)
+    this.locationY.setValue(height / 2)
   }
 
   render() {
-    const {touchAnim, layout, locationX, locationY, panResponder, captureLayout} = this;
+    const {touchAnim, percentageX, percentageY, panResponder, captureLayout} = this;
     const {children, style, activeStyleOutput, ..._props} = this.props;
-      
-    const scale = touchAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: activeStyleOutput?.scale || [1, 1.05]
-    })
-  
-    const opacity = touchAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: activeStyleOutput?.opacity || [1, 0.7]
-    })
-  
-    const rotateX = locationY.interpolate({
-      inputRange: [0, layout.height],
-      outputRange: this.layout.width
-        ? activeStyleOutput?.rotateX || ["20deg", "-20deg"]
-        : ["0deg", "0deg"],
-      extrapolate: "clamp"
-    })
-  
-    const rotateY = locationX.interpolate({
-      inputRange: [0, layout.width],
-      outputRange: this.layout.height
-        ? activeStyleOutput?.rotateY || ["-10deg", "10deg"]
-        : ["0deg", "0deg"],
-      extrapolate: "clamp"
-    })
-  
-    const elevation = touchAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0, 5]
-    })
 
-    const shadowOpacity = touchAnim.interpolate({
+    const bindInterpolateInput = (anim: Animated.Value, inputRange: Animated.InterpolationConfigType["inputRange"]) => {
+      return (outputRange: Animated.InterpolationConfigType["outputRange"]) => anim.interpolate({
+        inputRange,
+        outputRange,
+        extrapolate: "clamp"
+      })
+    }
+
+    const interpolateTouchAnim = bindInterpolateInput(touchAnim, [0, 1])
+
+    const scale = interpolateTouchAnim(activeStyleOutput?.scale || [1, 1.05])
+    const opacity = interpolateTouchAnim(activeStyleOutput?.opacity || [1, 0.7])
+    const elevation = interpolateTouchAnim([0, 5])
+    const shadowOpacity = interpolateTouchAnim([0, 0.2])
+
+    const rotateX = percentageY.interpolate({
       inputRange: [0, 1],
-      outputRange: [0, 0.2]
-    })
-  
+      outputRange: activeStyleOutput?.rotateX || ["20deg", "-20deg"],
+      extrapolate: "clamp"
+    });
+
+    const rotateY = percentageX.interpolate({
+      inputRange: [0, 1],
+      outputRange: activeStyleOutput?.rotateX || ["-20deg", "20deg"],
+      extrapolate: "clamp"
+    });
+
     const animatedStyle: Animated.WithAnimatedValue<ViewStyle> = {
       opacity: opacity,
       transform: [
@@ -109,13 +113,13 @@ export class ShyView extends React.Component<ShyViewProps> {
       <Animated.View
         {..._props}
         {...panResponder.panHandlers}
-        style={[
-          animatedStyle,
-          style
-        ]}
-        onLayout={captureLayout}
       >
-        {this.props.children}
+        <Animated.View
+          style={[ animatedStyle, style]}
+          onLayout={captureLayout}
+        >
+          {children}
+        </Animated.View>
       </Animated.View>
     )
   }

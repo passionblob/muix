@@ -9,7 +9,6 @@ module.exports = {
     ["module-resolver", {
       root: ["./"],
       alias: {
-        "^react-native$": "react-native-web",
         "@monthem/muix/src": "@monthem/muix",
       }
     }],
