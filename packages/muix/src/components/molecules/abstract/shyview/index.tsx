@@ -14,10 +14,6 @@ export class ShyView extends React.Component<ShyViewProps> {
   private layout = {width: new Animated.Value(1), height: new Animated.Value(1)}
   private locationX = new Animated.Value(0)
   private locationY = new Animated.Value(0)
-  private center = {
-    x: Animated.divide(this.layout.width, 2),
-    y: Animated.divide(this.layout.height, 2),
-  }
   private percentageX = Animated.divide(this.locationX, this.layout.width)
   private percentageY = Animated.divide(this.locationY, this.layout.height)
 
@@ -32,15 +28,7 @@ export class ShyView extends React.Component<ShyViewProps> {
           Animated.spring(locationX, {toValue: e.nativeEvent.locationX, useNativeDriver: false}),
           Animated.spring(locationY, {toValue: e.nativeEvent.locationY, useNativeDriver: false}),
         ]).start()
-      },
-      onPanResponderMove: (e) => {
-        const {
-          locationX: _locationX,
-          locationY: _locationY
-        } = e.nativeEvent
-
-        locationX.setValue(_locationX)
-        locationY.setValue(_locationY)
+        console.log(e)
       },
       onPanResponderRelease: () => {
         Animated.timing(touchAnim, {toValue: 0, useNativeDriver: false}).start()
@@ -113,13 +101,10 @@ export class ShyView extends React.Component<ShyViewProps> {
       <Animated.View
         {..._props}
         {...panResponder.panHandlers}
+        style={[ animatedStyle, style]}
+        onLayout={captureLayout}
       >
-        <Animated.View
-          style={[ animatedStyle, style]}
-          onLayout={captureLayout}
-        >
-          {children}
-        </Animated.View>
+        {children}
       </Animated.View>
     )
   }
