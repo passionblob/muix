@@ -63,7 +63,6 @@ export class ShyView extends React.Component<ShyViewProps> {
     const scale = interpolateTouchAnim(activeStyleOutput?.scale || [1, 1.05])
     const opacity = interpolateTouchAnim(activeStyleOutput?.opacity || [1, 0.7])
     const elevation = interpolateTouchAnim([0, 5])
-    const shadowOpacity = interpolateTouchAnim([0, 0.2])
 
     const rotateX = percentageY.interpolate({
       inputRange: [0, 1],
@@ -73,31 +72,25 @@ export class ShyView extends React.Component<ShyViewProps> {
 
     const rotateY = percentageX.interpolate({
       inputRange: [0, 1],
-      outputRange: activeStyleOutput?.rotateX || ["-20deg", "20deg"],
+      outputRange: activeStyleOutput?.rotateX || ["-10deg", "10deg"],
       extrapolate: "clamp"
     });
 
     const animatedStyle: Animated.WithAnimatedValue<ViewStyle> = {
       opacity: opacity,
       transform: [
+        {perspective: 1000},
         {scale},
         {rotateX},
         {rotateY},
       ],
-      shadowColor: "black",
-      shadowOffset: {
-        width: 0,
-        height: 10,
-      },
-      shadowOpacity,
-      shadowRadius: 10,
       elevation,
     }
-    
+
     return (
       <Animated.View
         {..._props}
-        style={[ animatedStyle, style]}
+        style={[animatedStyle, style]}
         onLayout={captureLayout}
       >
         <Pressable onPressIn={onPressIn} onPress={this.props.onPress} onPressOut={onPressOut}>
