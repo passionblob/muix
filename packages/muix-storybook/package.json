@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@monthem/muix": "*",
+    "@types/react-native": "^0.64.4",
     "chroma-js": "^2.1.1",
     "expo-gl": "^10.2.0",
     "react-native": "^0.64.0",
