@@ -9,33 +9,29 @@ if (process.env.USE_DOCGEN === "TRUE") tsLoader.push({
 	}
 })
 
-module.exports = {
-	module: {
-		rules: [
-			{
-				test: /\.(ts|tsx)$/,
-				exclude: /node_modules/,
-				use: [
-					{
-						loader: 'ts-loader',
-						options: {
-							transpileOnly: true
-						}
+module.exports = ({ config }) => {
+	config.module.rules.push(
+		{
+			test: /\.(ts|tsx)$/,
+			exclude: /node_modules/,
+			use: [
+				{
+					loader: 'ts-loader',
+					options: {
+						transpileOnly: true
 					}
-				]
-			}
-		]
-	},
-	resolve: {
-		extensions: [".ts", ".tsx"],
-		alias: {
-			'core-js/modules': path.resolve(rootNodeModules, 'core-js/modules'),
-			'react-native$': path.resolve(rootNodeModules, 'react-native-web'),
-			'@storybook/react-native': path.resolve(rootNodeModules, '@storybook/react'),	
+				}
+			]
 		}
-	},
-	node: {
+	);
+	config.resolve.extensions.push(".ts", ".tsx");
+	config.resolve.alias = {
+		'core-js/modules': path.resolve(rootNodeModules, 'core-js/modules'),
+		'react-native$': path.resolve(rootNodeModules, 'react-native-web'),
+		'@storybook/react-native': path.resolve(rootNodeModules, '@storybook/react'),
+	};
+	config.node = {
 		fs: "empty"
-	}
-}
-
+	};
+	return config;
+};
