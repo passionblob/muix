@@ -1,6 +1,6 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react-native';
-import { Animated, Text, View } from 'react-native';
+import { View } from 'react-native';
 import { GLView, ExpoWebGLRenderingContext } from "expo-gl"
 
 storiesOf("Test/Shape", module)

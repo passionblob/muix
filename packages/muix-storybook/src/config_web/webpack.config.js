@@ -10,11 +10,23 @@ if (process.env.USE_DOCGEN === "TRUE") tsLoader.push({
 })
 
 module.exports = ({ config }) => {
-	config.module.rules.push(
+	config.module.rules.unshift(
 		{
 			test: /\.(ts|tsx)$/,
 			exclude: /node_modules/,
 			use: [
+				{
+					loader: 'babel-loader',
+					options: {
+						presets: [
+							{
+								plugins: [
+									"react-native-reanimated/plugin"
+								]
+							}
+						]
+					}
+				},
 				{
 					loader: 'ts-loader',
 					options: {
@@ -22,16 +34,37 @@ module.exports = ({ config }) => {
 					}
 				}
 			]
-		}
+		},
+		{
+			test: /\.(js|jsx)$/,
+			use: [
+				{
+					loader: 'babel-loader',
+					options: {
+						presets: [
+							{
+								plugins: [
+									"react-native-reanimated/plugin"
+								]
+							}
+						]
+					}
+				},
+			]
+		},
 	);
-	config.resolve.extensions.push(".ts", ".tsx");
+	
+	config.resolve.extensions.unshift(".web.js", ".web.ts");
+
 	config.resolve.alias = {
 		'core-js/modules': path.resolve(rootNodeModules, 'core-js/modules'),
 		'react-native$': path.resolve(rootNodeModules, 'react-native-web'),
 		'@storybook/react-native': path.resolve(rootNodeModules, '@storybook/react'),
 	};
+
 	config.node = {
 		fs: "empty"
 	};
+
 	return config;
 };
