@@ -1,3 +1,4 @@
+const fs = require("fs")
 const path = require('path')
 const tsLoader = [require.resolve("ts-loader")];
 const rootNodeModules = path.resolve(__dirname, "../../../../node_modules")
@@ -65,6 +66,8 @@ module.exports = ({ config }) => {
 	config.node = {
 		fs: "empty"
 	};
+
+	fs.writeFileSync(path.resolve(__dirname, "my.webpack.config.json"), JSON.stringify(config))
 
 	return config;
 };
