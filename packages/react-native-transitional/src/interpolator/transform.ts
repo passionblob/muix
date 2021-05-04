@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { Animated, ViewStyle } from "react-native"
+import { Animated, Platform, ViewStyle } from "react-native"
 import { keysOf } from "@monthem/utils"
 import { mapNumberToAnimated, interpolateNumber, makeRecords, returnNext } from "./common"
 
@@ -36,13 +36,19 @@ const transformKeys = [
     "skewX", "skewY"
 ] as const
 
+const defaultMatrix = Platform.OS !== "android" && Platform.OS !== "ios" ? [
+    1, 0,
+    0, 1,
+    0, 0,
+] : [
+    1, 0, 0, 0,
+    0, 1, 0, 0,
+    0, 0, 1, 0,
+    0, 0, 0, 1,
+]
+
 const defaultTransform: ViewStyle["transform"] = [
-    { matrix: [
-        1, 0, 0, 0,
-        0, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1,
-    ] },
+    { matrix: defaultMatrix },
     { perspective: 1000 },
     { rotate: "0deg" }, { rotateX: "0deg" }, { rotateY: "0deg" }, { rotateZ: "0deg" },
     { scale: 1 }, { scaleX: 1 }, { scaleY: 1 },
@@ -51,13 +57,6 @@ const defaultTransform: ViewStyle["transform"] = [
 ]
 
 const defaultFlatTransform = flattenTransform(defaultTransform)
-
-const defaultMatrix = [
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1,
-]
 
 export const interpolateMatrix = (prev = defaultMatrix, next = defaultMatrix, ratio: number): number[] => {
     return defaultMatrix.map((_, i) => interpolateNumber(prev[i], next[i], ratio))

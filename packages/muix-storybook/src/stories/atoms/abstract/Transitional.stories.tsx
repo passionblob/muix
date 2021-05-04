@@ -1,7 +1,7 @@
 import React from "react"
 import { Transitional } from "@monthem/muix"
 import { storiesOf } from "@storybook/react-native"
-import { StatusBar, Text, TouchableOpacity, View } from "react-native"
+import { StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
 storiesOf("Atoms/Abstract", module)
 	.add("Transitional", () => <TransitionalStory />)
@@ -41,7 +41,7 @@ const TransitionalStory = () => {
 	)
 }
 
-const styles = {
+const styles = StyleSheet.create({
 	common: {
 		width: 200,
 		height: 200,
@@ -107,4 +107,4 @@ const styles = {
 	title: {
 		fontSize: 24
 	}
-}
+})

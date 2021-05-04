@@ -92,6 +92,7 @@ export class TransitionalView extends Component<ViewProps & { config?: Transitio
       targets: ["style"]
     })
 
+    console.log(transitionalStyles.style.transform)
     return React.createElement(
       Animated.View,
       { ..._props, ...transitionalStyles },
