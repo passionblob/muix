@@ -67,7 +67,5 @@ module.exports = ({ config }) => {
 		fs: "empty"
 	};
 
-	fs.writeFileSync(path.resolve(__dirname, "my.webpack.config.json"), JSON.stringify(config))
-
 	return config;
 };

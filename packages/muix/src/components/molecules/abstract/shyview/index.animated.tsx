@@ -5,7 +5,6 @@ import {
   ViewProps,
   StyleProp,
   ViewStyle,
-  PanResponder,
   GestureResponderEvent,
   Pressable,
 } from 'react-native'

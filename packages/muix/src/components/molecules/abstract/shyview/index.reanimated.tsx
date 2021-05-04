@@ -17,10 +17,8 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated'
 
-const stiffness = 1000
-
-const ContentIntroducer = (props: ContentIntroducerProps) => {
-  const {children, style, activeStyleOutput, onPress, ..._props} = props;
+export const ShyView = (props: ShyViewProps) => {
+  const {children, style, activeStyleOutput, springConfig, onPress, ..._props} = props;
   const sharedValue = useSharedValue(0);
   const layout = useSharedValue({
     width: 0,
@@ -37,8 +35,8 @@ const ContentIntroducer = (props: ContentIntroducerProps) => {
     sharedValue.value = 1
     svX.value = layout.value.width / 2
     svY.value = layout.value.height / 2
-    svX.value = withSpring(e.nativeEvent.locationX, {stiffness})
-    svY.value = withSpring(e.nativeEvent.locationY, {stiffness})
+    svX.value = withSpring(e.nativeEvent.locationX, springConfig)
+    svY.value = withSpring(e.nativeEvent.locationY, springConfig)
 
     if (_props.onResponderStart) _props.onResponderStart(e)
   }
@@ -78,14 +76,41 @@ const ContentIntroducer = (props: ContentIntroducerProps) => {
       activeStyleOutput?.rotateY || [-10, 10],
       Extrapolate.CLAMP
     );
+
+    const shadowOffset = {
+      width: interpolate(
+        svX.value,
+        [0, layout.value.width],
+        [10, -10]
+      ),
+      height: interpolate(
+        svY.value,
+        [0, layout.value.height],
+        [10, -10]
+      ),
+    }
+
+    const shadowOpacity = interpolate(
+      sharedValue.value,
+      [0, 1],
+      [0, 0.2]
+    )
+
     return {
       opacity: withTiming(opacity),
       transform: [
-        {scale: withSpring(scale, {stiffness})},
+        {perspective: 1000},
+        {scale: withSpring(scale, springConfig)},
         {rotateX: touching ? `${rotateX}deg` : withSpring("0deg")},
         {rotateY: touching ? `${rotateY}deg` : withSpring("0deg")},
       ],
-      elevation: withTiming(touching ? 5 : 0)
+      elevation: withTiming(touching ? 5 : 0),
+      shadowOpacity: withTiming(shadowOpacity),
+      shadowOffset: {
+        width: withSpring(shadowOffset.width, springConfig),
+        height: withSpring(shadowOffset.height, springConfig),
+      },
+      shadowRadius: 10,
     }
   })
 
@@ -99,14 +124,14 @@ const ContentIntroducer = (props: ContentIntroducerProps) => {
       ]}
       onLayout={captureLayout}
     >
-      <Pressable onPressIn={onPressIn} onPress={onPress} onPressOut={onPressOut}>
+      <Pressable  onPressIn={onPressIn} onPress={onPress} onPressOut={onPressOut}>
         {props.children}
       </Pressable>
     </Animated.View>
   )
 }
 
-interface ContentIntroducerProps extends ViewProps {
+interface ShyViewProps extends ViewProps {
   children: React.ReactNode
   activeStyleOutput?: {
     scale?: [number, number]
@@ -116,6 +141,7 @@ interface ContentIntroducerProps extends ViewProps {
   }
   style?: StyleProp<ViewStyle>
   onPress?: () => void
+  springConfig?: Animated.WithSpringConfig
 }
 
 const styles = StyleSheet.create({
@@ -126,4 +152,4 @@ const styles = StyleSheet.create({
   }
 })
 
-export default ContentIntroducer
+export default ShyView
