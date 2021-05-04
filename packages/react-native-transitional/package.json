@@ -1,6 +1,6 @@
 {
   "name": "react-native-transitional",
-  "version": "1.15.9",
+  "version": "1.16.0",
   "main": "index.ts",
   "license": "MIT",
   "scripts": {
