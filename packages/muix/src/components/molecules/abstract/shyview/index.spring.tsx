@@ -60,9 +60,9 @@ export const ShyView = (props: ShyViewProps) => {
       scale: 1,
       opacity: 1,
       elevation: 0,
-      // shadowOffsetX: 0,
-      // shadowOffsetY: 0,
-      // shadowOpacity: 0,
+      shadowOffsetX: 0,
+      shadowOffsetY: 0,
+      shadowOpacity: 0,
     })
   }
 
