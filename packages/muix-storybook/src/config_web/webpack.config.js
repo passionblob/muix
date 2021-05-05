@@ -21,6 +21,10 @@ module.exports = ({ config }) => {
 				}
 			}
 		},
+		{
+			test: /\.(js|jsx)$/,
+			use: 'babel-loader'
+		}
 	);
 	
 	config.resolve.extensions.unshift(".web.js", ".web.ts");

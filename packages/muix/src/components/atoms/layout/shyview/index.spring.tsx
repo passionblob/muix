@@ -4,7 +4,7 @@ import { useSpring, animated, SpringConfig } from "react-spring/native"
 
 export const ShyView = (props: ShyViewProps) => {
   const {children, style, activeStyleOutput, springConfig, onPress, ..._props} = props;
-  const [springs, api] = useSpring(() => {
+  const [spring, setSpring] = useSpring(() => {
     return {
       rotateX: "0deg",
       rotateY: "0deg",
@@ -32,21 +32,21 @@ export const ShyView = (props: ShyViewProps) => {
 
   const onPressIn = (e: GestureResponderEvent) => {
     const {x, y} = getRelativeTouchPos(layout.current, e)
-    api.set({relativeX: x, relativeY: y})
-    api.start({
-      rotateY: springs.relativeX.to({
+    setSpring.set({relativeX: x, relativeY: y})
+    setSpring.start({
+      rotateY: spring.relativeX.to({
         output: activeStyleOutput?.rotateY || ["-10deg", "10deg"]
       }),
-      rotateX: springs.relativeY.to({
+      rotateX: spring.relativeY.to({
         output: activeStyleOutput?.rotateX || ["20deg", "-20deg"]
       }),
       scale: activeStyleOutput?.scale || 1.05,
       opacity: activeStyleOutput?.opacity || 0.7,
       elevation: 5,
-      shadowOffsetX: springs.relativeX.to({
+      shadowOffsetX: spring.relativeX.to({
         output: [10, -10]
       }),
-      shadowOffsetY: springs.relativeY.to({
+      shadowOffsetY: spring.relativeY.to({
         output: [20, -20]
       }),
       shadowOpacity: 0.2,
@@ -54,7 +54,7 @@ export const ShyView = (props: ShyViewProps) => {
   }
 
   const onPressOut = (e: GestureResponderEvent) => {
-    api.start({
+    setSpring.start({
       rotateX: "0deg",
       rotateY: "0deg",
       scale: 1,
@@ -73,19 +73,19 @@ export const ShyView = (props: ShyViewProps) => {
         {
           transform: [
             {perspective: 1000},
-            {rotateX: springs.rotateX},
-            {rotateY: springs.rotateY},
-            {scale: springs.scale},
+            {rotateX: spring.rotateX},
+            {rotateY: spring.rotateY},
+            {scale: spring.scale},
           ],
-          opacity: springs.opacity,
+          opacity: spring.opacity,
           borderRadius: 0,
           overflow: "hidden",
-          elevation: springs.elevation,
+          elevation: spring.elevation,
           shadowOffset: {
-            width: springs.shadowOffsetX,
-            height: springs.shadowOffsetY,
+            width: spring.shadowOffsetX,
+            height: spring.shadowOffsetY,
           },
-          shadowOpacity: springs.shadowOpacity,
+          shadowOpacity: spring.shadowOpacity,
           shadowRadius: 20,
         },
         style,

@@ -14,6 +14,7 @@ function loadStories() {
   require('./stories/atoms/layout/GridBase.stories');
   require('./stories/atoms/layout/Padding.stories');
   require('./stories/atoms/layout/Proportional.stories');
+  require('./stories/atoms/layout/SlideView.stories');
   require('./stories/atoms/shape/Box.stories');
   require('./stories/molecules/abstract/ShyView.stories');
   require('./stories/molecules/shape/badge/Badge.stories');
@@ -31,6 +32,7 @@ const stories = [
   './stories/atoms/layout/GridBase.stories',
   './stories/atoms/layout/Padding.stories',
   './stories/atoms/layout/Proportional.stories',
+  './stories/atoms/layout/SlideView.stories',
   './stories/atoms/shape/Box.stories',
   './stories/molecules/abstract/ShyView.stories',
   './stories/molecules/shape/badge/Badge.stories',

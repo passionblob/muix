@@ -28,7 +28,7 @@ const ShyViewStory = () => {
   )
 }
 
-storiesOf("Molecules/Abstract", module)
+storiesOf("Atoms/Abstract", module)
   .add(
     "ShyView",
     () => <ShyViewStory/>,

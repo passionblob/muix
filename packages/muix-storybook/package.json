@@ -7,7 +7,7 @@
     "ios": "react-native run-ios",
     "test": "jest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
-    "watch-stories": "watch 'npx rnstl' ./src/stories",
+    "load-stories": "npx rnstl",
     "start-storybook-web": "node ../../node_modules/@storybook/react/dist/cjs/server/index.js -p 2995 -c ./src/config_web",
     "storybook-web": "yarn run start-storybook-web",
     "build:web": "yarn build-storybook -c ./src/config_web",

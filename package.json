@@ -6,7 +6,7 @@
     "utils": "yarn workspace @monthem/utils",
     "rnt": "yarn workspace react-native-transitional",
     "storybook": "yarn workspace @monthem/muix-storybook",
-    "storybook:watch": "yarn storybook watch-stories",
+    "storybook:load": "yarn storybook load-stories",
     "storybook:reactnative": "yarn storybook start",
     "storybook:web": "yarn storybook storybook-web",
     "storybook:android": "yarn storybook android",
