@@ -26,6 +26,10 @@ export const SlideView: React.FC<SlideViewProps> = ({
     inRadius: point.inRadius || defaultRadius,
     outRadius: point.outRadius || defaultRadius,
     key: "",
+    distanceFromOrigin: Math.sqrt(
+      Math.pow(point.translateX || 0, 2) +
+      Math.pow(point.translateY || 0, 2)
+    )
   }))
 
   const touchID = React.useRef(-1);
@@ -81,7 +85,6 @@ export const SlideView: React.FC<SlideViewProps> = ({
 
       let snapPointX;
       let snapPointY;
-      let shouldResetSnappedPoint;
 
       const nearestSnapPoint = getNearestSnapPoint(cleanSnapPoints, {
           translateX: spring.translateX.get(),
@@ -94,7 +97,7 @@ export const SlideView: React.FC<SlideViewProps> = ({
         const diffY = spring.translateY.get() - snappedPoint.current.translateY;
         const distanceFromSnappedPoint = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
         if (distanceFromSnappedPoint > snappedPoint.current.outRadius) {
-          shouldResetSnappedPoint = true
+          snappedPoint.current = undefined
           snapPointX = 0
           snapPointY = 0
         } else {
@@ -104,17 +107,10 @@ export const SlideView: React.FC<SlideViewProps> = ({
       }
 
       if (nearestSnapPoint) {
-        if (snappedPoint.current && isSameSnapPoint(nearestSnapPoint, snappedPoint.current)) {
-        } else {
-          snappedPoint.current = nearestSnapPoint
-          snapPointX = nearestSnapPoint.translateX
-          snapPointY = nearestSnapPoint.translateY
-          if (onSnap) onSnap(snappedPoint.current)
-        }
-      }
-
-      if (shouldResetSnappedPoint && snappedPoint.current !== nearestSnapPoint) {
-        snappedPoint.current = undefined
+        snappedPoint.current = nearestSnapPoint
+        snapPointX = nearestSnapPoint.translateX
+        snapPointY = nearestSnapPoint.translateY
+        if (onSnap) onSnap(snappedPoint.current)
       }
 
       setSpring.start({
@@ -155,19 +151,29 @@ const isSameSnapPoint = (point1: SlideViewSnapPoint, point2: SlideViewSnapPoint)
 
 // If there's no snap point within in-radius, returns undefined
 const getNearestSnapPoint = (
-  snapPoints: Required<SlideViewSnapPoint>[],
-  origin: {translateX: number, translateY: number}
+  snapPoints: Required<SlideViewSnapPoint & {distanceFromOrigin: number}>[],
+  view: {translateX: number, translateY: number}
 ) => {
+  const distanceFromOrigin = Math.sqrt(
+    Math.pow(view.translateX, 2) +
+    Math.pow(view.translateY, 2)
+  )
+
   return snapPoints
-  .map((point) => {
-    const diffX = point.translateX - origin.translateX
-    const diffY = point.translateY - origin.translateY
-    const distance = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2))
-    return {...point, distance}
-  })
-  .sort((pointA, pointB) => pointA.distance - pointB.distance)
-  .filter((point) => point.distance < point.inRadius)
-  .shift()
+    .map((point) => {
+      const diffX = point.translateX - view.translateX
+      const diffY = point.translateY - view.translateY
+      const distance = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2))
+      return {...point, distance}
+    })
+    .sort((pointA, pointB) => pointA.distance - pointB.distance)
+    .filter((point) => {
+      return [
+        point.distance < point.inRadius,
+        distanceFromOrigin > point.distanceFromOrigin
+      ].find((val) => !!val)
+    })
+    .shift()
 }
 
 type SlideViewSnapPoint = {

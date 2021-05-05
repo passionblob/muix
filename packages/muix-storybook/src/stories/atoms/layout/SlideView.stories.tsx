@@ -51,13 +51,10 @@ const SlideViewStory = () => {
         />
         <SlideView
           snapPoints={[
-            {translateX: 50, translateY: 50, inRadius: 300, outRadius: 10, key: "something"},
-            {translateX: 100, translateY: 150, inRadius: 300, outRadius: 10, key: "further"},
-            {translateX: 300, translateY: 240, inRadius: 300, outRadius: 10, key: "further more"},
+            {translateX: 50, translateY: 50, inRadius: 20, outRadius: 10, key: "something"},
+            {translateX: 100, translateY: 150, inRadius: 20, outRadius: 10, key: "further"},
+            {translateX: 300, translateY: 240, inRadius: 20, outRadius: 10, key: "further more"},
           ]}
-          onSlide={(translate) => {
-            console.log(translate)
-          }}
           onSnap={(point) => {
             console.log(point.key)
           }}
@@ -70,12 +67,9 @@ const SlideViewStory = () => {
         />
         <SlideView
           snapPoints={[
-            {translateX: -100, inRadius: 250, outRadius: 5},
-            {translateX: 100, inRadius: 250, outRadius: 5},
+            {translateX: -100, inRadius: 10, outRadius: 5},
+            {translateX: 100, inRadius: 10, outRadius: 5},
           ]}
-          onSlide={(spring) => {
-            console.log(spring)
-          }}
           disableVerticalSlide
           style={{height: 100, backgroundColor: "grey", position: "absolute", width: "100%"}}
         />
