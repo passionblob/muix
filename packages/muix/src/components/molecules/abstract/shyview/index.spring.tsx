@@ -12,10 +12,10 @@ export const ShyView = (props: ShyViewProps) => {
       relativeY: 0,
       scale: 1,
       opacity: 1,
-      // shadowOffsetX: 0,
-      // shadowOffsetY: 0,
-      // elevation: 0,
-      // shadowOpacity: 0,
+      elevation: 0,
+      shadowOffsetX: 0,
+      shadowOffsetY: 0,
+      shadowOpacity: 0,
       config: springConfig
     }
   })
@@ -42,14 +42,14 @@ export const ShyView = (props: ShyViewProps) => {
       }),
       scale: activeStyleOutput?.scale || 1.05,
       opacity: activeStyleOutput?.opacity || 0.7,
-      // shadowOffsetX: springs.relativeX.to({
-      //   output: [10, -10]
-      // }),
-      // shadowOffsetY: springs.relativeY.to({
-      //   output: [20, -20]
-      // }),
-      // shadowOpacity: 0.2,
-      // elevation: 5,
+      elevation: 5,
+      shadowOffsetX: springs.relativeX.to({
+        output: [10, -10]
+      }),
+      shadowOffsetY: springs.relativeY.to({
+        output: [20, -20]
+      }),
+      shadowOpacity: 0.2,
     })
   }
 
@@ -59,10 +59,10 @@ export const ShyView = (props: ShyViewProps) => {
       rotateY: "0deg",
       scale: 1,
       opacity: 1,
+      elevation: 0,
       // shadowOffsetX: 0,
       // shadowOffsetY: 0,
       // shadowOpacity: 0,
-      // elevation: 0,
     })
   }
 
@@ -78,13 +78,15 @@ export const ShyView = (props: ShyViewProps) => {
             {scale: springs.scale},
           ],
           opacity: springs.opacity,
-          // shadowOffset: {
-          //   width: springs.shadowOffsetX,
-          //   height: springs.shadowOffsetY,
-          // },
-          // shadowOpacity: springs.shadowOpacity,
-          // shadowRadius: 20,
-          // elevation: springs.elevation,
+          borderRadius: 0,
+          overflow: "hidden",
+          elevation: springs.elevation,
+          shadowOffset: {
+            width: springs.shadowOffsetX,
+            height: springs.shadowOffsetY,
+          },
+          shadowOpacity: springs.shadowOpacity,
+          shadowRadius: 20,
         },
         style,
       ]}
