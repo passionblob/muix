@@ -21,6 +21,7 @@
     "react-native": "^0.64.0",
     "react-native-unimodules": "^0.13.3",
     "react-native-web": "^0.15.0",
+    "react-spring": "^9.1.2",
     "styled-components": "^5.2.1"
   },
   "devDependencies": {

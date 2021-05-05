@@ -2,6 +2,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react-native';
 import { ScrollView, Text, View } from 'react-native';
 import { SlideView } from '@monthem/muix/src';
+import { useSpring, animated } from "react-spring/native"
 
 storiesOf("Atoms/Layout", module)
   .add(
@@ -10,6 +11,13 @@ storiesOf("Atoms/Layout", module)
   )
 
 const SlideViewStory = () => {
+  const [spring, setSpring] = useSpring(() => {
+    return {
+      ballLScale: 1,
+      ballRScale: 1,
+    }
+  })
+
   return (
     <ScrollView>
       <View style={{height: 300, width: "100%"}}>
@@ -51,9 +59,9 @@ const SlideViewStory = () => {
         />
         <SlideView
           snapPoints={[
-            {translateX: 50, translateY: 50, inRadius: 20, outRadius: 10, key: "something"},
-            {translateX: 100, translateY: 150, inRadius: 20, outRadius: 10, key: "further"},
-            {translateX: 300, translateY: 240, inRadius: 20, outRadius: 10, key: "further more"},
+            {translateX: 50, translateY: 50, radius: 50, key: "something"},
+            {translateX: 100, translateY: 150, radius: 50, key: "further"},
+            {translateX: 300, translateY: 240, radius: 50, key: "further more"},
           ]}
           onSnap={(point) => {
             console.log(point.key)
@@ -62,14 +70,56 @@ const SlideViewStory = () => {
         />
       </View>
       <View style={{height: 300}}>
-        <View
-          style={{height: 100, backgroundColor: "purple", position: "absolute", width: "100%"}}
-        />
+        <View style={{
+          height: 100,
+          backgroundColor: "purple",
+          position: "absolute",
+          width: "100%",
+          flexDirection: "row"
+        }}>
+          <View style={{height: "100%", justifyContent: "center", flex: 1, paddingLeft: 20}}>
+            <animated.View style={{
+              width: 50,
+              height: 50,
+              borderRadius: 25,
+              backgroundColor: "white",
+              opacity: spring.ballLScale,
+              transform: [{scale: spring.ballLScale}]}}
+            />
+          </View>
+          <View style={{height: "100%", justifyContent: "center", flex: 1, alignItems: "flex-end", paddingRight: 20}}>
+            <animated.View style={{
+              width: 50,
+              height: 50,
+              borderRadius: 25,
+              backgroundColor: "white",
+              opacity: spring.ballRScale,
+              transform: [{scale: spring.ballRScale}]}}
+            />
+          </View>
+        </View>
         <SlideView
           snapPoints={[
-            {translateX: -100, inRadius: 10, outRadius: 5},
-            {translateX: 100, inRadius: 10, outRadius: 5},
+            {translateX: -100, radius: 10},
+            {translateX: 100, radius: 10},
           ]}
+          onSlide={({x, y}) => {
+            const target = x > 0 ? "ballLScale" : "ballRScale"
+            const other = x > 0 ? "ballRScale" : "ballLScale"
+            const progress = Math.abs(x / 100) || 1
+            setSpring.set({
+              [other]: 0
+            })
+            setSpring.start({
+              [target]: Math.log10(progress * 10),
+            })
+          }}
+          onSnap={({translateX: x}) => {
+            const target = x > 0 ? "ballLScale" : "ballRScale"
+            setSpring.start({
+              [target]: 1,
+            })
+          }}
           disableVerticalSlide
           style={{height: 100, backgroundColor: "grey", position: "absolute", width: "100%"}}
         />

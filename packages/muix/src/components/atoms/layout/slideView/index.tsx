@@ -20,11 +20,9 @@ export const SlideView: React.FC<SlideViewProps> = ({
   ..._props
 }) => {
   const cleanSnapPoints = snapPoints.map((point) => mapWithDefaultValue(point, {
-    radius: defaultRadius,
+    radius: point.radius || defaultRadius,
     translateX: 0,
     translateY: 0,
-    inRadius: point.inRadius || defaultRadius,
-    outRadius: point.outRadius || defaultRadius,
     key: "",
     distanceFromOrigin: Math.sqrt(
       Math.pow(point.translateX || 0, 2) +
@@ -65,10 +63,6 @@ export const SlideView: React.FC<SlideViewProps> = ({
     onPanResponderMove: (e) => {
       const {identifier, pageX, pageY} = e.nativeEvent
       if (Number(identifier) !== touchID.current) return;
-      if (onSlide) onSlide({
-        translateX: spring.translateX.get(),
-        translateY: spring.translateY.get(),
-      })
       setSpring.start({
         translateX: disableHorizontalSlide
           ? 0
@@ -76,6 +70,12 @@ export const SlideView: React.FC<SlideViewProps> = ({
         translateY: disableVerticalSlide
           ? 0
           : record.startTranslateY + pageY - record.startY,
+        onChange: () => {
+          if (onSlide) onSlide({
+            x: spring.translateX.get(),
+            y: spring.translateY.get(),
+          })    
+        }
       })
     },
     onPanResponderEnd: (e) => {
@@ -96,7 +96,7 @@ export const SlideView: React.FC<SlideViewProps> = ({
         const diffX = spring.translateX.get() - snappedPoint.current.translateX;
         const diffY = spring.translateY.get() - snappedPoint.current.translateY;
         const distanceFromSnappedPoint = Math.sqrt(Math.pow(diffX, 2) + Math.pow(diffY, 2));
-        if (distanceFromSnappedPoint > snappedPoint.current.outRadius) {
+        if (distanceFromSnappedPoint > snappedPoint.current.radius) {
           snappedPoint.current = undefined
           snapPointX = 0
           snapPointY = 0
@@ -110,12 +110,18 @@ export const SlideView: React.FC<SlideViewProps> = ({
         snappedPoint.current = nearestSnapPoint
         snapPointX = nearestSnapPoint.translateX
         snapPointY = nearestSnapPoint.translateY
-        if (onSnap) onSnap(snappedPoint.current)
+        if (onSnap) onSnap(nearestSnapPoint)
       }
 
       setSpring.start({
         translateX: snapPointX || 0,
         translateY: snapPointY || 0,
+        onChange: () => {
+          if (onSlide) onSlide({
+            x: spring.translateX.get(),
+            y: spring.translateY.get(),
+          })
+        }
       })
     }
   })
@@ -135,18 +141,6 @@ export const SlideView: React.FC<SlideViewProps> = ({
       ]}
     />
   )
-}
-
-const isSameSnapPoint = (point1: SlideViewSnapPoint, point2: SlideViewSnapPoint) => {
-  const keys = Object.keys(point1)
-    .filter((key) => key !== "distance" && key !== "radius")
-
-  for (let i = 0; i < keys.length; i += 1) {
-    const key = keys[i] as keyof SlideViewSnapPoint
-    if (point1[key] !== point2[key]) return false
-  }
-
-  return true
 }
 
 // If there's no snap point within in-radius, returns undefined
@@ -169,7 +163,7 @@ const getNearestSnapPoint = (
     .sort((pointA, pointB) => pointA.distance - pointB.distance)
     .filter((point) => {
       return [
-        point.distance < point.inRadius,
+        point.distance < point.radius,
         distanceFromOrigin > point.distanceFromOrigin
       ].find((val) => !!val)
     })
@@ -180,8 +174,6 @@ type SlideViewSnapPoint = {
   translateX?: number
   translateY?: number
   radius?: number
-  inRadius?: number
-  outRadius?: number
   key?: string
 }
 
@@ -195,5 +187,5 @@ export interface SlideViewProps extends ViewProps {
   disableVerticalSlide?: boolean
   snapPoints?: SlideViewSnapPoint[]
   onSnap?: (point: SlideViewSnapPoint) => void
-  onSlide?: (translate: SlideViewSpring) => void
+  onSlide?: (translate: {x: number, y: number}) => void
 }
