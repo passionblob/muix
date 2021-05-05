@@ -1,8 +1,6 @@
 package com.rnstorybook;
 
 import com.rnstorybook.generated.BasePackageList;
-import com.facebook.react.bridge.JSIModulePackage; // <- add
-import com.swmansion.reanimated.ReanimatedJSIModulePackage; // <- add
 
 import android.app.Application;
 import android.content.Context;
@@ -52,11 +50,6 @@ public class MainApplication extends Application implements ReactApplication {
         @Override
         protected String getJSMainModuleName() {
           return "index";
-        }
-
-        @Override
-        protected JSIModulePackage getJSIModulePackage() {
-          return new ReanimatedJSIModulePackage(); // <- add
         }
       };
 

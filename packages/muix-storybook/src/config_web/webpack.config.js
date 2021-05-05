@@ -1,4 +1,3 @@
-const fs = require("fs")
 const path = require('path')
 const tsLoader = [require.resolve("ts-loader")];
 const rootNodeModules = path.resolve(__dirname, "../../../../node_modules")
@@ -15,43 +14,12 @@ module.exports = ({ config }) => {
 		{
 			test: /\.(ts|tsx)$/,
 			exclude: /node_modules/,
-			use: [
-				{
-					loader: 'babel-loader',
-					options: {
-						presets: [
-							{
-								plugins: [
-									"react-native-reanimated/plugin"
-								]
-							}
-						]
-					}
-				},
-				{
-					loader: 'ts-loader',
-					options: {
-						transpileOnly: true
-					}
+			use: {
+				loader: 'ts-loader',
+				options: {
+					transpileOnly: true
 				}
-			]
-		},
-		{
-			test: /\.(js|jsx)$/,
-			use: [
-				{
-					loader: 'babel-loader',
-					options: {
-						presets: [
-							{
-								plugins: [
-									"react-native-reanimated/plugin"
-								]
-							}
-						]
-					}
-				},
-			]
+			}
 		},
 	);
 	

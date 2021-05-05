@@ -1,1 +1,1 @@
-export * from "./index.reanimated"
+export * from "./index.spring"
