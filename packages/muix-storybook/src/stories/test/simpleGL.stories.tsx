@@ -3,12 +3,8 @@ import { storiesOf } from '@storybook/react-native';
 import { View } from 'react-native';
 import { GLView, ExpoWebGLRenderingContext } from "expo-gl"
 
-storiesOf("Test/Shape", module)
-    .add(
-        "GL/Simple",
-        () => <SimpleGLStory />,
-    )
-
+storiesOf("Test/WebGL", module)
+    .add("Simple", () => <SimpleGLStory />)
 
 const SimpleGLStory = () => {
     return (
@@ -19,7 +15,7 @@ const SimpleGLStory = () => {
         }}>
             <GLView
                 style={{
-                    width: 300,
+                    width: "100%",
                     height: 300,
                     backgroundColor: "lightgrey"
                 }}
@@ -82,18 +78,18 @@ function onContextCreate(gl: ExpoWebGLRenderingContext) {
     const offset = 0;
     const count = 6;
 
-    gl.uniform2f(resolutionUniformLocation, 300, 300)
+    gl.uniform2f(resolutionUniformLocation, gl.drawingBufferWidth, gl.drawingBufferHeight)
     for (let i = 0; i < 50; i += 1) {
         setRectangle(gl, randomInt(300), randomInt(300), randomInt(50), randomInt(50))
         gl.uniform4f(colorUniformLocation, Math.random(), Math.random(), Math.random(), 1)
         gl.drawArrays(primitiveType, offset, count);
-    }    
+    }
 
     function createShader(type: number, source: string) {
         const shader = gl.createShader(type)
         gl.shaderSource(shader, source);
         gl.compileShader(shader);
-        
+
         const success = gl.getShaderParameter(shader, gl.COMPILE_STATUS);
         if (success) {
             return shader
@@ -108,13 +104,12 @@ function onContextCreate(gl: ExpoWebGLRenderingContext) {
         gl.attachShader(program, vert);
         gl.attachShader(program, frag);
         gl.linkProgram(program);
-        
+
         const success = gl.getProgramParameter(program, gl.LINK_STATUS);
         if (success) {
             return program;
         }
-        
-        console.log(gl.getProgramInfoLog(program));
+
         gl.deleteProgram(program);
     }
 

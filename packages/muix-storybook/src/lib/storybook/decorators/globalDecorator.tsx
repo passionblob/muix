@@ -4,6 +4,7 @@ import {View, Text, TextProps} from "react-native"
 import {Badge, BadgeProps, Box, BoxProps, Flex, Responsive, ResponsiveProvider} from "@monthem/muix"
 import chroma from "chroma-js"
 import { defineBreakpoints } from "../../responsive"
+import {WebColors} from "@monthem/web-color"
 
 const colorForKind: {[index: string]: string} = {
     abstract: "dodgerblue",
@@ -17,8 +18,15 @@ export const globalDecorator = makeDecorator({
     wrapper: (getStory, c, settings) => {
         let nearestKind = c.kind.match(/[a-zA-Z]+$/g)?.join("") || "";
         nearestKind = nearestKind.toLowerCase()
-        if (!(nearestKind in colorForKind)) throw Error(`No color exists for ${nearestKind}`)
-        const color = colorForKind[nearestKind?.toLowerCase()]
+        const color = (nearestKind in colorForKind)
+            ? colorForKind[nearestKind?.toLowerCase()]
+            : chroma(
+                nearestKind
+                .split("")
+                .map((str) => str.charCodeAt(0))
+                .reduce((acc, ele) => acc + Math.pow(ele, 2))
+            ).hex()
+
         return (
             <ResponsiveProvider>
                 <View style={{flex: 1, padding: 10}}>

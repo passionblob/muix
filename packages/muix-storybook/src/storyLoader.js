@@ -18,7 +18,9 @@ function loadStories() {
   require('./stories/atoms/shape/Box.stories');
   require('./stories/molecules/abstract/ShyView.stories');
   require('./stories/molecules/shape/badge/Badge.stories');
-  require('./stories/test/gl.stories');
+  require('./stories/test/lineGL.stories');
+  require('./stories/test/pixi.stories');
+  require('./stories/test/simpleGL.stories');
 }
 
 const stories = [
@@ -36,7 +38,9 @@ const stories = [
   './stories/atoms/shape/Box.stories',
   './stories/molecules/abstract/ShyView.stories',
   './stories/molecules/shape/badge/Badge.stories',
-  './stories/test/gl.stories',
+  './stories/test/lineGL.stories',
+  './stories/test/pixi.stories',
+  './stories/test/simpleGL.stories',
 ];
 
 module.exports = {
