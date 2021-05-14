@@ -1,48 +1,7 @@
 import React, { Component } from 'react'
-import { Animated, Image, ImageProps, ImageStyle, StyleSheet } from 'react-native'
+import { Animated, ImageProps } from 'react-native'
 import { SpringConfig, StyleHolderOf, TransitionConfig } from './types'
-import { createStyleHolder, getTransitionalStyles, TransitionalInterpolator } from "./interpolator"
-
-const interpolator = new TransitionalInterpolator<ImageStyle>({
-  default: {
-    opacity: 1,
-  },
-  properties: {
-    color: [
-      "backgroundColor", "borderColor",
-      "overlayColor", "tintColor", "shadowColor",
-    ],
-    number: [
-      "borderRadius", "aspectRatio", "borderTopLeftRadius",
-      "borderTopRightRadius", "borderBottomLeftRadius",
-      "borderBottomRightRadius", "borderBottomWidth",
-      "borderRightWidth", "borderLeftWidth", "borderTopWidth",
-      "flex", "flexGrow", "flexShrink", "opacity", "rotation",
-      "scaleX", "scaleY", "borderWidth", "shadowOpacity",
-      "zIndex", "translateX", "translateY", "shadowRadius",
-    ],
-    length: [
-      "borderStartWidth", "borderEndWidth", "width",
-      "height", "margin", "marginBottom", "marginEnd",
-      "marginHorizontal", "marginLeft", "marginRight",
-      "marginStart", "marginTop", "marginVertical",
-      "maxHeight", "maxWidth", "minHeight", "minWidth",
-      "padding", "paddingBottom", "paddingEnd", "paddingHorizontal",
-      "paddingLeft", "paddingRight", "paddingStart", "paddingTop",
-      "paddingVertical", "top", "left", "right", "bottom", "flexBasis"
-    ],
-    nonInterpolable: [
-      "alignContent", "alignItems", "alignSelf", "backfaceVisibility",
-      "display", "direction", "flexDirection", "flexWrap",
-      "justifyContent", "overflow", "position",
-      "resizeMode", "end", "start",
-    ],
-    layout: [
-      "shadowOffset"
-    ]
-  }
-})
-
+import { createStyleHolder, getTransitionalStyles, imageStyleInterpolator } from "./interpolator"
 
 export class TransitionalImage extends Component<ImageProps & { config?: TransitionConfig }> {
   private anim = new Animated.Value(1)
@@ -83,7 +42,7 @@ export class TransitionalImage extends Component<ImageProps & { config?: Transit
     const { children, ..._props } = this.props
     const transitionalStyles = getTransitionalStyles<ImageProps>({
       anim: this.anim,
-      interpolator,
+      interpolator: imageStyleInterpolator,
       progress: this.progress,
       props: this.props,
       styleHolder: this.styleHolder,

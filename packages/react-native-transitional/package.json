@@ -13,7 +13,12 @@
     "sync-to-dist-package": "yarn muix sync-version -i ./dist/package.json",
     "deploy": "yarn build && yarn publish-dist && yarn sync-to-dist-package && rm -rf dist/"
   },
-  "dependencies": {"@monthem/utils": "^1.21.7", "chroma-js": "^2.1.1"},
+  "dependencies": {
+    "@monthem/utils": "^1.21.7",
+    "@types/react-native": "0.64.0",
+    "chroma-js": "^2.1.1",
+    "concurrently": "^6.0.2"
+  },
   "devDependencies": {
     "@babel/cli": "^7.13.16",
     "@babel/core": "^7.14.0",
@@ -32,9 +37,16 @@
     "prettier": "^2.2.1",
     "typescript": "^4.2.4"
   },
-  "peerDependencies": {"react": "^17.0.2", "react-native": "^0.64.0"},
+  "peerDependencies": {
+    "react": "^17.0.2",
+    "react-native": "^0.64.0"
+  },
   "author": "monthem <lpoeh01@gmail.com>",
-  "keywords": ["animation"],
-  "publishConfig": {"access": "public"},
+  "keywords": [
+    "animation"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "description": ""
 }

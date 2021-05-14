@@ -1,56 +1,7 @@
 import React, { Component } from 'react'
-import { Animated, TextInput, TextInputProps, TextStyle } from 'react-native'
-import { createStyleHolder, getTransitionalStyles, TransitionalInterpolator } from './interpolator'
+import { Animated, TextInput, TextInputProps } from 'react-native'
+import { createStyleHolder, getTransitionalStyles, textStyleInterpolator } from './interpolator'
 import { SpringConfig, StyleHolderOf, TransitionConfig } from './types'
-
-const interpolator = new TransitionalInterpolator<TextStyle>({
-  default: {
-    opacity: 1,
-    fontSize: 10,
-  },
-  properties: {
-    color: [
-      "backgroundColor", "borderColor", "borderEndColor",
-      "borderLeftColor", "borderRightColor", "borderStartColor",
-      "borderTopColor", "color", "textDecorationColor",
-      "textShadowColor", "borderBottomColor", "shadowColor",
-    ],
-    number: [
-      "borderRadius", "aspectRatio", "borderTopLeftRadius",
-      "borderTopRightRadius", "borderBottomLeftRadius",
-      "borderBottomRightRadius", "borderBottomWidth",
-      "borderRightWidth", "borderLeftWidth", "borderTopWidth",
-      "flex", "flexGrow", "flexShrink", "opacity", "rotation",
-      "scaleX", "scaleY", "borderWidth", "shadowOpacity",
-      "zIndex", "translateX", "translateY", "shadowRadius",
-      "borderBottomEndRadius", "borderBottomStartRadius",
-      "borderTopStartRadius", "borderTopEndRadius", "elevation",
-      "fontSize", "lineHeight", "textShadowRadius", "letterSpacing",
-    ],
-    length: [
-      "borderStartWidth", "borderEndWidth", "width",
-      "height", "margin", "marginBottom", "marginEnd",
-      "marginHorizontal", "marginLeft", "marginRight",
-      "marginStart", "marginTop", "marginVertical",
-      "maxHeight", "maxWidth", "minHeight", "minWidth",
-      "padding", "paddingBottom", "paddingEnd", "paddingHorizontal",
-      "paddingLeft", "paddingRight", "paddingStart", "paddingTop",
-      "paddingVertical", "top", "left", "right", "bottom", "flexBasis"
-    ],
-    nonInterpolable: [
-      "alignContent", "alignItems", "alignSelf", "backfaceVisibility",
-      "display", "direction", "flexDirection", "flexWrap", "fontFamily",
-      "fontStyle", "includeFontPadding", "justifyContent", "overflow",
-      "position", "textAlign", "textAlignVertical",
-      "textDecorationLine", "textDecorationStyle", "writingDirection",
-      "borderStyle", "end", "start", "testID", "fontVariant", "fontWeight",
-      "textTransform",
-    ],
-    layout: [
-      "shadowOffset", "textShadowOffset"
-    ]
-  }
-})
 
 export class TransitionalTextInput extends Component<TextInputProps & { config?: TransitionConfig }> {
   private anim = new Animated.Value(1)
@@ -92,7 +43,7 @@ export class TransitionalTextInput extends Component<TextInputProps & { config?:
     const { children, ..._props } = this.props
     const transitionalStyles = getTransitionalStyles<TextInputProps>({
       anim: this.anim,
-      interpolator,
+      interpolator: textStyleInterpolator,
       progress: this.progress,
       props: this.props,
       styleHolder: this.styleHolder,
