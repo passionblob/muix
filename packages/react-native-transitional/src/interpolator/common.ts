@@ -15,13 +15,4 @@ export const mapNumberToAnimated = (
     })
 }
 
-export const makeRecords = <Keys extends Readonly<string[]>, T>(
-    keys: Keys, value: T
-): Record<Keys[number], T> => {
-    return keys.reduce((acc, key) => {
-        acc[key as Keys[number]] = value
-        return acc
-    }, {} as Record<Keys[number], T>)
-}
-
 export const returnNext = <Prev, Next>(prev: Prev, next: Next): Next => next

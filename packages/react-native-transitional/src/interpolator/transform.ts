@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Animated, Platform, ViewStyle } from "react-native"
-import { keysOf } from "@monthem/utils"
-import { mapNumberToAnimated, interpolateNumber, makeRecords, returnNext } from "./common"
+import { keysOf, makeRecords } from "@monthem/utils"
+import { mapNumberToAnimated, interpolateNumber, returnNext } from "./common"
 
 const flattenTransform = (arr: NonNullable<ViewStyle["transform"]>): Partial<FlatTransform> => {
     return arr.reduce((acc, obj) => {

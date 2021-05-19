@@ -1,3 +1,5 @@
+import utils from ".."
+
 type ExtractNonNullableKeys<T> = Exclude<{
   [K in keyof T]: T[K] extends null
     ? false
@@ -22,3 +24,20 @@ export const mapWithDefaultValue = <T, D extends T>(origin: T, defaultObj: D) =>
     }, {} as MergeNonNullable<T, D>)
 }
 
+export const makeRecords = <Keys extends Readonly<string[]>, T>(
+  keys: Keys, value: T
+): Record<Keys[number], T> => {
+  return keys.reduce((acc, key) => {
+      acc[key as Keys[number]] = value
+      return acc
+  }, {} as Record<Keys[number], T>)
+}
+
+export function getRandomEntry<T extends Record<string, any>>(obj: T): {key: keyof T, value: T[keyof T]} {
+  const keys = Object.keys(obj)
+  const randomKey = utils.array.getRandom(keys)
+  return {
+    key: randomKey,
+    value: obj[randomKey]
+  }
+}
