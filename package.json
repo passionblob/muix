@@ -7,7 +7,7 @@
     "rnt": "yarn workspace react-native-transitional",
     "storybook": "yarn workspace @monthem/muix-storybook",
     "storybook:load": "yarn storybook load-stories",
-    "storybook:reactnative": "yarn storybook start",
+    "storybook:reactnative": "yarn storybook:load && yarn storybook start",
     "storybook:web": "yarn storybook storybook-web",
     "storybook:android": "yarn storybook android",
     "storybook:ios": "yarn storybook ios"

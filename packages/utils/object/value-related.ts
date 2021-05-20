@@ -34,10 +34,19 @@ export const makeRecords = <Keys extends Readonly<string[]>, T>(
 }
 
 export function getRandomEntry<T extends Record<string, any>>(obj: T): {key: keyof T, value: T[keyof T]} {
-  const keys = Object.keys(obj)
-  const randomKey = utils.array.getRandom(keys)
+  const randomKey = getRandomKey(obj)
   return {
     key: randomKey,
     value: obj[randomKey]
   }
+}
+
+export function getRandomKey<T extends Record<string, any>>(obj: T): keyof T {
+  const keys = Object.keys(obj)
+  const randomKey = utils.array.getRandom(keys)
+  return randomKey
+}
+
+export function getRandomValue<T extends Record<string, any>>(obj: T): T[keyof T] {
+  return obj[getRandomKey(obj)]
 }

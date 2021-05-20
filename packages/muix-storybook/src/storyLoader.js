@@ -9,18 +9,20 @@ function loadStories() {
   require('./stories/atoms/abstract/Identity.stories');
   require('./stories/atoms/abstract/Responsive.stories');
   require('./stories/atoms/abstract/Transitional.stories');
+  require('./stories/atoms/layout/Carousel.stories');
   require('./stories/atoms/layout/Collapsible.stories');
   require('./stories/atoms/layout/Flex.stories');
   require('./stories/atoms/layout/GridBase.stories');
   require('./stories/atoms/layout/Padding.stories');
   require('./stories/atoms/layout/Proportional.stories');
   require('./stories/atoms/layout/SlideView.stories');
+  require('./stories/atoms/layout/TouchableStyle.stories');
   require('./stories/atoms/shape/Box.stories');
-  require('./stories/molecules/abstract/ShyView.stories');
   require('./stories/molecules/shape/badge/Badge.stories');
-  require('./stories/test/lineGL.stories');
-  require('./stories/test/pixi.stories');
-  require('./stories/test/simpleGL.stories');
+  require('./stories/organisms/layout/choiceSlider.stories');
+  require('./stories/test/gl/lineGL.stories');
+  require('./stories/test/gl/simpleGL.stories');
+  require('./stories/test/react-spring/trail.stories');
 }
 
 const stories = [
@@ -29,18 +31,20 @@ const stories = [
   './stories/atoms/abstract/Identity.stories',
   './stories/atoms/abstract/Responsive.stories',
   './stories/atoms/abstract/Transitional.stories',
+  './stories/atoms/layout/Carousel.stories',
   './stories/atoms/layout/Collapsible.stories',
   './stories/atoms/layout/Flex.stories',
   './stories/atoms/layout/GridBase.stories',
   './stories/atoms/layout/Padding.stories',
   './stories/atoms/layout/Proportional.stories',
   './stories/atoms/layout/SlideView.stories',
+  './stories/atoms/layout/TouchableStyle.stories',
   './stories/atoms/shape/Box.stories',
-  './stories/molecules/abstract/ShyView.stories',
   './stories/molecules/shape/badge/Badge.stories',
-  './stories/test/lineGL.stories',
-  './stories/test/pixi.stories',
-  './stories/test/simpleGL.stories',
+  './stories/organisms/layout/choiceSlider.stories',
+  './stories/test/gl/lineGL.stories',
+  './stories/test/gl/simpleGL.stories',
+  './stories/test/react-spring/trail.stories',
 ];
 
 module.exports = {

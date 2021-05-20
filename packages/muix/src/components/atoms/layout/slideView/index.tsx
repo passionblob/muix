@@ -1,6 +1,6 @@
 import React from 'react'
-import { ViewProps, PanResponder, StyleSheet } from 'react-native'
-import { animated, useSpring, SpringValues } from '@react-spring/native'
+import { ViewProps, PanResponder } from 'react-native'
+import { animated, useSpring } from '@react-spring/native'
 import { mapWithDefaultValue } from "@monthem/utils"
 
 const defaultRadius = 50
@@ -133,6 +133,8 @@ export const SlideView: React.FC<SlideViewProps> = ({
       style={[
         style,
         {
+          //@ts-ignore
+          userSelect: "none",
           transform: [
             {translateX: spring.translateX},
             {translateY: spring.translateY},

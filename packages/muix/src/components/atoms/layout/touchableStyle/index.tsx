@@ -35,7 +35,8 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
         onPressIn={_onPressIn}
         onPressOut={_onPressOut}
         onPress={onPress}
-        style={{ width: "100%", height: "100%" }}
+        //@ts-ignore
+        style={{ width: "100%", height: "100%", userSelect: "none" }}
       >
         {children}
       </Pressable>
