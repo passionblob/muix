@@ -17,6 +17,7 @@ export const CarouselBase
       renderItem,
       autoInterval = 3000,
       onChange,
+      infinite = true,
       ..._props
     } = props;
 
@@ -43,18 +44,39 @@ export const CarouselBase
     const transitionPosition = spring.virtualTranslate.to((value) => {
       if (layoutSize.current <= 0) return 0
       const translatePosition = -value / layoutSize.current
-      return (
-        translatePosition % items.length +
-        items.length
-      ) % items.length
+
+      const deviation = (() => {
+        if (translatePosition >= 0 && translatePosition <= items.length - 1) return 0
+        if (translatePosition < 0) return Math.abs(translatePosition)
+        return translatePosition % (items.length - 1)
+      })();
+      const margin = Math.log(deviation + 1) * 0.3
+
+      return infinite
+        ? (
+          translatePosition % items.length +
+          items.length
+        ) % items.length - 1
+        : Math.min(
+          items.length - 1 + margin,
+          Math.max(translatePosition, -margin)
+        ) - 1
     })
 
     const slicedItems = getSliced()
 
     function getSlicer(index: number) {
+      const pureStart = index - frontPaddingRenderCount
+      const pureEnd = index + backPaddingRenderCount
+      const start = infinite
+        ? (pureStart + items.length) % items.length
+        : Math.max(0, pureStart)
+      const end = infinite
+        ? pureEnd % items.length
+        : Math.min(items.length, pureEnd)
       return {
-        start: (index - frontPaddingRenderCount + items.length) % items.length,
-        end: (index + backPaddingRenderCount) % items.length
+        start,
+        end
       }
     }
 
@@ -64,11 +86,12 @@ export const CarouselBase
         originalIndex: i
       }))
       const _slicer = slicer.current
-      return _slicer.start > _slicer.end
+      const result = _slicer.start > _slicer.end
         ? itemsWithIndex.slice(_slicer.start).concat(itemsWithIndex.slice(0, _slicer.end))
         : _slicer.start === _slicer.end
           ? itemsWithIndex.slice(0, _slicer.start).concat(itemsWithIndex.slice(_slicer.end))
           : itemsWithIndex.slice(_slicer.start, _slicer.end)
+      return result
     }
 
     function forceUpdate() {
@@ -121,7 +144,8 @@ export const CarouselBase
     }
 
     const calcDestination = () => {
-      const detailedTranslatePosition = -spring.virtualTranslate.get() / layoutSize.current
+      const virtualTranslate = -spring.virtualTranslate.get()
+      const detailedTranslatePosition = virtualTranslate / layoutSize.current
       const detailedStartTransitionPosition = -virtualTranslateStart.current / layoutSize.current
       const diff = detailedTranslatePosition - detailedStartTransitionPosition
       const translatePosition = (() => {
@@ -131,7 +155,10 @@ export const CarouselBase
         if (Math.abs(diff) >= 0.5) return base
         return diff > 0 ? base + 1 : base - 1
       })()
-      return translatePosition
+
+      return infinite
+        ? translatePosition
+        : Math.min(items.length - 1, Math.max(translatePosition, 0))
     }
 
     const calcIndex = () => {
@@ -139,7 +166,7 @@ export const CarouselBase
       return convertDestinationToIndex(destination)
     }
 
-    const convertDestinationToIndex = (destination: number) => {
+    function convertDestinationToIndex(destination: number) {
       let result = destination
 
       while (result < 0) {
@@ -177,7 +204,7 @@ export const CarouselBase
       const curDestination = calcDestination()
       const curIndex = convertDestinationToIndex(curDestination)
       const diff = index - curIndex
-      const newDestination = curDestination + diff
+      const nextDestination = curDestination + diff
 
       slicer.current = getSlicer(index)
 
@@ -186,7 +213,11 @@ export const CarouselBase
         onChange(index)
       }
 
-      setNewDestination(newDestination)
+      if (nextDestination === newDestination) {
+        scrollToPosition(nextDestination)
+      } else {
+        setNewDestination(nextDestination)
+      }
     }
 
     const getRandomItemIndex = () => Math.floor(Math.random() * items.length)
@@ -219,10 +250,10 @@ export const CarouselBase
           ? pageY - touchStart.current
           : pageX - touchStart.current
 
+        const nextVirtualTranslate = virtualTranslateStart.current + touchDiff
+
         springApi.set({
-          virtualTranslate:
-            virtualTranslateStart.current +
-            touchDiff,
+          virtualTranslate: nextVirtualTranslate,
         })
       },
       onPanResponderEnd: (e) => {
@@ -291,6 +322,7 @@ export const CarouselBase
               item={item}
               key={originalIndex}
               renderItem={renderItem}
+              infinite={infinite}
               originalIndex={originalIndex}
               transitionPosition={transitionPosition}
               info={{
@@ -314,12 +346,15 @@ const CarouselBaseItem: <TItem>(props: CarouselBaseItemProps<TItem>) => React.Re
     renderItem,
     originalIndex,
     transitionPosition,
+    infinite,
   } = props;
 
   if (info.layout.width <= 0 || info.layout.height <= 0) return null
 
   const itemPosition = transitionPosition.to((value) => {
-    return (originalIndex - value + info.itemLength) % info.itemLength - 1
+    return infinite
+      ? (originalIndex - value + info.itemLength) % info.itemLength - 1
+      : Math.max(0, Math.min(info.itemLength, originalIndex - value)) - 1
   })
 
   return (
@@ -340,6 +375,8 @@ const MemoizedItem = React.memo(CarouselBaseItem, (prev, next) => {
     prev.info.layout.width === next.info.layout.width,
     prev.info.layout.height === next.info.layout.height,
     prev.originalIndex === next.originalIndex,
+    prev.renderItem === next.renderItem,
+    prev.item === next.item,
   ])
 })
 
@@ -367,14 +404,15 @@ export type CarouselBaseRenderItemInfo<TItem> = {
 }
 
 export interface CarouselBaseProps<TItem extends any> extends ViewProps {
+  items: TItem[]
+  renderItem: (info: CarouselBaseRenderItemInfo<TItem>) => React.ReactNode
   ref?: React.Ref<CarouselBase>
   auto?: boolean
   autoInterval?: number
   vertical?: boolean
-  items: TItem[]
+  infinite?: boolean
   frontPaddingRenderCount?: number
   backPaddingRenderCount?: number
-  renderItem: (info: CarouselBaseRenderItemInfo<TItem>) => React.ReactNode
   onChange?: (index: number) => void
   /**
    * this defines scroll behavior
@@ -396,4 +434,5 @@ type CarouselBaseItemProps<TItem extends any> = {
   originalIndex: number
   transitionPosition: Interpolation<number, number>
   info: CarouselBaseInterpolatorInfo
+  infinite: boolean
 }

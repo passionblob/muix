@@ -88,7 +88,8 @@ const CarouselStory = () => {
       />
       <Carousel
         ref={catchRef}
-        items={indice}
+        items={indice.slice(0, 3)}
+        infinite={false}
         renderItem={({item, index}) => <RandomColorBox index={index} />}
         scrollInterpolator={customScrollInterpolator1}
         style={{ height: 100, backgroundColor: "lightgrey", marginBottom: 20 }}
