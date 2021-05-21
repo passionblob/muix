@@ -9,7 +9,7 @@ function loadStories() {
   require('./stories/atoms/abstract/Identity.stories');
   require('./stories/atoms/abstract/Responsive.stories');
   require('./stories/atoms/abstract/Transitional.stories');
-  require('./stories/atoms/layout/Carousel.stories');
+  require('./stories/atoms/layout/Carousel.spring.stories');
   require('./stories/atoms/layout/Collapsible.stories');
   require('./stories/atoms/layout/Flex.stories');
   require('./stories/atoms/layout/GridBase.stories');
@@ -31,7 +31,7 @@ const stories = [
   './stories/atoms/abstract/Identity.stories',
   './stories/atoms/abstract/Responsive.stories',
   './stories/atoms/abstract/Transitional.stories',
-  './stories/atoms/layout/Carousel.stories',
+  './stories/atoms/layout/Carousel.spring.stories',
   './stories/atoms/layout/Collapsible.stories',
   './stories/atoms/layout/Flex.stories',
   './stories/atoms/layout/GridBase.stories',

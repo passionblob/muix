@@ -127,10 +127,12 @@ const CarouselStory = () => {
 }
 
 const customScrollInterpolator1: CarouselScrollInterpolator = {
-  translateX: (info) => ({
-    range: [-1, info.itemLength - 1],
-    output: [-info.layout.width, (info.itemLength - 1) * info.layout.width],
-  }),
+  translateX: (info) => {
+    return {
+      range: [-1, info.itemLength - 1],
+      output: [-info.layout.width, (info.itemLength - 1) * info.layout.width],
+    }
+  },
   scale: (info) => ({
     range: [-1, 0, 1, info.itemLength - 1],
     output: [0.5, 1, 0.5, 0]
@@ -152,10 +154,6 @@ const customScrollInterpolator2: CarouselScrollInterpolator = {
     output: [0, 1, 0.8, 0],
     extrapolate: "clamp"
   }),
-  zIndex: (info) => ({
-    range: [-1, 4],
-    output: [info.itemLength + 1, 1],
-  }),
   scale: (info) => ({
     range: [-1, 4],
     output: [0.8, 0.8]
@@ -171,10 +169,6 @@ const customScrollInterpolator3: CarouselScrollInterpolator = {
     range: [-1, 0, info.itemLength - 2, info.itemLength - 1],
     output: [0, 1, 0, 0]
   }),
-  zIndex: (info) => ({
-    range: [-1, info.itemLength - 1],
-    output: [info.itemLength + 1, 1],
-  }),
 }
 
 const customScrollInterpolator4: CarouselScrollInterpolator = {
@@ -185,10 +179,6 @@ const customScrollInterpolator4: CarouselScrollInterpolator = {
   height: (info) => ({
     range: [-1, 0, info.itemLength - 2, info.itemLength - 1],
     output: ["0%", "100%", "0%", "0%",]
-  }),
-  zIndex: (info) => ({
-    range: [-1, info.itemLength - 1],
-    output: [info.itemLength + 1, 1],
   }),
 }
 
@@ -201,12 +191,8 @@ const customScrollInterpolator5: CarouselScrollInterpolator = {
     range: [-1, 0, 1, info.itemLength - 1],
     output: [30, 0, -30]
   }),
-  zIndex: (info) => ({
-    range: [-1, info.itemLength - 1],
-    output: [info.itemLength + 1, 1],
-  }),
 }
 
 storiesOf("Atoms/Layout", module)
-  .add("Carousel", () => <CarouselStory />)
+  .add("Carousel(react-spring)", () => <CarouselStory />)
 

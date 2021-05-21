@@ -1,8 +1,8 @@
 import React, { forwardRef, ForwardRefRenderFunction } from 'react'
 import { View, ViewStyle, LayoutChangeEvent, PanResponder, ViewProps, VirtualizedList } from 'react-native'
-import { animated } from "react-spring/native"
+import { animated, Interpolation } from "react-spring/native"
 import { useSpring, useSprings, to, InterpolatorConfig } from "react-spring"
-import { anyOf, makeRecords, viewStyleProperties } from "@monthem/utils"
+import { anyOf, isAllTrue, makeRecords, viewStyleProperties } from "@monthem/utils"
 
 const plainHorizontalScrollInterpolator: CarouselScrollInterpolator = {
   translateX: (info: CarouselInterpolatorInfo) => ({
@@ -33,8 +33,8 @@ export const Carousel
       style,
       auto = false,
       hideInactive = false,
-      frontPaddingRenderCount = 5,
-      backPaddingRenderCount = 5,
+      frontPaddingRenderCount = 1,
+      backPaddingRenderCount = 6,
       items,
       renderItem,
       scrollInterpolator = vertical
@@ -58,16 +58,49 @@ export const Carousel
     const threshold = vertical ? 20 : 30
     const lastSlideTimestamp = React.useRef(0);
     const scrollBlocked = React.useRef(false);
-    const interpolateConfigs = React.useRef<{ [K in CarouselScrollInterpolatorKeys]?: InterpolatorConfig }>({});
     const prevScrollIndex = React.useRef(0);
     const containerRef = React.useRef<View>(null);
-    const slicer = React.useRef(getSlicer(0)).current
+    const slicer = React.useRef(getSlicer(0))
+    const initialized = React.useRef(false)
+    const [dummyState, setDummyState] = React.useState(0)
+
+    const [spring, springApi] = useSpring(() => ({
+      virtualTranslate: 0,
+    }))
+
+    const transitionPosition = spring.virtualTranslate.to((value) => {
+      if (layoutSize.current <= 0) return 0
+      const translatePosition = -value / layoutSize.current
+      return (
+        translatePosition % items.length +
+        items.length
+      ) % items.length
+    })
+
+    const slicedItems = getSliced()
 
     function getSlicer(index: number) {
       return {
-        start: (index - 1 - frontPaddingRenderCount + items.length) % items.length,
-        end: (index - 1 + backPaddingRenderCount) % items.length
+        start: (index - frontPaddingRenderCount + items.length) % items.length,
+        end: (index + backPaddingRenderCount) % items.length
       }
+    }
+
+    function getSliced() {
+      const itemsWithIndex = items.map((item, i) => ({
+        item,
+        originalIndex: i
+      }))
+      const _slicer = slicer.current
+      return _slicer.start > _slicer.end
+        ? itemsWithIndex.slice(_slicer.start).concat(itemsWithIndex.slice(0, _slicer.end))
+        : _slicer.start === _slicer.end
+          ? itemsWithIndex.slice(0, _slicer.start).concat(itemsWithIndex.slice(_slicer.end))
+          : itemsWithIndex.slice(_slicer.start, _slicer.end)
+    }
+
+    function forceUpdate() {
+      setDummyState(dummyState + 1)
     }
 
     const updateSlideTimestamp = (time?: number) => {
@@ -79,47 +112,6 @@ export const Carousel
         lastSlideTimestamp.current = time
       })
     }
-
-    const [spring, springApi] = useSpring(() => ({
-      virtualTranslate: 0,
-    }))
-
-    const [springs, springsApi] = useSprings<{
-      [K in CarouselScrollInterpolatorKeys]?: K extends keyof ViewStyle
-      ? ViewStyle[K]
-      : number
-    }>(items.length, (index) => ({
-      ...makeRecords(viewStyleProperties.color, undefined),
-      ...makeRecords(viewStyleProperties.number, undefined),
-      ...makeRecords(viewStyleProperties.length, undefined),
-      ...makeRecords(viewStyleProperties.nonInterpolable, undefined),
-      flex: 1,
-      flexBasis: "100%",
-      flexGrow: 1,
-      flexShrink: 0,
-      zIndex: items.length - index + 1,
-      opacity: 0,
-      perspective: 1000,
-      translateX: 0,
-      translateY: 0,
-      scale: 1,
-      scaleX: 1,
-      scaleY: 1,
-      rotate: 0,
-      rotateX: 0,
-      rotateY: 0,
-      rotateZ: 0,
-      skewX: 0,
-      skewY: 0,
-      shadowOffsetX: 0,
-      shadowOffsetY: 0,
-      maxWidth: "100%",
-      maxHeight: "100%",
-      width: "100%",
-      height: "100%",
-      position: "absolute",
-      overflow: "hidden",
-    }))
 
     const onLayout = (e: LayoutChangeEvent) => {
       const { width, height } = e.nativeEvent.layout
@@ -136,82 +128,24 @@ export const Carousel
       }
 
       stopScroll()
-      springsApi.set({ opacity: 1 })
       setTimeout(enableScroll, 0)
-      syncToVirtualTranslate()
+
+      if (!initialized.current) {
+        initialized.current = true
+        forceUpdate()
+      }
     }
 
     const stopScroll = () => {
       if (scrollBlocked.current) return;
       const destination = calcDestination()
-      scrollTo(destination, true)
+      scrollToPosition(destination, true)
       scrollBlocked.current = true
     }
 
     const enableScroll = () => {
       if (!scrollBlocked.current) return;
       scrollBlocked.current = false
-    }
-
-    const redefineInterpolateConfigs = () => {
-      for (const key in springs[0]) {
-        if (key in mergedScrollInterpolator) {
-          const getConfig = mergedScrollInterpolator[key as CarouselScrollInterpolatorKeys] as NonNullable<CarouselScrollInterpolator[CarouselScrollInterpolatorKeys]>
-          interpolateConfigs.current[key as CarouselScrollInterpolatorKeys]
-            = getConfig({
-              layout: layout.current,
-              itemLength: items.length,
-            })
-        }
-      }
-    }
-
-    const syncToVirtualTranslate = () => {
-      const translatePosition = spring.virtualTranslate.to((value) => {
-        return -value / layoutSize.current
-      })
-
-      const interpolatedPosition = translatePosition.to((value) => {
-        return (
-          value % items.length +
-          items.length
-        ) % items.length
-      })
-
-      const progress = interpolatedPosition.to((value) => {
-        return value - Math.floor(value)
-      })
-
-      const head = Math.floor(interpolatedPosition.get())
-
-      const newOrder = (() => {
-        const result: number[] = []
-        for (let i = 0; i < items.length; i += 1) {
-          result.push((head + i) % items.length)
-        }
-        return result
-      })()
-
-      items.forEach((item, i) => {
-        const position = newOrder.indexOf(i)
-        const detailedPosition = to([progress], (_progress) => position - _progress)
-        const spring = springs[i]
-
-        for (const key in spring) {
-          if (key in mergedScrollInterpolator) {
-            const config = interpolateConfigs.current[key as CarouselScrollInterpolatorKeys] as InterpolatorConfig
-            let interpolated = detailedPosition
-              .to(config)
-              .get()
-
-            if (key === "zIndex") {
-              interpolated = Math.round(interpolated as number)
-            }
-
-            spring[key as keyof typeof spring].set(interpolated)
-          }
-        }
-      })
     }
 
     const calcDestination = () => {
@@ -243,20 +177,15 @@ export const Carousel
       return result % items.length
     }
 
-    const scrollTo = (translatePosition: number, immediate?: boolean) => {
+    const scrollToPosition = (translatePosition: number, immediate?: boolean) => {
       updateSlideTimestamp()
+
+      const virtualTranslate = -translatePosition * layoutSize.current
+
       if (immediate) {
-        redefineInterpolateConfigs()
-        springApi.set({
-          virtualTranslate: -translatePosition * layoutSize.current,
-        })
-        syncToVirtualTranslate()
+        springApi.set({virtualTranslate})
       } else {
-        springApi.start({
-          virtualTranslate: -translatePosition * layoutSize.current,
-          onChange: syncToVirtualTranslate,
-          onResolve: redefineInterpolateConfigs,
-        })
+        springApi.start({virtualTranslate})
       }
     }
 
@@ -278,16 +207,15 @@ export const Carousel
       const diff = index - curIndex
       const newDestination = curDestination + diff
 
-      const {start, end} = getSlicer(index)
-      slicer.start = start
-      slicer.end = end
+      slicer.current = getSlicer(index)
 
+      forceUpdate()
       if (onChange && index !== prevScrollIndex.current) {
         prevScrollIndex.current = index
         onChange(index)
       }
-      
-      scrollTo(newDestination)
+
+      scrollToPosition(newDestination)
     }
 
     const getRandomItemIndex = () => Math.floor(Math.random() * items.length)
@@ -306,6 +234,7 @@ export const Carousel
         if (touchID.current !== "-1") return;
         const { identifier, pageX, pageY } = e.nativeEvent
         touchID.current = identifier
+
         touchStart.current = vertical ? pageY : pageX
         virtualTranslateStart.current = spring.virtualTranslate.get()
       },
@@ -313,39 +242,37 @@ export const Carousel
         const { identifier, pageX, pageY } = e.nativeEvent
         if (touchID.current !== identifier) return
 
-        function syncSlide() {
-          updateSlideTimestamp()
+        updateSlideTimestamp()
 
-          const touchDiff = vertical
-            ? pageY - touchStart.current
-            : pageX - touchStart.current
+        const touchDiff = vertical
+          ? pageY - touchStart.current
+          : pageX - touchStart.current
 
-          const newVirtualTranslate = virtualTranslateStart.current + touchDiff
-          springApi.set({
-            virtualTranslate: newVirtualTranslate,
-          })
-
-          syncToVirtualTranslate()
-        }
-
-        syncSlide()
+        springApi.set({
+          virtualTranslate:
+            virtualTranslateStart.current +
+            touchDiff,
+        })
       },
       onPanResponderEnd: (e) => {
-        const { identifier, locationX, locationY } = e.nativeEvent
+        const { identifier } = e.nativeEvent
         if (touchID.current !== identifier) return
         touchID.current = "-1"
+
         const index = calcIndex()
         scrollToIndex(index)
       }
     })
 
-    React.useImperativeHandle(ref, () => ({
-      current: containerRef.current,
-      scrollTo: scrollToIndex,
-      scrollToNext,
-      scrollToPrev,
-      scrollToRandom,
-    }), [])
+    React.useImperativeHandle(ref, () => {
+      return {
+        current: containerRef.current,
+        scrollTo: scrollToIndex,
+        scrollToNext,
+        scrollToPrev,
+        scrollToRandom,
+      }
+    }, [dummyState])
 
     React.useEffect(() => {
       const tick = (time: number) => {
@@ -362,61 +289,152 @@ export const Carousel
 
     return (
       <View
-        style={[
-          { overflow: "hidden" },
-          style,
-        ]}
         {..._props}
+        {...panResponder.panHandlers}
         ref={containerRef}
         onLayout={onLayout}
-        {...panResponder.panHandlers}
-        onStartShouldSetResponderCapture={() => true}
-        removeClippedSubviews
+        style={[{ overflow: "hidden" }, style]}
       >
-        {items.map((item, i) => {
-          const {
-            translateX,
-            translateY,
-            scale,
-            scaleX,
-            scaleY,
-            rotate,
-            rotateX,
-            rotateY,
-            rotateZ,
-            skewX,
-            skewY,
-            perspective,
-            ...itemStyle
-          } = springs[i]
-
+        {slicedItems.map(({ item, originalIndex }) => {
           return (
-            <animated.View key={i} style={[{
-              //@ts-ignore
-              userSelect: "none",
-              ...itemStyle,
-              transform: [
-                { perspective },
-                { translateX },
-                { translateY },
-                { scale },
-                { scaleX },
-                { scaleY },
-                { rotate: to(rotate, (value) => `${value}deg`) },
-                { rotateX: to(rotateX, (value) => `${value}deg`) },
-                { rotateY: to(rotateY, (value) => `${value}deg`) },
-                { rotateZ: to(rotateZ, (value) => `${value}deg`) },
-                { skewX: to(skewX, (value) => `${value}deg`) },
-                { skewY: to(skewY, (value) => `${value}deg`) },
-              ]
-            }]}>
-              {renderItem(item, i)}
-            </animated.View>
+            <MemoizedItem
+              item={item}
+              key={originalIndex}
+              renderItem={renderItem}
+              originalIndex={originalIndex}
+              transitionPosition={transitionPosition}
+              interpolator={mergedScrollInterpolator}
+              info={{
+                layout: {
+                  width: layout.current.width,
+                  height: layout.current.height,
+                },
+                itemLength: items.length
+              }}
+            />
           )
         })}
       </View>
     )
   })
+
+const CarouselItem: <TItem>(props: CarouselItemProps<TItem>) => React.ReactElement | null = (props) => {
+  const {
+    originalIndex,
+    item,
+    renderItem,
+    transitionPosition,
+    interpolator,
+    info,
+  } = props;
+
+  if (info.layout.width <= 0 || info.layout.height <= 0) return null
+
+  const itemPosition = transitionPosition.to((value) => {
+    return (originalIndex - value + info.itemLength) % info.itemLength - 1
+  })
+
+  const configs = Object.entries(interpolator)
+    .map(([key, getConfig], i) => {
+      const config = (getConfig as NonNullable<typeof getConfig>)(info)
+      const interpolated = itemPosition.to(config)
+      return [key, interpolated] as const
+    })
+    .reduce((acc, [key, interpolated]) => {
+      acc[key as CarouselScrollInterpolatorKeys] = interpolated
+      return acc
+    }, {} as { [K in CarouselScrollInterpolatorKeys]: Interpolation })
+
+  const {
+    perspective = 1000,
+    translateX = 0,
+    translateY = 0,
+    scale = 1,
+    scaleX = 1,
+    scaleY = 1,
+    rotate = 0,
+    rotateX = 0,
+    rotateY = 0,
+    rotateZ = 0,
+    skewX = 0,
+    skewY = 0,
+    shadowOffsetX,
+    shadowOffsetY,
+    ...itemStyle
+  } = configs;
+
+  return (
+    <animated.View style={[
+      {
+        //@ts-ignore
+        userSelect: "none",
+        position: "absolute",
+        width: "100%",
+        height: "100%",
+        overflow: "hidden",
+        zIndex: itemPosition.to((value) => Math.floor(info.itemLength - value)),
+        shadowOffset: {
+          width: shadowOffsetX,
+          height: shadowOffsetY,
+        }
+      },
+      {
+        transform: [
+          { perspective },
+          { translateX },
+          { translateY },
+          { scale },
+          { scaleX },
+          { scaleY },
+          { rotate: to(rotate, (value) => `${value}deg`) },
+          { rotateX: to(rotateX, (value) => `${value}deg`) },
+          { rotateY: to(rotateY, (value) => `${value}deg`) },
+          { rotateZ: to(rotateZ, (value) => `${value}deg`) },
+          { skewX: to(skewX, (value) => `${value}deg`) },
+          { skewY: to(skewY, (value) => `${value}deg`) },
+        ]
+      },
+      itemStyle,
+    ]}>
+      {renderItem(item, originalIndex)}
+    </animated.View>
+  )
+}
+
+const MemoizedItem = React.memo(CarouselItem, (prev, next) => {
+  return isAllTrue([
+    prev.info.itemLength === next.info.itemLength,
+    prev.info.layout.width === next.info.layout.width,
+    prev.info.layout.height === next.info.layout.height,
+    prev.originalIndex === next.originalIndex,
+  ])
+})
+
+
+export interface CarouselRef {
+  current: View | null
+  scrollTo: (index: number) => void
+  scrollToNext: () => number
+  scrollToPrev: () => number
+  scrollToRandom: () => number
+}
+
+export type Carousel = CarouselRef
+
+export type CarouselScrollInterpolatorKeys = keyof Omit<ViewStyle, "transform" | "shadowOffset" | "transformMatrix"> |
+  "zIndex" | "opacity" | "shadowOffsetX" | "shadowOffsetY" |
+  "perspective" | "translateX" | "translateY" | "scale" | "scaleX" |
+  "scaleY" | "rotate" | "rotateX" | "rotateY" | "rotateZ" |
+  "skewX" | "skewY"
+
+export type CarouselInterpolatorInfo = {
+  layout: { width: number, height: number }
+  itemLength: number
+}
+
+export type CarouselScrollInterpolator = {
+  [K in CarouselScrollInterpolatorKeys]?: (info: CarouselInterpolatorInfo) => InterpolatorConfig
+}
 
 export interface CarouselProps<TItem extends any> extends ViewProps {
   initialIndex?: number
@@ -445,28 +463,11 @@ export interface CarouselProps<TItem extends any> extends ViewProps {
   scrollInterpolator?: CarouselScrollInterpolator
 }
 
-export interface CarouselRef {
-  current: View | null
-  scrollTo: (index: number) => void
-  scrollToNext: () => number
-  scrollToPrev: () => number
-  scrollToRandom: () => number
+type CarouselItemProps<TItem extends any> = {
+  item: CarouselProps<TItem>["items"][number]
+  renderItem: CarouselProps<TItem>["renderItem"]
+  originalIndex: number
+  transitionPosition: Interpolation<number, number>
+  interpolator: CarouselScrollInterpolator
+  info: CarouselInterpolatorInfo
 }
-
-export type Carousel = CarouselRef
-
-export type CarouselScrollInterpolatorKeys = keyof Omit<ViewStyle, "transform"> |
-  "zIndex" | "opacity" | "shadowOffsetX" | "shadowOffsetY" |
-  "perspective" | "translateX" | "translateY" | "scale" | "scaleX" |
-  "scaleY" | "rotate" | "rotateX" | "rotateY" | "rotateZ" |
-  "skewX" | "skewY"
-
-export type CarouselInterpolatorInfo = {
-  layout: { width: number, height: number }
-  itemLength: number
-}
-
-export type CarouselScrollInterpolator = {
-  [K in CarouselScrollInterpolatorKeys]?: (info: CarouselInterpolatorInfo) => InterpolatorConfig
-}
-
