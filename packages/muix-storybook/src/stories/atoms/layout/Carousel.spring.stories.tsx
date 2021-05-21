@@ -4,6 +4,7 @@ import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import WebColors from '@monthem/web-color';
 import monthem from "@monthem/utils"
 import { Carousel, CarouselScrollInterpolator } from "@monthem/muix"
+import { animated } from '@react-spring/native';
 
 const carouselItemCount = 10000
 const indice = Array(carouselItemCount).fill(0).map((_, i) => i)
@@ -50,67 +51,73 @@ const CarouselStory = () => {
   const carouselRefs = React.useRef<Carousel[]>([])
 
   const scrollToRandom = () => {
-    carouselRefs.current.forEach((carousel) => carousel?.scrollToRandom())
+    carouselRefs.current.forEach((carousel) => carousel.current?.scrollToRandom())
   }
 
   const scrollToPrev = () => {
-    carouselRefs.current.forEach((carousel) => carousel?.scrollToPrev())
+    carouselRefs.current.forEach((carousel) => carousel.current?.scrollToPrev())
   }
 
   const scrollToNext = () => {
-    carouselRefs.current.forEach((carousel) => carousel?.scrollToNext())
+    carouselRefs.current.forEach((carousel) => carousel.current?.scrollToNext())
+  }
+
+  const catchRef = (_ref: Carousel) => {
+    if (_ref) {
+      carouselRefs.current.push(_ref)
+    }
   }
 
   return (
     <ScrollView>
       <Carousel
         auto
-        ref={(_ref) => carouselRefs.current.push(_ref)}
+        ref={catchRef}
         items={indice}
-        renderItem={(item, index) => <RandomColorBox index={index} />}
+        renderItem={({item, index}) => <RandomColorBox index={index} />}
         vertical
         style={{ height: 100, backgroundColor: "lightgrey", marginBottom: 20 }}
       />
       <Carousel
         auto
-        ref={(_ref) => carouselRefs.current.push(_ref)}
+        ref={catchRef}
         items={indice}
-        renderItem={(item, index) => <RandomColorBox index={index} />}
+        renderItem={({item, index}) => <RandomColorBox index={index} />}
         scrollInterpolator={exampleInterpolator}
         style={{ height: 100, backgroundColor: "lightgrey", marginBottom: 20 }}
       />
       <Carousel
-        ref={(_ref) => carouselRefs.current.push(_ref)}
+        ref={catchRef}
         items={indice}
-        renderItem={(item, index) => <RandomColorBox index={index} />}
+        renderItem={({item, index}) => <RandomColorBox index={index} />}
         scrollInterpolator={customScrollInterpolator1}
         style={{ height: 100, backgroundColor: "lightgrey", marginBottom: 20 }}
       />
       <Carousel
-        ref={(_ref) => carouselRefs.current.push(_ref)}
+        ref={catchRef}
         items={indice}
-        renderItem={(item, index) => <RandomColorBox index={index} />}
+        renderItem={({item, index}) => <RandomColorBox index={index} />}
         scrollInterpolator={customScrollInterpolator2}
         style={{ height: 300, backgroundColor: "lightgrey", marginBottom: 20 }}
       />
       <Carousel
-        ref={(_ref) => carouselRefs.current.push(_ref)}
+        ref={catchRef}
         items={indice}
-        renderItem={(item, index) => <RandomColorBox index={index} />}
+        renderItem={({item, index}) => <RandomColorBox index={index} />}
         scrollInterpolator={customScrollInterpolator3}
         style={{ height: 300, backgroundColor: "lightgrey", marginBottom: 20 }}
       />
       <Carousel
-        ref={(_ref) => carouselRefs.current.push(_ref)}
+        ref={catchRef}
         items={indice}
-        renderItem={(item, index) => <RandomColorBox index={index} />}
+        renderItem={({item, index}) => <RandomColorBox index={index} />}
         scrollInterpolator={customScrollInterpolator4}
         style={{ height: 300, backgroundColor: "lightgrey", marginBottom: 20 }}
       />
       <Carousel
-        ref={(_ref) => carouselRefs.current.push(_ref)}
+        ref={catchRef}
         items={indice}
-        renderItem={(item, index) => <RandomColorBox index={index} />}
+        renderItem={({item, index}) => <RandomColorBox index={index} />}
         scrollInterpolator={customScrollInterpolator5}
         hideInactive
         style={{ height: 300, backgroundColor: "lightgrey", marginBottom: 20 }}

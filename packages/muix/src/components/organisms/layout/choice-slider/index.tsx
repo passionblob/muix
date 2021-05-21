@@ -10,37 +10,29 @@ const choices = [
 
 export const ChoiceSlider = (props: ChoiceSliderProps) => {
   const [index, setIndex] = React.useState(0);
-  const [spring, setSpring] = useSpring(() => {
-    return {
-      
-    }
-  })
   const touchID = React.useRef("-1");
   const touchStart = React.useRef({x: 0, y: 0}).current;
-  const touchCurrent = React.useRef({x: 0, y: 0}).current;
-  const touchEnd = React.useRef({x: 0, y: 0}).current;
+  const [spring, setSpring] = useSpring(() => ({
+    virtualTranslate: 0
+  }))
 
   const panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: () => true,
     onPanResponderStart: (e) => {
       if (touchID.current !== "-1") return;
-      const { locationX, locationY, identifier } = e.nativeEvent;
+      const { pageX, pageY, identifier } = e.nativeEvent;
       touchID.current = identifier;
-      touchStart.x = locationX;
-      touchStart.y = locationY;
+      touchStart.x = pageX;
+      touchStart.y = pageY;
     },
     onPanResponderMove: (e) => {
-      const { locationX, locationY, identifier } = e.nativeEvent;
+      const { pageX, locationY, identifier } = e.nativeEvent;
       if (touchID.current !== identifier) return;
-      touchCurrent.x = locationX;
-      touchCurrent.y = locationY;
     },
     onPanResponderEnd: (e) => {
-      const { locationX, locationY, identifier } = e.nativeEvent;
+      const { pageX, pageY, identifier } = e.nativeEvent;
       if (touchID.current !== identifier) return;
       touchID.current = "-1";
-      touchEnd.x = locationX;
-      touchEnd.y = locationY;
     }
   })
 
