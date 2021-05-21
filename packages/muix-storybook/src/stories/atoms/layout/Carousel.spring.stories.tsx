@@ -5,7 +5,7 @@ import WebColors from '@monthem/web-color';
 import monthem from "@monthem/utils"
 import { Carousel, CarouselScrollInterpolator } from "@monthem/muix"
 
-const carouselItemCount = 100
+const carouselItemCount = 10000
 const indice = Array(carouselItemCount).fill(0).map((_, i) => i)
 
 const exampleInterpolator: CarouselScrollInterpolator = {
