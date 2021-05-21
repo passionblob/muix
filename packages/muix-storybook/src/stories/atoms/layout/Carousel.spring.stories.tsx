@@ -18,7 +18,7 @@ const exampleInterpolator: CarouselScrollInterpolator = {
   }
 }
 
-const RandomColorBox = ({index}: {index: number}) => {
+const RandomColorBox = ({ index }: { index: number }) => {
   const color = React.useRef(monthem.obejct.getRandomEntry(WebColors).value);
   return (
     <View
@@ -64,6 +64,7 @@ const CarouselStory = () => {
   return (
     <ScrollView>
       <Carousel
+        auto
         ref={(_ref) => carouselRefs.current.push(_ref)}
         items={indice}
         renderItem={(item, index) => <RandomColorBox index={index} />}
@@ -71,6 +72,7 @@ const CarouselStory = () => {
         style={{ height: 100, backgroundColor: "lightgrey", marginBottom: 20 }}
       />
       <Carousel
+        auto
         ref={(_ref) => carouselRefs.current.push(_ref)}
         items={indice}
         renderItem={(item, index) => <RandomColorBox index={index} />}
@@ -127,12 +129,18 @@ const CarouselStory = () => {
 }
 
 const customScrollInterpolator1: CarouselScrollInterpolator = {
-  translateX: (info) => {
-    return {
-      range: [-1, info.itemLength - 1],
-      output: [-info.layout.width, (info.itemLength - 1) * info.layout.width],
-    }
-  },
+  translateX: (info) => ({
+    range: [-1, 0, 1],
+    output: [-info.layout.width / 2, 0, info.layout.width / 2],
+  }),
+  opacity: () => ({
+    range: [-1, 0, 1],
+    output: [0, 1, 0],
+  }),
+  zIndex: () => ({
+    range: [-1, 0, 1],
+    output: [0, 10, 0],
+  }),
   scale: (info) => ({
     range: [-1, 0, 1, info.itemLength - 1],
     output: [0.5, 1, 0.5, 0]

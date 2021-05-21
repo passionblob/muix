@@ -62,6 +62,7 @@ export const Carousel
     const containerRef = React.useRef<View>(null);
     const slicer = React.useRef(getSlicer(0))
     const initialized = React.useRef(false)
+    const [newDestination, setNewDestination] = React.useState(0)
     const [dummyState, setDummyState] = React.useState(0)
 
     const [spring, springApi] = useSpring(() => ({
@@ -183,9 +184,9 @@ export const Carousel
       const virtualTranslate = -translatePosition * layoutSize.current
 
       if (immediate) {
-        springApi.set({virtualTranslate})
+        springApi.set({ virtualTranslate })
       } else {
-        springApi.start({virtualTranslate})
+        springApi.start({ virtualTranslate })
       }
     }
 
@@ -209,13 +210,12 @@ export const Carousel
 
       slicer.current = getSlicer(index)
 
-      forceUpdate()
       if (onChange && index !== prevScrollIndex.current) {
         prevScrollIndex.current = index
         onChange(index)
       }
 
-      scrollToPosition(newDestination)
+      setNewDestination(newDestination)
     }
 
     const getRandomItemIndex = () => Math.floor(Math.random() * items.length)
@@ -285,6 +285,16 @@ export const Carousel
       }
 
       if (auto) requestAnimationFrame(tick)
+    })
+
+    React.useEffect(() => {
+      scrollToPosition(newDestination)
+    }, [newDestination])
+
+    React.useEffect(() => {
+      return () => {
+        scrollBlocked.current = true
+      }
     }, [])
 
     return (
@@ -337,13 +347,21 @@ const CarouselItem: <TItem>(props: CarouselItemProps<TItem>) => React.ReactEleme
   const configs = Object.entries(interpolator)
     .map(([key, getConfig], i) => {
       const config = (getConfig as NonNullable<typeof getConfig>)(info)
-      const interpolated = itemPosition.to(config)
+      let interpolated;
+      if (typeof config === "object" && "range" in config)  {
+        interpolated = itemPosition.to(config)
+        if (key === "zIndex") {
+          interpolated = interpolated.to((value) => Math.floor(value as number))
+        }
+      } else {
+        interpolated = config
+      }
       return [key, interpolated] as const
     })
     .reduce((acc, [key, interpolated]) => {
       acc[key as CarouselScrollInterpolatorKeys] = interpolated
       return acc
-    }, {} as { [K in CarouselScrollInterpolatorKeys]: Interpolation })
+    }, {} as { [K in CarouselScrollInterpolatorKeys]: any })
 
   const {
     perspective = 1000,
@@ -432,8 +450,17 @@ export type CarouselInterpolatorInfo = {
   itemLength: number
 }
 
+type CustomStyle = {
+  shadowOffsetX: number
+  shadowOffsetY: number
+}
+
 export type CarouselScrollInterpolator = {
-  [K in CarouselScrollInterpolatorKeys]?: (info: CarouselInterpolatorInfo) => InterpolatorConfig
+  [K in CarouselScrollInterpolatorKeys]?: (info: CarouselInterpolatorInfo) => K extends keyof ViewStyle
+    ? ViewStyle[K] | InterpolatorConfig
+    : K extends keyof CustomStyle
+      ? CustomStyle[K] | InterpolatorConfig
+      : InterpolatorConfig
 }
 
 export interface CarouselProps<TItem extends any> extends ViewProps {
