@@ -272,7 +272,7 @@ export const Carousel
         scrollToPrev,
         scrollToRandom,
       }
-    }, [dummyState])
+    })
 
     React.useEffect(() => {
       const tick = (time: number) => {
