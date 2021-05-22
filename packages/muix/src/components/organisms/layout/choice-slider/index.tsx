@@ -265,7 +265,7 @@ const mapChunkBaseToInterpolation = <T extends any>({
 }
 
 function extractCustomKeysFromFlatStyle
-  <T extends Partial<Record<keyof MicroChunkInterpolatorConfig, any>>>
+  <T extends Partial<Record<keyof FlatTextStyle | keyof ChunkInterpolatorConfig, any>>>
   (style: T) {
   const {
     perspective,
@@ -366,15 +366,12 @@ type FlatTextStyle = {
   }
 
 type MicroChunkInterpolatorConfig = {
-  from?: Partial<FlatTextStyle>
-  config?: SpringConfig
-} & {
-    [K in keyof FlatTextStyle]?: [
-      NonNullable<FlatTextStyle[K]>,
-      NonNullable<FlatTextStyle[K]>,
-      NonNullable<FlatTextStyle[K]>,
-    ] | NonNullable<FlatTextStyle[K]>
-  }
+  [K in keyof FlatTextStyle]?: [
+    NonNullable<FlatTextStyle[K]>,
+    NonNullable<FlatTextStyle[K]>,
+    NonNullable<FlatTextStyle[K]>,
+  ] | NonNullable<FlatTextStyle[K]>
+}
 
 type ChunkInterpolatorConfig = {
   from?: Partial<FlatViewStyle>

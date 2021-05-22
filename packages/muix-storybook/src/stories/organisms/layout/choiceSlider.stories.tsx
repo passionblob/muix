@@ -25,18 +25,20 @@ const ChoiceSliderStory = () => {
 					["I usually", "have been", { value: "pragmatic and realistic" }],
 					["I usually", "have been", { value: "no no no no no no no no" }],
 				]}
-				chunkInterpolator={({}) => {
+				chunkInterpolator={({info}) => {
 					return {
 						translateX: [-50, 0, 50],
-						translateY: [100, 0, 100],
+						translateY: [info.layout.height * 0.2, 0, info.layout.height * 0.2],
+						opacity: [0, 1, 0],
+						scale: [0.2, 1, 0.2],
+						rotateY: ["-180deg", "0deg", "180deg"],
 					}
 				}}
 				microChunkInterpolator={({ info, chunkIndex, chunks, item, props }) => {
 					const color = props.primary ? "blue" : "black"
 					const fontWeight = props.primary ? "700" : "400"
 					return {
-						opacity: [0, 1, 0],
-						fontSize: [5, 20, 5],
+						fontSize: 20,
 						color: ["grey", color, "grey"],
 						fontWeight: fontWeight,
 					}
