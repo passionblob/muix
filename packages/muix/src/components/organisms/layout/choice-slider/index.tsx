@@ -3,21 +3,37 @@ import React from 'react'
 import { TextStyle, View, ViewProps, Text, ViewStyle } from 'react-native'
 import { animated, Interpolation } from "react-spring/native"
 import { SpringConfig, useChain, useSpring, useSpringRef, useSprings, useTrail } from "react-spring"
-import { CarouselBase, CarouselBaseInterpolatorInfo, CarouselBaseRenderItemInfo } from '../../../atoms'
+import { CarouselBase, CarouselBaseInterpolatorInfo, CarouselBaseProps, CarouselBaseRenderItemInfo } from '../../../atoms'
 import { Easing } from 'react-native'
 
-const defaultMicroChunkInterpolator: ChunkInterpolatorFn<any> = ({ info, chunkIndex, chunks, item, props }) => {
+const defaultMicroChunkInterpolator: MicronChunkInterpolatorFn<any> = ({ info, chunkIndex, chunks, item, props }) => {
   return {
-    opacity: [0, 1, 0],
     fontSize: [12, 20, 12],
-    translateX: [-info.layout.width / 2, 0, info.layout.width],
   }
 }
 
-const defaultChunkInterpolator: ChunkInterpolatorFn<any> = ({ info }) => {
+const defaultChunkInterpolatorHorizontal: ChunkInterpolatorFn<any> = ({ info }) => {
   return {
-    translateX: [-info.layout.width / 4, 0, info.layout.width / 4],
-    translateY: [50, 0, 50],
+    opacity: [0, 1, 0],
+    translateX: [-30, 0, 30],
+    translateY: [30, 0, 30],
+    rotateY: ["-120deg", "0deg", "120deg"],
+    config: {
+      tension: 300,
+      bounce: 0,
+    }
+  }
+}
+
+const defaultChunkInterpolatorVertical: ChunkInterpolatorFn<any> = ({ info }) => {
+  return {
+    opacity: [-1, 1, -1],
+    translateY: [-20, 0, 20],
+    rotateX: ["-120deg", "0deg", "120deg"],
+    config: {
+      tension: 300,
+      bounce: 0,
+    }
   }
 }
 
@@ -25,7 +41,9 @@ export const ChoiceSlider = <T extends any>(props: ChoiceSliderProps<T>) => {
   const {
     choices,
     microChunkInterpolator = defaultMicroChunkInterpolator,
-    chunkInterpolator = defaultChunkInterpolator,
+    chunkInterpolator = props.vertical
+      ? defaultChunkInterpolatorVertical
+      : defaultChunkInterpolatorHorizontal,
     alignChunks,
     ..._props
   } = props
@@ -34,6 +52,8 @@ export const ChoiceSlider = <T extends any>(props: ChoiceSliderProps<T>) => {
       {..._props}
       items={choices}
       infinite={false}
+      frontPaddingRenderCount={0}
+      backPaddingRenderCount={0}
       renderItem={({ item, itemPosition, index, info }) => {
         const chunkTexts = item.map((chunk) => {
           if (Array.isArray(chunk)) return chunk.map(mapChunkBaseToString).join(" ")
@@ -394,9 +414,16 @@ type Choice<T> = (ChunkBase<T> | ChunkBase<T>[])[]
 type MicronChunkInterpolatorFn<T> = (info: ChoiceChunkInterpolatorInfo<T>) => MicroChunkInterpolatorConfig
 type ChunkInterpolatorFn<T> = (info: ChoiceChunkInterpolatorInfo<T>) => ChunkInterpolatorConfig
 
-export interface ChoiceSliderProps<T> extends ViewProps {
+
+export type ChoiceSliderProps<T> = {
   alignChunks?: ViewStyle["alignItems"]
   choices: Choice<T>[]
   chunkInterpolator?: ChunkInterpolatorFn<T>
   microChunkInterpolator?: MicronChunkInterpolatorFn<T>
-}
+} & Omit<CarouselBaseProps<T>,
+  "items" |
+  "renderItem" |
+  "infinite" |
+  "frontPaddingRenderCount" |
+  "backPaddingRenderCount"
+>

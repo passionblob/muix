@@ -197,6 +197,11 @@ export const CarouselBase
     const scrollToNext = () => {
       const index = calcIndex() + 1
       scrollToIndex(index)
+
+      if (!infinite && index === items.length) {
+        scrollToIndex(0)
+      }
+
       return index
     }
 

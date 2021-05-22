@@ -5,13 +5,12 @@ import { View, Text, TouchableWithoutFeedback, Pressable, PressableProps } from 
 import { useTrail } from '@react-spring/core';
 import { animated } from '@react-spring/native';
 import WebColors from '@monthem/web-color';
-import styled from 'styled-components/native';
+import styled from "styled-components";
 
 const SampleText = styled(Text)`
   font-size: 40px;
   font-weight: bold;
   color: ${WebColors.FloralWhite};
-  user-select: none;
 `
 
 const TrailContailer: React.FC<PressableProps> = styled(Pressable)`
@@ -56,7 +55,7 @@ const Trail: React.FC<{visible: boolean}> = (props) => {
   )
 }
 
-const TrailStory: StoryFn<JSX.Element> = (p) => {
+const TrailStory = () => {
   const [visible, setVisibility] = React.useState(true)
 
   const onPress = () => {
@@ -69,11 +68,10 @@ const TrailStory: StoryFn<JSX.Element> = (p) => {
         <SampleText>This</SampleText>
         <SampleText>is a</SampleText>
         <SampleText>trail effect</SampleText>
-        <View style={{backgroundColor: "blue", width: 70, height: 5}}></View>
       </Trail>
 		</TrailContailer>
 	)
 }
 
 storiesOf("Test/ReactSpring", module)
-	.add("Trail", TrailStory)
+	.add("Trail", () => <TrailStory/>)
