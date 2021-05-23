@@ -52,8 +52,8 @@ export const ChoiceSlider = <T extends any>(props: ChoiceSliderProps<T>) => {
       {..._props}
       items={choices}
       infinite={false}
-      frontPaddingRenderCount={0}
-      backPaddingRenderCount={0}
+      frontPaddingRenderCount={2}
+      backPaddingRenderCount={2}
       renderItem={({ item, itemPosition, index, info }) => {
         const chunkTexts = item.map((chunk) => {
           if (Array.isArray(chunk)) return chunk.map(mapChunkBaseToString).join(" ")

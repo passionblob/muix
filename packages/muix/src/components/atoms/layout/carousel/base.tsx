@@ -1,8 +1,83 @@
 import React, { forwardRef } from 'react'
-import { View, ViewStyle, LayoutChangeEvent, PanResponder, ViewProps } from 'react-native'
-import { Interpolation } from "react-spring/native"
-import { useSpring, to, InterpolatorConfig } from "react-spring"
-import { isAllTrue } from "@monthem/utils"
+import { View, ViewStyle, LayoutChangeEvent, PanResponder, ViewProps, Text } from 'react-native'
+import { animated, Interpolation } from "react-spring/native"
+import { useSpring, to, InterpolatorConfig, SpringValue } from "react-spring"
+import { anyOf, isAllTrue } from "@monthem/utils"
+import { WebColors } from "@monthem/web-color"
+import chroma from "chroma-js"
+
+export const CarouselNumberPager: CarouselCustomComponent = (props) => {
+  const { info, relativePosition, page } = props
+  const textShadowOffset = { width: 2, height: 2 }
+  const textShadowColor = WebColors.Black
+  const color = WebColors.White
+  const fontSize = 14
+  const fontWeight = "bold"
+
+  return (
+    <View style={{
+      flexDirection: "row",
+    }}>
+      <View style={{
+        margin: 10,
+        padding: 6,
+        paddingHorizontal: 12,
+        borderRadius: 50,
+        flexDirection: "row",
+        overflow: "hidden",
+        backgroundColor: chroma(WebColors.Black).alpha(0.3).hex(),
+        borderWidth: 1,
+        borderColor: chroma(WebColors.Black).alpha(0.5).hex()
+      }}>
+        <animated.Text style={{
+          fontSize,
+          fontWeight,
+          color,
+          textShadowOffset,
+          textShadowColor,
+          opacity: relativePosition.to({
+            range: [-1, 0, 1],
+            output: [0, 1, 0],
+          }),
+          transform: [
+            {translateY: relativePosition.to({
+              range: [-1, 0, 1],
+              output: [-30, 0, 30],
+            })}
+          ]
+        }}>
+          {page}
+        </animated.Text>
+        <Text style={{
+          textShadowOffset,
+          textShadowColor,
+          color,
+          fontSize,
+          fontWeight,
+        }}>
+          {` / ${info.itemLength - 1}`}
+        </Text>
+      </View>
+    </View>
+  )
+}
+
+const CarouseldefaultCustomComponent: CarouselCustomComponent = (props) => {
+  return (
+    <View style={{
+      width: "100%",
+      height: "100%"
+    }}>
+      <View style={{
+        position: "absolute",
+        bottom: 0,
+        right: 0,
+      }}>
+        <CarouselNumberPager {...props} />
+      </View>
+    </View>
+  )
+}
 
 export const CarouselBase
   : <TItem extends any>(props: CarouselBaseProps<TItem>) => (React.ReactElement<any, string | React.JSXElementConstructor<any>> | null)
@@ -18,6 +93,7 @@ export const CarouselBase
       autoInterval = 3000,
       onChange,
       infinite = true,
+      customComponent = CarouseldefaultCustomComponent,
       ..._props
     } = props;
 
@@ -36,6 +112,8 @@ export const CarouselBase
     const timer = React.useRef<NodeJS.Timeout>();
     const [newDestination, setNewDestination] = React.useState(0)
     const [dummyState, setDummyState] = React.useState(0)
+
+    const totalRenderCount = frontPaddingRenderCount + backPaddingRenderCount + 1
 
     const [spring, springApi] = useSpring(() => ({
       virtualTranslate: 0,
@@ -89,7 +167,7 @@ export const CarouselBase
       const result = _slicer.start > _slicer.end
         ? itemsWithIndex.slice(_slicer.start).concat(itemsWithIndex.slice(0, _slicer.end))
         : _slicer.start === _slicer.end
-          ? itemsWithIndex.slice(0, _slicer.start).concat(itemsWithIndex.slice(_slicer.end))
+          ? itemsWithIndex.slice(0, _slicer.start).concat(itemsWithIndex.slice(_slicer.end)).slice(0, totalRenderCount)
           : itemsWithIndex.slice(_slicer.start, _slicer.end)
       return result
     }
@@ -184,7 +262,9 @@ export const CarouselBase
       if (immediate) {
         springApi.set({ virtualTranslate })
       } else {
-        springApi.start({ virtualTranslate })
+        springApi.start({
+          virtualTranslate,
+        })
       }
     }
 
@@ -262,7 +342,7 @@ export const CarouselBase
         })
       },
       onPanResponderEnd: (e) => {
-        const { identifier } = e.nativeEvent
+        const { identifier, pageY, pageX } = e.nativeEvent
         if (touchID.current !== identifier) return
         touchID.current = "-1"
 
@@ -313,13 +393,25 @@ export const CarouselBase
       }
     }, [])
 
+    const carouselBaseInterpolatorInfo = {
+      layout: {
+        width: layout.current.width,
+        height: layout.current.height,
+      },
+      itemLength: items.length
+    }
+
     return (
       <View
         {..._props}
         {...panResponder.panHandlers}
         ref={containerRef}
         onLayout={onLayout}
-        style={[{ overflow: "hidden" }, style]}
+        style={[{
+          //@ts-ignore
+          userSelect: "none",
+          overflow: "hidden",
+        }, style]}
       >
         {slicedItems.map(({ item, originalIndex }) => {
           return (
@@ -330,19 +422,125 @@ export const CarouselBase
               infinite={infinite}
               originalIndex={originalIndex}
               transitionPosition={transitionPosition}
-              info={{
-                layout: {
-                  width: layout.current.width,
-                  height: layout.current.height,
-                },
-                itemLength: items.length
-              }}
+              info={carouselBaseInterpolatorInfo}
             />
           )
         })}
+        <MemoizedCustomComponent
+          customComponent={customComponent}
+          infinite={infinite}
+          info={carouselBaseInterpolatorInfo}
+          virtualTranslate={spring.virtualTranslate}
+          transitionPosition={transitionPosition}
+        />
       </View>
     )
   })
+
+const CustomComponent = (
+  props: Omit<CarouselCustomComponentProps, "page" | "direction" | "relativePosition"> & { customComponent: CarouselCustomComponent }
+) => {
+  const {
+    infinite,
+    info,
+    customComponent,
+    transitionPosition,
+    virtualTranslate
+  } = props
+
+  const prevVirtualTranslate = React.useRef(0);
+  const curVirtualTranslate = React.useRef(0);
+  const prevPage = React.useRef(0);
+  const curPage = React.useRef(0);
+
+  const direction = virtualTranslate.to((value) => {
+    const interpolated = -value
+    prevVirtualTranslate.current = curVirtualTranslate.current
+    curVirtualTranslate.current = interpolated
+    return curVirtualTranslate.current > prevVirtualTranslate.current
+      ? 1
+      : -1
+  })
+
+  const page = to(
+    [direction, transitionPosition],
+    (_direction, _transitionPosition) => {
+      const page = _direction > 0
+        ? Math.ceil(_transitionPosition + 1)
+        : Math.floor(_transitionPosition + 1)
+
+      const clamped = (() => {
+        const truncated = Math.max(0, Math.min(page, info.itemLength - 1))
+        if (infinite) {
+          if (page > info.itemLength - 1) return 0
+          return truncated
+        } else {
+          if (page > info.itemLength - 1) return info.itemLength - 1
+          return truncated
+        }
+      })()
+
+      if (curPage.current !== clamped) {
+        prevPage.current = curPage.current
+        curPage.current = clamped
+      }
+
+      return clamped
+    })
+
+  const relativePosition = to(
+    [direction, transitionPosition],
+    (_direction, _transitionPosition) => {
+      const decimal = (_transitionPosition - Math.floor(_transitionPosition))
+      const interpolated = _direction > 0
+        ? decimal === 0 ? 0 : 1 - decimal
+        : decimal
+      const result = interpolated * _direction
+      const clamped = (() => {
+        if (infinite) return result
+
+        if (_direction < 0) {
+          if (curPage.current === 0) {
+
+          }
+        }
+
+        if (_direction > 0) {
+          if (curPage.current === info.itemLength - 1) {
+          }
+        }
+
+        return result
+      })()
+
+      return clamped
+    })
+
+  return (
+    <View style={{ zIndex: 99999, width: "100%", height: "100%" }}>
+      {React.createElement(customComponent, {
+        infinite,
+        info,
+        transitionPosition,
+        virtualTranslate,
+        direction,
+        relativePosition,
+        page,
+      })}
+    </View>
+  )
+}
+
+const MemoizedCustomComponent = React.memo(CustomComponent, (prev, next) => {
+  return isAllTrue([
+    prev.info.itemLength === next.info.itemLength,
+    prev.info.layout.width === next.info.layout.width,
+    prev.info.layout.height === next.info.layout.height,
+    prev.customComponent === next.customComponent,
+    prev.infinite === next.infinite,
+    // prev.transitionPosition === next.transitionPosition
+  ])
+})
 
 const CarouselBaseItem: <TItem>(props: CarouselBaseItemProps<TItem>) => React.ReactElement | null = (props) => {
   const {
@@ -419,21 +617,22 @@ export interface CarouselBaseProps<TItem extends any> extends ViewProps {
   frontPaddingRenderCount?: number
   backPaddingRenderCount?: number
   onChange?: (index: number) => void
-  /**
-   * this defines scroll behavior
-   * @example
-   * 
-   * translateX: (info) => ({
-   *  range: [-1, carouselItemCount - 1],
-   *  output: [-1 * info.layout.width, (carouselItemCount - 1) * info.layout.width],
-   * })
-   * 
-   * @param range this starts from -1 to children.length - 1
-   * 
-   */
+  customComponent?: CarouselCustomComponent
 }
 
-type CarouselBaseItemProps<TItem extends any> = {
+export type CarouselCustomComponent = (props: CarouselCustomComponentProps) => JSX.Element
+
+export type CarouselCustomComponentProps = {
+  info: CarouselBaseInterpolatorInfo
+  virtualTranslate: SpringValue<number>
+  transitionPosition: Interpolation<number, number>
+  infinite: boolean
+  page: Interpolation<number, number>
+  direction: Interpolation<number, 1 | -1>
+  relativePosition: Interpolation<number, number>
+}
+
+export type CarouselBaseItemProps<TItem extends any> = {
   item: CarouselBaseProps<TItem>["items"][number]
   renderItem: CarouselBaseProps<TItem>["renderItem"]
   originalIndex: number
