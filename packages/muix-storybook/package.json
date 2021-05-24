@@ -17,6 +17,7 @@
   "dependencies": {
     "@monthem/muix": "*",
     "@monthem/web-color": "^1.0.3",
+    "@react-native-community/slider": "^3.0.3",
     "chroma-js": "^2.1.1",
     "expo-font": "^9.1.0",
     "pixi.js": "^6.0.2",
