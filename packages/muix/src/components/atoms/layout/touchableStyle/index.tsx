@@ -6,14 +6,14 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
   const {
     children,
     styleOnTouch,
-    style,
+    style = {},
     onPressIn,
     onPressOut,
     onPress,
     ..._props
   } = props
 
-  const [_style, setStyle] = React.useState(style)
+  const [_style, setStyle] = React.useState<StyleProp<ViewStyle>>(style)
 
   const _onPressIn = (e: GestureResponderEvent) => {
     if (onPressIn) onPressIn(e)
@@ -28,6 +28,8 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
     if (onPressOut) onPressOut(e)
     setStyle(style)
   }
+
+  console.log(_style)
 
   return (
     //@ts-ignore
@@ -45,7 +47,7 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
   )
 }
 
-interface TouchableStyleProps extends ViewProps {
+export interface TouchableStyleProps extends ViewProps {
   style?: StyleProp<ViewStyle>
   styleOnTouch?: StyleProp<ViewStyle> | ((e: GestureResponderEvent) => StyleProp<ViewStyle>)
   onPressIn?: (e: GestureResponderEvent) => void

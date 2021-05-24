@@ -20,6 +20,7 @@
     "@react-native-community/slider": "^3.0.3",
     "chroma-js": "^2.1.1",
     "expo-font": "^9.1.0",
+    "expo-gl": "^10.2.0",
     "pixi.js": "^6.0.2",
     "react-native": "^0.64.0",
     "react-native-unimodules": "^0.13.3",

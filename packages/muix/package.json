@@ -1,13 +1,12 @@
 {
   "name": "@monthem/muix",
-  "version": "1.12.9",
+  "version": "1.13.34",
   "dependencies": {
-    "@monthem/utils": "^1.21.7",
+    "@monthem/utils": "latest",
     "@monthem/web-color": "^1.0.3",
     "chroma-js": "^2.1.1",
     "deepmerge": "^4.2.2",
-    "react-native-transitional": "^1.15.9",
-    "react-native-web": "^0.16.1",
+    "react-native-transitional": "latest",
     "react-spring": "^9.1.2",
     "styled-components": "^5.2.3"
   },
@@ -36,11 +35,9 @@
     "@types/react": "^17.0.2",
     "@types/react-dom": "^17.0.3",
     "@types/react-native": "0.64.0",
-    "@types/react-native-snap-carousel": "^3.8.3",
     "@typescript-eslint/eslint-plugin": "^4.16.1",
     "@typescript-eslint/parser": "^4.16.1",
     "babel-plugin-module-resolver": "^4.1.0",
-    "babel-plugin-react-native-web": "^0.16.1",
     "eslint": "^7.21.0",
     "eslint-plugin-react": "^7.22.0",
     "eslint-plugin-react-native": "^3.10.0",
@@ -53,15 +50,11 @@
     "react-dom": "^17.0.2",
     "react-native": "^0.64.0"
   },
-  "publishConfig": {
-    "access": "public"
-  },
+  "publishConfig": {"access": "public"},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/passionblob/muix.git"
   },
-  "bugs": {
-    "url": "https://github.com/passionblob/muix/issues"
-  },
+  "bugs": {"url": "https://github.com/passionblob/muix/issues"},
   "homepage": "https://github.com/passionblob/muix#readme"
 }

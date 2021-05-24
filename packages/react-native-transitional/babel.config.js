@@ -8,7 +8,6 @@ module.exports = {
     ["module-resolver", {
       root: ["./src"],
       alias: {
-        "^react-native$": "react-native-web",
         "@src": "./src",
       }
     }],

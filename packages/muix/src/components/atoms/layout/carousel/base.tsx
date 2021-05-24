@@ -109,7 +109,7 @@ export const CarouselBase
     const containerRef = React.useRef<View>(null);
     const slicer = React.useRef(getSlicer(0))
     const initialized = React.useRef(false)
-    const timer = React.useRef<NodeJS.Timeout>();
+    const timer = React.useRef<number>();
     const [newDestination, setNewDestination] = React.useState(0)
     const [dummyState, setDummyState] = React.useState(0)
 
