@@ -50,6 +50,7 @@ export const TransitionalText: React.FC<TransitionalTextProps> = (props) => {
     })
     .reduce((acc: InterpolatedTransform, ele) => {
       const [key, interpolation] = ele
+      //@ts-ignore
       acc[key] = interpolation
       return acc
     }, {} as InterpolatedTransform)
@@ -69,6 +70,7 @@ export const TransitionalText: React.FC<TransitionalTextProps> = (props) => {
       return [styleKey, interpolation] as const
     })
     .reduce((acc, [key, interpolation]) => {
+      //@ts-ignore
       acc[key] = interpolation
       return acc
     }, {} as InterpolatedTextStyle)
@@ -76,6 +78,7 @@ export const TransitionalText: React.FC<TransitionalTextProps> = (props) => {
   const normalizedStyle = normalizeFlattenedTextStyle(interpolatedStyle)
 
   return (
+    //@ts-ignore
     <animated.Text style={normalizedStyle}>
       {children}
     </animated.Text>

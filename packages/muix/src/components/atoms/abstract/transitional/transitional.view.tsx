@@ -42,6 +42,7 @@ export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
     })
     .reduce((acc: InterpolatedTransform, ele) => {
       const [key, interpolation] = ele
+      //@ts-ignore
       acc[key] = interpolation
       return acc
     }, {} as InterpolatedTransform)
@@ -60,6 +61,7 @@ export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
       return [styleKey, interpolation] as const
     })
     .reduce((acc, [key, interpolation]) => {
+      //@ts-ignore
       acc[key] = interpolation
       return acc
     }, {} as InterpolatedViewStyle)
@@ -67,6 +69,7 @@ export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
   const normalizedStyle = normalizeFlattenedViewStyle(interpolatedStyle)
 
   return (
+    //@ts-ignore
     <animated.Text style={normalizedStyle}>
       {children}
     </animated.Text>

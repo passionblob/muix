@@ -30,6 +30,7 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
   }
 
   return (
+    //@ts-ignore
     <Transitional.View {..._props} style={_style}>
       <Pressable
         onPressIn={_onPressIn}
