@@ -2,6 +2,8 @@ import React from "react"
 import { StyleProp, ViewStyle, Pressable, GestureResponderEvent, ViewProps } from "react-native"
 import { Transitional } from "react-native-transitional"
 
+export * from "./index.spring"
+
 export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
   const {
     children,
@@ -28,8 +30,6 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
     if (onPressOut) onPressOut(e)
     setStyle(style)
   }
-
-  console.log(_style)
 
   return (
     //@ts-ignore

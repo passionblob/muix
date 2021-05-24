@@ -8,7 +8,7 @@ import {
   flattenTransform,
   InterpolatedTransform,
   normalizeFlattenedTransform,
-} from "./common"
+} from "../../../../utils"
 
 export const TransitionalText: React.FC<TransitionalTextProps> = (props) => {
   const { children, styles = [], range = [0, 1], extrapolate } = props

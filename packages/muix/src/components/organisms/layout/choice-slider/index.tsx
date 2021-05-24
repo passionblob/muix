@@ -204,7 +204,7 @@ const mapChunkBaseToInterpolation = <T extends any>({
 }: SpringConfigExtractorParams<T>) => {
   const chunkText = (() => {
     return Array.isArray(chunk)
-      ? chunk.map(mapChunkBaseToString).join(" ")
+      ? chunk.map(mapChunkBaseToString).join("")
       : mapChunkBaseToString(chunk)
   })()
 

@@ -8,7 +8,11 @@ import {
   flattenTransform,
   InterpolatedTransform,
   normalizeFlattenedTransform,
-} from "./common"
+  flattenViewStyle,
+  FlatViewStyle,
+  normalizeFlattenedViewStyle,
+  InterpolatedViewStyle,
+} from "../../../../utils"
 
 export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
   const { children, progress, styles, range = [0, 1] } = props
@@ -85,47 +89,4 @@ type TransitionalViewProps = Omit<ViewProps, "style"> & {
    */
   range?: number[]
   styles: StyleProp<ViewStyle>[]
-}
-
-type FlatViewStyle = Omit<ViewStyle, "transform" | "shadowOffset" | "textShadowOffset"> & {
-  shadowOffsetX?: number
-  shadowOffsetY?: number
-  transform?: Partial<FlatTransform>
-}
-
-type InterpolatedViewStyle = {
-  [K in keyof FlatViewStyle]: Interpolation<number, NonNullable<FlatViewStyle[K]>>
-}
-
-type FlatViewStyleShape = { [K in keyof FlatViewStyle]: any }
-
-const flattenViewStyle = (style: ViewStyle): FlatViewStyle => {
-  const {
-    transform,
-    shadowOffset,
-    ...plainStyle
-  } = style
-  return {
-    ...plainStyle,
-    transform: flattenTransform(transform),
-    shadowOffsetX: shadowOffset?.width,
-    shadowOffsetY: shadowOffset?.height,
-  }
-}
-
-const normalizeFlattenedViewStyle = <T extends FlatViewStyleShape>(flattened: T) => {
-  const { shadowOffsetX, shadowOffsetY, transform, ...rest } = flattened
-  const normalizedTransform = normalizeFlattenedTransform(transform)
-  const shadowOffset = anyOf([
-    shadowOffsetX,
-    shadowOffsetY,
-  ]) ? {
-    width: shadowOffsetX,
-    height: shadowOffsetY
-  } : undefined
-  return {
-    shadowOffset,
-    transform: normalizedTransform,
-    ...rest
-  }
 }

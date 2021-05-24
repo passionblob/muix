@@ -22,7 +22,7 @@ export const ShyView: React.FC<ShyViewProps> = (props) => {
         const relativeY = locationY / layout.current.height
         const style = typeof styleOnTouch === "function"
           ? styleOnTouch(e)
-          : styleOnTouch || props.style
+          : styleOnTouch
 
         return [
           {
@@ -39,6 +39,7 @@ export const ShyView: React.FC<ShyViewProps> = (props) => {
             shadowOpacity: 0.5,
           },
           style,
+          props.style,
         ]
       }}
     >
