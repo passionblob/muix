@@ -5,7 +5,7 @@ import { mapWithDefaultValue } from "@monthem/utils"
 
 const defaultRadius = 50
 
-export const SlideView: React.FC<SlideViewProps> = ({
+export const DraggableView: React.FC<DraggableViewProps> = ({
   style,
   onStartShouldSetResponder,
   onMoveShouldSetResponder,
@@ -39,9 +39,9 @@ export const SlideView: React.FC<SlideViewProps> = ({
     startTranslateY: 0,
   }).current
 
-  const snappedPoint = React.useRef<Required<SlideViewSnapPoint> & { distance: number }>()
+  const snappedPoint = React.useRef<Required<DraggableViewSnapPoint> & { distance: number }>()
 
-  const [spring, setSpring] = useSpring<SlideViewSpring>(() => {
+  const [spring, setSpring] = useSpring<DraggableViewSpring>(() => {
     return {
       translateX: 0,
       translateY: 0,
@@ -89,8 +89,7 @@ export const SlideView: React.FC<SlideViewProps> = ({
       const nearestSnapPoint = getNearestSnapPoint(cleanSnapPoints, {
         translateX: spring.translateX.get(),
         translateY: spring.translateY.get()
-      }
-      )
+      })
 
       if (snappedPoint.current) {
         const diffX = spring.translateX.get() - snappedPoint.current.translateX;
@@ -148,7 +147,7 @@ export const SlideView: React.FC<SlideViewProps> = ({
 
 // If there's no snap point within in-radius, returns undefined
 const getNearestSnapPoint = (
-  snapPoints: Required<SlideViewSnapPoint & { distanceFromOrigin: number }>[],
+  snapPoints: Required<DraggableViewSnapPoint & { distanceFromOrigin: number }>[],
   view: { translateX: number, translateY: number }
 ) => {
   const distanceFromOrigin = Math.sqrt(
@@ -173,22 +172,22 @@ const getNearestSnapPoint = (
     .shift()
 }
 
-type SlideViewSnapPoint = {
-  translateX?: number
-  translateY?: number
-  radius?: number
-  key?: string
+type DraggableViewSnapPoint = {
+  translateX: number
+  translateY: number
+  radius: number
+  key: string
 }
 
-type SlideViewSpring = {
+type DraggableViewSpring = {
   translateX: number
   translateY: number
 }
 
-export interface SlideViewProps extends ViewProps {
+export interface DraggableViewProps extends ViewProps {
   disableHorizontalSlide?: boolean
   disableVerticalSlide?: boolean
-  snapPoints?: SlideViewSnapPoint[]
-  onSnap?: (point: SlideViewSnapPoint) => void
+  snapPoints?: Partial<DraggableViewSnapPoint>[]
+  onSnap?: (point: DraggableViewSnapPoint) => void
   onSlide?: (translate: { x: number, y: number }) => void
 }

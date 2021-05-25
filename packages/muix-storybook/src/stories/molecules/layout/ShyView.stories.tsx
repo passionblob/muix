@@ -10,7 +10,7 @@ const ShyViewStory = () => {
   )
 }
 
-storiesOf("Atoms/Layout", module)
+storiesOf("Molecules/Layout", module)
   .add(
     "ShyView", () => <ShyViewStory />
   )

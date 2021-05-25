@@ -1,28 +1,46 @@
 import React from "react"
 import { StyleSheet, TextProps, TextStyle, StyleProp, TransformsStyle } from "react-native"
-import { Interpolation, InterpolatorConfig, useSpring } from "react-spring"
+import { Interpolation, InterpolatorConfig, SpringConfig, useSpring } from "react-spring"
 import { animated, SpringValue } from "@react-spring/native"
-import { anyOf } from "@monthem/utils"
 import {
   FlatTransform,
-  flattenTransform,
   InterpolatedTransform,
-  normalizeFlattenedTransform,
+  FlatTextStyle,
+  flattenTextStyle,
+  InterpolatedTextStyle,
+  normalizeFlattenedTextStyle,
+  defaultFlatTransform,
+  flattenTransform,
 } from "../../../../utils"
+import { getRange } from "@monthem/utils"
 
 export const TransitionalText: React.FC<TransitionalTextProps> = (props) => {
-  const { children, styles = [], range = [0, 1], extrapolate } = props
-  //TODO: should implement auto behavior
-  const progress = props.progress || (() => {
-    const [spring, api] = useSpring(() => ({
-      _progress: 0
-    }))
-    return spring._progress
-  })()
+  const {
+    children,
+    styles = [],
+    extrapolate,
+    styleIndex,
+    onStyleChange,
+    springConfig,
+    fallbackStyle = {},
+  } = props
+
+  const flattenedFallback = flattenTextStyle(StyleSheet.flatten(fallbackStyle))
+
+  const range = props.progress
+    ? props.range || getRange(0, styles.length - 1)
+    : getRange(0, styles.length - 1)
 
   if (styles.length < range.length) {
     throw Error("the length of style array should be bigger than that of range")
   }
+
+  const [spring, springApi] = (() => {
+    if (props.progress) return [{ progress: props.progress }, null] as const
+    const [_spring, _api] = useSpring(() => ({ progress: 0 }))
+    return [_spring, _api] as const
+  })()
+
 
   const flattenedStyles = styles
     .map((s) => StyleSheet.flatten(s))
@@ -37,10 +55,12 @@ export const TransitionalText: React.FC<TransitionalTextProps> = (props) => {
     .map(<K extends keyof FlatTransform>(transformKey: K) => {
       const output = range.map((_, i) => {
         const transform = flattendTransforms[i]
-        if (!transform) throw new Error(`expected style[${i}].transform to exist but got nothing`)
+        if (transform === undefined) return flattenedFallback.transform
+          ? flattenedFallback.transform[transformKey]
+          : defaultFlatTransform[transformKey]
         return transform[transformKey]
       }) as FlatTransform[K][]
-      const interpolation = progress.to({
+      const interpolation = spring.progress.to({
         //@ts-ignore
         range,
         output,
@@ -55,13 +75,18 @@ export const TransitionalText: React.FC<TransitionalTextProps> = (props) => {
       return acc
     }, {} as InterpolatedTransform)
 
-  const styleKeys = Object.keys(flattenedStyles[0]) as (keyof FlatTextStyle)[]
+    const styleKeys = flattenedStyles.map((s) => Object.keys(s))
+    .reduce((acc, ele) => acc.concat(ele)) as (keyof FlatTextStyle)[]
 
   const interpolatedStyle = styleKeys
     .map(<K extends keyof FlatTextStyle>(styleKey: K) => {
       if (styleKey === "transform") return [styleKey, interpolatedTransform] as const
-      const output = range.map((_, i) => flattenedStyles[i][styleKey]) as FlatTextStyle[K][]
-      const interpolation = progress.to({
+      const output = range.map((_, i) => {
+        const value = flattenedStyles[i][styleKey]
+        if (value !== undefined) return value
+        return flattenedFallback[styleKey]
+      }) as FlatTextStyle[K][]
+      const interpolation = spring.progress.to({
         //@ts-ignore
         range,
         output,
@@ -77,6 +102,17 @@ export const TransitionalText: React.FC<TransitionalTextProps> = (props) => {
 
   const normalizedStyle = normalizeFlattenedTextStyle(interpolatedStyle)
 
+  React.useEffect(() => {
+    if (props.progress) return;
+    if (props.styleIndex === undefined) return;
+    if (!props.styles) return;
+    springApi?.start({
+      progress: styleIndex,
+      onResolve: onStyleChange,
+      config: springConfig,
+    })
+  }, [styleIndex, styles, onStyleChange, props.progress])
+
   return (
     //@ts-ignore
     <animated.Text style={normalizedStyle}>
@@ -85,70 +121,21 @@ export const TransitionalText: React.FC<TransitionalTextProps> = (props) => {
   )
 }
 
-type TransitionalTextProps = Omit<TextProps, "style"> & {
+export type TransitionalTextProps = Omit<TextProps, "style"> & {
   progress?: Interpolation<any, number> | SpringValue<number>
   /**
    * describes range of progress value.
-   * default range is [0, 1]
+   * default range is [0, ..., styles.length - 1]
    * but it can be customized to whatever range you want
    */
   range?: number[]
   styles?: StyleProp<TextStyle>[]
+  fallbackStyle?: StyleProp<TextStyle>
   extrapolate?: InterpolatorConfig["extrapolate"]
-}
-
-type FlatTextStyle = Omit<TextStyle, "transform" | "shadowOffset" | "textShadowOffset"> & {
-  shadowOffsetX?: number
-  shadowOffsetY?: number
-  textShadowOffsetX?: number
-  textShadowOffsetY?: number
-  transform?: Partial<FlatTransform>
-}
-
-type InterpolatedTextStyle = {
-  [K in keyof FlatTextStyle]: Interpolation<number, NonNullable<FlatTextStyle[K]>>
-}
-
-type FlatTextStyleShape = { [K in keyof FlatTextStyle]: any }
-
-const flattenTextStyle = (style: TextStyle): FlatTextStyle => {
-  const {
-    transform,
-    shadowOffset,
-    textShadowOffset,
-    ...plainStyle
-  } = style
-  return {
-    ...plainStyle,
-    transform: flattenTransform(transform),
-    shadowOffsetX: shadowOffset?.width,
-    shadowOffsetY: shadowOffset?.height,
-    textShadowOffsetX: textShadowOffset?.width,
-    textShadowOffsetY: textShadowOffset?.height,
-  }
-}
-
-const normalizeFlattenedTextStyle = <T extends FlatTextStyleShape>(flattened: T) => {
-  const { textShadowOffsetY, textShadowOffsetX, shadowOffsetX, shadowOffsetY, transform, ...rest } = flattened
-  const normalizedTransform = normalizeFlattenedTransform(transform)
-  const textShadowOffset = anyOf([
-    textShadowOffsetX,
-    textShadowOffsetY,
-  ]) ? {
-    width: textShadowOffsetX,
-    height: textShadowOffsetY
-  } : undefined
-  const shadowOffset = anyOf([
-    shadowOffsetX,
-    shadowOffsetY,
-  ]) ? {
-    width: shadowOffsetX,
-    height: shadowOffsetY
-  } : undefined
-  return {
-    textShadowOffset,
-    shadowOffset,
-    transform: normalizedTransform,
-    ...rest
-  }
+  /** works only when progress is undefined */
+  styleIndex?: number
+  /** works only when progress is undefined */
+  onStyleChange?: () => void
+  /** works only when progress is undefined */
+  springConfig?: SpringConfig
 }

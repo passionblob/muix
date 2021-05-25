@@ -1,16 +1,16 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react-native';
 import { ScrollView, Text, View } from 'react-native';
-import { SlideView } from '@monthem/muix/src';
+import { DraggableView } from '@monthem/muix';
 import { useSpring, animated } from "react-spring/native"
 
 storiesOf("Atoms/Layout", module)
   .add(
-    "SlideView",
-    () => <SlideViewStory />,
+    "DraggableView",
+    () => <DraggableViewStory />,
   )
 
-const SlideViewStory = () => {
+const DraggableViewStory = () => {
   const [spring, setSpring] = useSpring(() => {
     return {
       ballLScale: 1,
@@ -57,7 +57,7 @@ const SlideViewStory = () => {
             position: "absolute"
           }}
         />
-        <SlideView
+        <DraggableView
           snapPoints={[
             {translateX: 50, translateY: 50, radius: 50, key: "something"},
             {translateX: 100, translateY: 150, radius: 50, key: "further"},
@@ -98,7 +98,7 @@ const SlideViewStory = () => {
             />
           </View>
         </View>
-        <SlideView
+        <DraggableView
           snapPoints={[
             {translateX: -100, radius: 10},
             {translateX: 100, radius: 10},

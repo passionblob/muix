@@ -1,5 +1,5 @@
-import { anyOf } from "@monthem/utils"
-import { TransformsStyle, ViewStyle } from "react-native"
+import { anyOf, makeRecords, viewStyleProperties } from "@monthem/utils"
+import { TextStyle, TransformsStyle, ViewStyle } from "react-native"
 import { Interpolation } from "react-spring"
 
 export type FlatTransform = {
@@ -15,6 +15,13 @@ export type FlatTransform = {
   scale: number
   scaleX: number
   scaleY: number
+}
+
+export const defaultFlatTransform: FlatTransform = {
+  perspective: 1000,
+  ...makeRecords(["rotate", "rotateX", "rotateY", "rotateZ", "skewX", "skewY"] as const, "0deg"),
+  ...makeRecords(["translateX", "translateY"] as const, 0),
+  ...makeRecords(["scale", "scaleX", "scaleY"] as const, 0)
 }
 
 export const flattenTransform = (transform: TransformsStyle["transform"]): undefined | Partial<FlatTransform> => {
@@ -53,4 +60,60 @@ export type FlatViewStyle = Omit<ViewStyle, "transform" | "shadowOffset" | "text
 
 export type InterpolatedViewStyle = {
   [K in keyof FlatViewStyle]: Interpolation<number, NonNullable<FlatViewStyle[K]>>
+}
+
+export type FlatTextStyle = Omit<TextStyle, "transform" | "shadowOffset" | "textShadowOffset"> & {
+  shadowOffsetX?: number
+  shadowOffsetY?: number
+  textShadowOffsetX?: number
+  textShadowOffsetY?: number
+  transform?: Partial<FlatTransform>
+}
+
+export type InterpolatedTextStyle = {
+  [K in keyof FlatTextStyle]: Interpolation<number, NonNullable<FlatTextStyle[K]>>
+}
+
+export type FlatTextStyleShape = { [K in keyof FlatTextStyle]: any }
+
+export const flattenTextStyle = (style: TextStyle): FlatTextStyle => {
+  const {
+    transform,
+    shadowOffset,
+    textShadowOffset,
+    ...plainStyle
+  } = style
+  return {
+    ...plainStyle,
+    transform: flattenTransform(transform),
+    shadowOffsetX: shadowOffset?.width,
+    shadowOffsetY: shadowOffset?.height,
+    textShadowOffsetX: textShadowOffset?.width,
+    textShadowOffsetY: textShadowOffset?.height,
+  }
+}
+
+export const normalizeFlattenedTextStyle = <T extends FlatTextStyleShape>(flattened: T) => {
+  const { textShadowOffsetY, textShadowOffsetX, shadowOffsetX, shadowOffsetY, transform, ...rest } = flattened
+  const normalizedTransform = normalizeFlattenedTransform(transform)
+  const textShadowOffset = anyOf([
+    textShadowOffsetX,
+    textShadowOffsetY,
+  ]) ? {
+    width: textShadowOffsetX,
+    height: textShadowOffsetY
+  } : undefined
+  const shadowOffset = anyOf([
+    shadowOffsetX,
+    shadowOffsetY,
+  ]) ? {
+    width: shadowOffsetX,
+    height: shadowOffsetY
+  } : undefined
+  return {
+    textShadowOffset,
+    shadowOffset,
+    transform: normalizedTransform,
+    ...rest
+  }
 }

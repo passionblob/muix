@@ -1,46 +1,69 @@
 import React from "react"
-import { StyleSheet, ViewProps, ViewStyle, StyleProp, TransformsStyle } from "react-native"
-import { Interpolation } from "react-spring"
+import { StyleSheet, ViewProps, ViewStyle, StyleProp, TransformsStyle, TextStyle } from "react-native"
+import { Interpolation, InterpolatorConfig, SpringConfig, useSpring } from "react-spring"
 import { animated, SpringValue } from "@react-spring/native"
-import { anyOf } from "@monthem/utils"
+import { getRange } from "@monthem/utils"
 import {
   FlatTransform,
-  flattenTransform,
   InterpolatedTransform,
-  normalizeFlattenedTransform,
   flattenViewStyle,
   FlatViewStyle,
   normalizeFlattenedViewStyle,
   InterpolatedViewStyle,
+  defaultFlatTransform,
 } from "../../../../utils"
 
 export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
-  const { children, progress, styles, range = [0, 1] } = props
+  const {
+    children,
+    styles = [],
+    extrapolate,
+    styleIndex,
+    onStyleChange,
+    springConfig,
+    fallbackStyle = {},
+  } = props
+
+  const flattenedFallback = flattenViewStyle(StyleSheet.flatten(fallbackStyle))
+
+  const range = props.progress
+    ? props.range || getRange(0, styles.length - 1)
+    : getRange(0, styles.length - 1)
 
   if (styles.length < range.length) {
     throw Error("the length of style array should be bigger than that of range")
   }
+
+  const [spring, springApi] = React.useRef((() => {
+    if (props.progress) return [{ progress: props.progress }, null] as const
+    const [_spring, _api] = useSpring(() => ({ progress: 0 }))
+    return [_spring, _api] as const
+  })()).current
+
 
   const flattenedStyles = styles
     .map((s) => StyleSheet.flatten(s))
     .map((s) => flattenViewStyle(s))
 
   const flattendTransforms = flattenedStyles.map((s) => s.transform)
-  const transformKeys = flattendTransforms[0]
-    ? Object.keys(flattendTransforms[0]) as (keyof FlatTransform)[]
-    : []
+  const transformKeys = (flattendTransforms.filter((t) => t !== undefined) as Partial<FlatTransform>[])
+    .map((t) => Object.keys(t))
+    .reduce((acc, ele) => acc.concat(ele)) as (keyof FlatTransform)[]
 
   const interpolatedTransform = transformKeys
     .map(<K extends keyof FlatTransform>(transformKey: K) => {
       const output = range.map((_, i) => {
         const transform = flattendTransforms[i]
-        if (!transform) throw new Error(`expected style[${i}].transform to exist but got nothing`)
+        if (!transform || transform[transformKey] === undefined) return flattenedFallback.transform
+          ? flattenedFallback.transform[transformKey]
+          : defaultFlatTransform[transformKey]
         return transform[transformKey]
       }) as FlatTransform[K][]
-      const interpolation = progress.to({
+      const interpolation = spring.progress.to({
         //@ts-ignore
         range,
         output,
+        extrapolate,
       })
       return [transformKey, interpolation] as const
     })
@@ -51,16 +74,22 @@ export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
       return acc
     }, {} as InterpolatedTransform)
 
-  const styleKeys = Object.keys(flattenedStyles[0]) as (keyof FlatViewStyle)[]
+  const styleKeys = flattenedStyles.map((s) => Object.keys(s))
+    .reduce((acc, ele) => acc.concat(ele)) as (keyof FlatViewStyle)[]
 
   const interpolatedStyle = styleKeys
     .map(<K extends keyof FlatViewStyle>(styleKey: K) => {
       if (styleKey === "transform") return [styleKey, interpolatedTransform] as const
-      const output = range.map((_, i) => flattenedStyles[i][styleKey]) as FlatViewStyle[K][]
-      const interpolation = progress.to({
+      const output = range.map((_, i) => {
+        const value = flattenedStyles[i][styleKey]
+        if (value !== undefined) return value
+        return flattenedFallback[styleKey]
+      }) as FlatViewStyle[K][]
+      const interpolation = spring.progress.to({
         //@ts-ignore
         range,
         output,
+        extrapolate,
       })
       return [styleKey, interpolation] as const
     })
@@ -72,21 +101,40 @@ export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
 
   const normalizedStyle = normalizeFlattenedViewStyle(interpolatedStyle)
 
+  React.useEffect(() => {
+    if (props.progress) return;
+    if (props.styleIndex === undefined) return;
+    if (!props.styles) return;
+    springApi?.start({
+      progress: styleIndex,
+      onResolve: onStyleChange,
+      config: springConfig,
+    })
+  }, [styleIndex, styles, onStyleChange, props.progress])
+
   return (
     //@ts-ignore
-    <animated.Text style={normalizedStyle}>
+    <animated.View style={normalizedStyle}>
       {children}
-    </animated.Text>
+    </animated.View>
   )
 }
 
-type TransitionalViewProps = Omit<ViewProps, "style"> & {
-  progress: Interpolation<any, number> | SpringValue<number>
+export type TransitionalViewProps = Omit<ViewProps, "style"> & {
+  progress?: Interpolation<any, number> | SpringValue<number>
   /**
    * describes range of progress value.
-   * default range is [0, 1]
+   * default range is [0, ..., styles.length - 1]
    * but it can be customized to whatever range you want
    */
   range?: number[]
-  styles: StyleProp<ViewStyle>[]
+  styles?: StyleProp<ViewStyle>[]
+  fallbackStyle?: StyleProp<ViewStyle>
+  extrapolate?: InterpolatorConfig["extrapolate"]
+  /** works only when progress is undefined */
+  styleIndex?: number
+  /** works only when progress is undefined */
+  onStyleChange?: () => void
+  /** works only when progress is undefined */
+  springConfig?: SpringConfig
 }
