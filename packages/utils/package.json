@@ -1,6 +1,6 @@
 {
   "name": "@monthem/utils",
-  "version": "1.21.8",
+  "version": "1.21.81",
   "main": "index.ts",
   "license": "MIT",
   "scripts": {

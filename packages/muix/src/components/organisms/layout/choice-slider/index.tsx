@@ -254,6 +254,7 @@ const mapChunkBaseToInterpolation = <T extends any>({
           })
         }
 
+        //@ts-ignore
         if (textStyleProperties.nonInterpolable.includes(key)) {
           return itemPosition.to((position) => {
             const floor = Math.floor(position)
