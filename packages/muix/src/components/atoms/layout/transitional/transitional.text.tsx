@@ -1,19 +1,20 @@
 import React from "react"
-import { StyleSheet, ViewProps, ViewStyle, StyleProp, TransformsStyle, TextStyle } from "react-native"
+import { StyleSheet, TextProps, TextStyle, StyleProp, TransformsStyle } from "react-native"
 import { Interpolation, InterpolatorConfig, SpringConfig, useSpring } from "react-spring"
 import { animated, SpringValue } from "@react-spring/native"
-import { getRange } from "@monthem/utils"
 import {
   FlatTransform,
   InterpolatedTransform,
-  flattenViewStyle,
-  FlatViewStyle,
-  normalizeFlattenedViewStyle,
-  InterpolatedViewStyle,
+  FlatTextStyle,
+  flattenTextStyle,
+  InterpolatedTextStyle,
+  normalizeFlattenedTextStyle,
   defaultFlatTransform,
 } from "../../../../utils"
+import { getRange, wholeStyleProperties } from "@monthem/utils"
+import chroma from "chroma-js"
 
-export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
+export const TransitionalText: React.FC<TransitionalTextProps> = (props) => {
   const {
     children,
     styles = [],
@@ -24,7 +25,11 @@ export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
     fallbackStyle = {},
   } = props
 
-  const flattenedFallback = flattenViewStyle(StyleSheet.flatten(fallbackStyle))
+  const flattenedFallback = flattenTextStyle(StyleSheet.flatten(fallbackStyle))
+  const styleConcat = flattenTextStyle(StyleSheet.flatten([
+    StyleSheet.flatten(fallbackStyle),
+    StyleSheet.flatten(styles)
+  ]))
 
   const range = props.progress
     ? props.range || getRange(0, styles.length - 1)
@@ -34,27 +39,27 @@ export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
     throw Error("the length of style array should be bigger than that of range")
   }
 
-  const [spring, springApi] = React.useRef((() => {
+  const [spring, springApi] = (() => {
     if (props.progress) return [{ progress: props.progress }, null] as const
     const [_spring, _api] = useSpring(() => ({ progress: 0 }))
     return [_spring, _api] as const
-  })()).current
+  })()
 
 
   const flattenedStyles = styles
     .map((s) => StyleSheet.flatten(s))
-    .map((s) => flattenViewStyle(s))
+    .map((s) => flattenTextStyle(s))
 
   const flattendTransforms = flattenedStyles.map((s) => s.transform)
-  const transformKeys = (flattendTransforms.filter((t) => t !== undefined) as Partial<FlatTransform>[])
-    .map((t) => Object.keys(t))
-    .reduce((acc, ele) => acc.concat(ele)) as (keyof FlatTransform)[]
+  const transformKeys = flattendTransforms[0]
+    ? Object.keys(flattendTransforms[0]) as (keyof FlatTransform)[]
+    : []
 
   const interpolatedTransform = transformKeys
     .map(<K extends keyof FlatTransform>(transformKey: K) => {
       const output = range.map((_, i) => {
         const transform = flattendTransforms[i]
-        if (!transform || transform[transformKey] === undefined) return flattenedFallback.transform
+        if (transform === undefined) return flattenedFallback.transform
           ? flattenedFallback.transform[transformKey]
           : defaultFlatTransform[transformKey]
         return transform[transformKey]
@@ -74,32 +79,47 @@ export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
       return acc
     }, {} as InterpolatedTransform)
 
-  const styleKeys = flattenedStyles.map((s) => Object.keys(s))
-    .reduce((acc, ele) => acc.concat(ele)) as (keyof FlatViewStyle)[]
+  const styleKeys = Object.keys(styleConcat) as (keyof FlatTextStyle)[]
 
   const interpolatedStyle = styleKeys
-    .map(<K extends keyof FlatViewStyle>(styleKey: K) => {
+    .map(<K extends keyof FlatTextStyle>(styleKey: K) => {
       if (styleKey === "transform") return [styleKey, interpolatedTransform] as const
-      const output = range.map((_, i) => {
+      let output = range.map((_, i) => {
         const value = flattenedStyles[i][styleKey]
         if (value !== undefined) return value
         return flattenedFallback[styleKey]
-      }) as FlatViewStyle[K][]
-      const interpolation = spring.progress.to({
-        //@ts-ignore
-        range,
-        output,
-        extrapolate,
-      })
+      }) as FlatTextStyle[K][]
+      if (styleKey.match(/color/i)) {
+        output = output.map((color) => `rgba(${chroma(color as string).rgba().join(",")})`)
+      }
+
+      const isNonInterpolableKey = wholeStyleProperties
+        .nonInterpolable
+        .filter((key) => key === styleKey)
+        .length !== 0
+
+      const interpolation = isNonInterpolableKey
+        ? spring.progress.to((value) => {
+          const index = Math.max(Math.min(Math.round(value), flattenedStyles.length - 1), 0)
+          const output = flattenedStyles[index][styleKey] || flattenedFallback[styleKey]
+          return output
+        })
+        : spring.progress.to({
+          //@ts-ignore
+          range,
+          output,
+          extrapolate,
+        })
+
       return [styleKey, interpolation] as const
     })
     .reduce((acc, [key, interpolation]) => {
       //@ts-ignore
       acc[key] = interpolation
       return acc
-    }, {} as InterpolatedViewStyle)
+    }, {} as InterpolatedTextStyle)
 
-  const normalizedStyle = normalizeFlattenedViewStyle(interpolatedStyle)
+  const normalizedStyle = normalizeFlattenedTextStyle(interpolatedStyle)
 
   React.useEffect(() => {
     if (props.progress) return;
@@ -114,13 +134,13 @@ export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
 
   return (
     //@ts-ignore
-    <animated.View style={normalizedStyle}>
+    <animated.Text style={normalizedStyle}>
       {children}
-    </animated.View>
+    </animated.Text>
   )
 }
 
-export type TransitionalViewProps = Omit<ViewProps, "style"> & {
+export type TransitionalTextProps = Omit<TextProps, "style"> & {
   progress?: Interpolation<any, number> | SpringValue<number>
   /**
    * describes range of progress value.
@@ -128,8 +148,8 @@ export type TransitionalViewProps = Omit<ViewProps, "style"> & {
    * but it can be customized to whatever range you want
    */
   range?: number[]
-  styles?: StyleProp<ViewStyle>[]
-  fallbackStyle?: StyleProp<ViewStyle>
+  styles?: StyleProp<TextStyle>[]
+  fallbackStyle?: StyleProp<TextStyle>
   extrapolate?: InterpolatorConfig["extrapolate"]
   /** works only when progress is undefined */
   styleIndex?: number

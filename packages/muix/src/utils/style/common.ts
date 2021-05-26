@@ -86,10 +86,14 @@ export const flattenTextStyle = (style: TextStyle): FlatTextStyle => {
   return {
     ...plainStyle,
     transform: flattenTransform(transform),
-    shadowOffsetX: shadowOffset?.width,
-    shadowOffsetY: shadowOffset?.height,
-    textShadowOffsetX: textShadowOffset?.width,
-    textShadowOffsetY: textShadowOffset?.height,
+    ...(shadowOffset ? {
+      shadowOffsetX: shadowOffset?.width,
+      shadowOffsetY: shadowOffset?.height,
+    } : {}),
+    ...(textShadowOffset ? {
+      textShadowOffsetX: textShadowOffset?.width,
+      textShadowOffsetY: textShadowOffset?.height,
+    } : {})
   }
 }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react-native';
-import { LayoutRectangle, ScrollView, View } from 'react-native';
+import { View } from 'react-native';
 import { TouchableStyle } from "@monthem/muix"
 
 storiesOf("Atoms/Layout", module)
@@ -17,41 +17,31 @@ const TouchableStyleStory = () => {
   return (
     <View>
       <TouchableStyle
-        onLayout={(e) => layout.current = e.nativeEvent.layout}
-        style={{
+        fallbackStyle={{
           width: 200,
           height: 200,
-          backgroundColor: "red",
-          opacity: 1,
-          shadowOffset: {
-            height: 0,
-            width: 0
-          }
+          backgroundColor: "blue",
+          transform: [
+            { perspective: 1000 },
+            { rotateX: "0deg" },
+            { rotateY: "0deg" }
+          ]
         }}
-        styleOnTouch={(e) => {
-          const {locationX, locationY} = e.nativeEvent
-          const relativeX = locationX / layout.current.width
-          const relativeY = locationY / layout.current.height
+        styleOnTouch={(info) => {
+          if (!info.e) return {}
+          const { width, height } = info.layout
+          const { locationX, locationY } = info.e.nativeEvent
+          const ratioX = (locationX / width) * 2 - 1
+          const ratioY = (locationY / height) * 2 - 1
           return {
-            width: 200,
-            height: 200,
-            backgroundColor: "blue",
-            opacity: 0.5,
+            backgroundColor: "red",
             transform: [
-              {scale: 0.95},
-              {rotateY: `${(relativeX * 2 - 1) * 30}deg`},
-              {rotateX: `${(relativeY * 2 - 1) * -30}deg`}
+              { rotateX: `${ratioY * -30}deg` },
+              { rotateY: `${ratioX * 30}deg` },
             ],
-            shadowOffset: {
-              width: (relativeY * 2 - 1) * -10,
-              height: (relativeX * 2 - 1) * 10
-            },
-            shadowRadius: 20,
-            shadowOpacity: 0.5,
           }
         }}
-      >
-      </TouchableStyle>
+      />
     </View>
   )
 }

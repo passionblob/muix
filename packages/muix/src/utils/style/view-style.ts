@@ -16,15 +16,19 @@ export const flattenViewStyle = (style: ViewStyle): FlatViewStyle => {
   } = style
   return {
     ...plainStyle,
-    transform: flattenTransform(transform),
-    shadowOffsetX: shadowOffset?.width,
-    shadowOffsetY: shadowOffset?.height,
+    ...(transform ? {
+      transform: flattenTransform(transform)
+    } : {}),
+    ...(shadowOffset ? {
+      shadowOffsetX: shadowOffset?.width,
+      shadowOffsetY: shadowOffset?.height,
+    } : {})
   }
 }
 
 export const normalizeFlattenedViewStyle = <T extends FlatViewStyleShape>(flattened: T) => {
   const { shadowOffsetX, shadowOffsetY, transform, ...rest } = flattened
-  const normalizedTransform = normalizeFlattenedTransform(transform)
+  const normalizedTransform = transform ? normalizeFlattenedTransform(transform) : undefined
   const shadowOffset = anyOf([
     shadowOffsetX,
     shadowOffsetY,
