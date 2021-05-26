@@ -10,10 +10,6 @@ storiesOf("Atoms/Layout", module)
   )
 
 const TouchableStyleStory = () => {
-  const layout = React.useRef({
-    height: 0,
-    width: 0,
-  })
   return (
     <View>
       <TouchableStyle
@@ -21,6 +17,11 @@ const TouchableStyleStory = () => {
           width: 200,
           height: 200,
           backgroundColor: "blue",
+          borderRadius: 0,
+          shadowOffset: {
+            width: 0,
+            height: 0,
+          },
           transform: [
             { perspective: 1000 },
             { rotateX: "0deg" },
@@ -35,6 +36,11 @@ const TouchableStyleStory = () => {
           const ratioY = (locationY / height) * 2 - 1
           return {
             backgroundColor: "red",
+            borderRadius: 40,
+            shadowOffset: {
+              width: ratioX * -30,
+              height: ratioY * -30,
+            },
             transform: [
               { rotateX: `${ratioY * -30}deg` },
               { rotateY: `${ratioX * 30}deg` },

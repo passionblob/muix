@@ -2,13 +2,20 @@ import React from 'react';
 import {
   GestureResponderEvent,
   LayoutChangeEvent,
+  PanResponder,
   Pressable,
   StyleProp,
   StyleSheet,
+  View,
   ViewProps,
   ViewStyle
 } from 'react-native';
-import { animated, config, SpringConfig, useSpring } from '@react-spring/native';
+import {
+  animated,
+  SpringConfig,
+  useSpring,
+  to,
+} from '@react-spring/native';
 import {
   flattenViewStyle,
   FlatTransform,
@@ -40,10 +47,12 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
   })
 
   const [spring, api] = useSpring(() => ({
-    progress: 0
+    progress: 0,
+    locationX: 0,
+    locationY: 0,
   }))
 
-  const shouldUpdateTouchStyle = React.useRef(false)
+  const shouldUpdateTouchStyle = React.useRef(true)
   const touchStyle = React.useRef<FlatViewStyle>()
 
   const flatFallback = StyleSheet.flatten(fallbackStyle)
@@ -60,7 +69,7 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
     const assertedKey = transformKey as keyof FlatTransform
     const fallback = transformFallback[assertedKey]
     const from = transformOnStatic[assertedKey] || transformFallback[assertedKey]
-    const interpolation = spring.progress.to((_progress) => {
+    const interpolation = to([spring.progress, spring.locationX, spring.locationY], () => {
       if (typeof styleOnTouch === "function") {
         if (shouldUpdateTouchStyle.current) {
           shouldUpdateTouchStyle.current = false
@@ -69,16 +78,18 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
       } else {
         touchStyle.current = flattenViewStyle(StyleSheet.flatten(styleOnTouch)).transform || {}
       }
-
+  
       const flatTransform = touchStyle.current?.transform || {}
-      let to: Partial<FlatTransform>[keyof FlatTransform]
-      to = flatTransform[assertedKey] || fallback
-      to = flatTransform[assertedKey] || fallback
+      let end: Partial<FlatTransform>[keyof FlatTransform]
+      end = flatTransform[assertedKey] || fallback
+      end = flatTransform[assertedKey] || fallback
       
-      return spring.progress.to({
-        //@ts-ignore
-        range: [0, 1],
-        output: [from, to],
+      return to([spring.progress, spring.locationX, spring.locationY], () => {
+        return spring.progress.to({
+          //@ts-ignore
+          range: [0, 1],
+          output: [from, end],
+        }).get()
       }).get()
     })
     return [assertedKey, interpolation] as const
@@ -103,13 +114,13 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
     const fallback = flattenedFallback[assertedKey]
     const from = flattenedStyle[assertedKey] || fallback
 
-    const interpolation = spring.progress.to((_progress) => {
+    const interpolation = to([spring.progress, spring.locationX, spring.locationY], (_progress) => {
       const index = Math.max(0, Math.min(_progress, 1))
 
       if (typeof styleOnTouch === "function") {
         if (shouldUpdateTouchStyle.current) {
-          touchStyle.current = flattenViewStyle(StyleSheet.flatten(styleOnTouch(info.current)))
           shouldUpdateTouchStyle.current = false
+          touchStyle.current = flattenViewStyle(StyleSheet.flatten(styleOnTouch(info.current)))
         }
       } else {
         touchStyle.current = flattenViewStyle(StyleSheet.flatten(styleOnTouch))
@@ -119,10 +130,12 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
 
       if (isNonInterpolableKey) return index === 0 ? from : valueOnTouch
 
-      return spring.progress.to({
-        //@ts-ignore
-        range: [0, 1],
-        output: [from, valueOnTouch]
+      return to([spring.progress, spring.locationX, spring.locationY], () => {
+        return spring.progress.to({
+          //@ts-ignore
+          range: [0, 1],
+          output: [from, valueOnTouch]
+        }).get()
       }).get()
     })
     return [assertedKey, interpolation] as const
@@ -168,7 +181,7 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
       //@ts-ignore
       style={normalizedStyle}
       {..._viewProps}
-    >
+      >
       <Pressable
         onPress={onPress}
         onPressIn={_onPressIn}
@@ -202,6 +215,7 @@ interface TouchableStyleProps extends Omit<ViewProps, "style"> {
   fallbackStyle?: StyleProp<ViewStyle>
   style?: StyleProp<ViewStyle>
   styleOnTouch?: StyleProp<ViewStyle> | ((info: TouchStyleCalcInfo) => StyleProp<ViewStyle>)
+  continuous?: boolean
   onPressIn?: (e: GestureResponderEvent) => void
   onPress?: (e: GestureResponderEvent) => void
   onPressOut?: (e: GestureResponderEvent) => void
