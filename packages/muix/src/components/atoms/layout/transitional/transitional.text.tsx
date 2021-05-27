@@ -90,6 +90,7 @@ export const TransitionalText: React.FC<TransitionalTextProps> = (props) => {
         return flattenedFallback[styleKey]
       }) as FlatTextStyle[K][]
       if (styleKey.match(/color/i)) {
+        //@ts-ignore
         output = output.map((color) => `rgba(${chroma(color as string).rgba().join(",")})`)
       }
 

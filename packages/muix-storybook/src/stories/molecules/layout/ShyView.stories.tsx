@@ -5,7 +5,7 @@ import { ShyView } from '@monthem/muix/src';
 
 const ShyViewStory = () => {
   return (
-    <ShyView style={{width: 200, height: 200, backgroundColor: "blue"}}>
+    <ShyView style={{width: 300, height: 200, backgroundColor: "blue"}}>
     </ShyView>
   )
 }

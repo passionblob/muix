@@ -89,6 +89,7 @@ export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
         return flattenedFallback[styleKey]
       }) as FlatViewStyle[K][]
       if (styleKey.match(/color/i)) {
+        //@ts-ignore
         output = output.map((color) => `rgba(${chroma(color as string).rgba().join(",")})`)
       }
 
@@ -96,7 +97,7 @@ export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
         .nonInterpolable
         .filter((key) => key === styleKey)
         .length > 0
-        
+
       const interpolation = isNonInterpolableKey
         ? spring.progress.to((value) => {
           const index = Math.max(Math.min(Math.round(value), flattenedStyles.length - 1), 0)

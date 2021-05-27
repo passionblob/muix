@@ -58,7 +58,6 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
   const flatFallback = StyleSheet.flatten(fallbackStyle)
   const flatStyle = StyleSheet.flatten(style)
   const flatWhole = flattenViewStyle(StyleSheet.flatten([fallbackStyle, flatStyle]))
-
   const flattenedFallback = flattenViewStyle(flatFallback)
   const flattenedStyle = flattenViewStyle(flatStyle)
 
@@ -73,17 +72,18 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
       if (typeof styleOnTouch === "function") {
         if (shouldUpdateTouchStyle.current) {
           shouldUpdateTouchStyle.current = false
-          touchStyle.current = flattenViewStyle(StyleSheet.flatten(styleOnTouch(info.current)))
+          const _s = styleOnTouch(info.current) || {}
+          touchStyle.current = flattenViewStyle(StyleSheet.flatten(_s))
         }
       } else {
         touchStyle.current = flattenViewStyle(StyleSheet.flatten(styleOnTouch)).transform || {}
       }
-  
+
       const flatTransform = touchStyle.current?.transform || {}
       let end: Partial<FlatTransform>[keyof FlatTransform]
       end = flatTransform[assertedKey] || fallback
       end = flatTransform[assertedKey] || fallback
-      
+
       return to([spring.progress, spring.locationX, spring.locationY], () => {
         return spring.progress.to({
           //@ts-ignore
@@ -120,7 +120,8 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
       if (typeof styleOnTouch === "function") {
         if (shouldUpdateTouchStyle.current) {
           shouldUpdateTouchStyle.current = false
-          touchStyle.current = flattenViewStyle(StyleSheet.flatten(styleOnTouch(info.current)))
+          const _s = styleOnTouch(info.current) || {}
+          touchStyle.current = flattenViewStyle(StyleSheet.flatten(_s))
         }
       } else {
         touchStyle.current = flattenViewStyle(StyleSheet.flatten(styleOnTouch))
@@ -181,7 +182,7 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
       //@ts-ignore
       style={normalizedStyle}
       {..._viewProps}
-      >
+    >
       <Pressable
         onPress={onPress}
         onPressIn={_onPressIn}
@@ -211,7 +212,7 @@ type TouchStyleCalcInfo = {
   }
 }
 
-interface TouchableStyleProps extends Omit<ViewProps, "style"> {
+export interface TouchableStyleProps extends Omit<ViewProps, "style"> {
   fallbackStyle?: StyleProp<ViewStyle>
   style?: StyleProp<ViewStyle>
   styleOnTouch?: StyleProp<ViewStyle> | ((info: TouchStyleCalcInfo) => StyleProp<ViewStyle>)

@@ -119,7 +119,7 @@ export const CarouselBase
       virtualTranslate: 0,
     }))
 
-    const transitionPosition = spring.virtualTranslate.to((value) => {
+    const virtualIndex = spring.virtualTranslate.to((value) => {
       if (layoutSize.current <= 0) return 0
       const translatePosition = -value / layoutSize.current
 
@@ -134,12 +134,14 @@ export const CarouselBase
         ? (
           translatePosition % items.length +
           items.length
-        ) % items.length - 1
+        ) % items.length
         : Math.min(
           items.length - 1 + margin,
           Math.max(translatePosition, -margin)
-        ) - 1
+        )
     })
+
+    const transitionPosition = virtualIndex.to((value) => value - 1)
 
     const slicedItems = getSliced()
 
@@ -498,18 +500,6 @@ const CustomComponent = (
       const result = interpolated * _direction
       const clamped = (() => {
         if (infinite) return result
-
-        if (_direction < 0) {
-          if (curPage.current === 0) {
-
-          }
-        }
-
-        if (_direction > 0) {
-          if (curPage.current === info.itemLength - 1) {
-          }
-        }
-
         return result
       })()
 
@@ -556,16 +546,18 @@ const CarouselBaseItem: <TItem>(props: CarouselBaseItemProps<TItem>) => React.Re
 
   const itemPosition = transitionPosition.to((value) => {
     return infinite
-      ? (originalIndex - value + info.itemLength) % info.itemLength - 1
-      : Math.max(0, Math.min(info.itemLength, originalIndex - value)) - 1
+      ? (originalIndex - value + info.itemLength) % info.itemLength
+      : Math.max(0, Math.min(info.itemLength, originalIndex - value))
   })
+  
+  const relativePosition = itemPosition.to((value) => value - 1)
 
   return (
     <>
       {renderItem({
         item,
         index: originalIndex,
-        itemPosition,
+        itemPosition: relativePosition,
         info,
       })}
     </>

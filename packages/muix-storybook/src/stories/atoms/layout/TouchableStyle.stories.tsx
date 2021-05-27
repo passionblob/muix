@@ -22,10 +22,12 @@ const TouchableStyleStory = () => {
             width: 0,
             height: 0,
           },
+          elevation: 0,
           transform: [
             { perspective: 1000 },
             { rotateX: "0deg" },
-            { rotateY: "0deg" }
+            { rotateY: "0deg" },
+            { scale: 1 }
           ]
         }}
         styleOnTouch={(info) => {
@@ -37,6 +39,7 @@ const TouchableStyleStory = () => {
           return {
             backgroundColor: "red",
             borderRadius: 40,
+            elevation: 5,
             shadowOffset: {
               width: ratioX * -30,
               height: ratioY * -30,
@@ -44,6 +47,7 @@ const TouchableStyleStory = () => {
             transform: [
               { rotateX: `${ratioY * -30}deg` },
               { rotateY: `${ratioX * 30}deg` },
+              { scale: 0.8 }
             ],
           }
         }}
