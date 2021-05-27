@@ -51,15 +51,15 @@ const CarouselStory = () => {
   const carouselRefs = React.useRef<Carousel[]>([])
 
   const scrollToRandom = () => {
-    carouselRefs.current.forEach((carousel) => carousel.current?.scrollToRandom())
+    carouselRefs.current.forEach((carousel) => carousel.scrollToRandom())
   }
 
   const scrollToPrev = () => {
-    carouselRefs.current.forEach((carousel) => carousel.current?.scrollToPrev())
+    carouselRefs.current.forEach((carousel) => carousel.scrollToPrev())
   }
 
   const scrollToNext = () => {
-    carouselRefs.current.forEach((carousel) => carousel.current?.scrollToNext())
+    carouselRefs.current.forEach((carousel) => carousel.scrollToNext())
   }
 
   const catchRef = (_ref: Carousel) => {

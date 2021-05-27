@@ -76,7 +76,7 @@ export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {
           touchStyle.current = flattenViewStyle(StyleSheet.flatten(_s))
         }
       } else {
-        touchStyle.current = flattenViewStyle(StyleSheet.flatten(styleOnTouch)).transform || {}
+        touchStyle.current = flattenViewStyle(StyleSheet.flatten(styleOnTouch)) || {}
       }
 
       const flatTransform = touchStyle.current?.transform || {}

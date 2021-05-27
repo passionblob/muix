@@ -355,13 +355,11 @@ export const CarouselBase
 
     React.useImperativeHandle(ref, () => {
       return {
-        current: {
-          ...containerRef.current,
-          scrollTo: scrollToIndex,
-          scrollToNext,
-          scrollToPrev,
-          scrollToRandom,
-        },
+        ...containerRef.current,
+        scrollTo: scrollToIndex,
+        scrollToNext,
+        scrollToPrev,
+        scrollToRandom,
       }
     })
 
@@ -576,12 +574,10 @@ const MemoizedItem = React.memo(CarouselBaseItem, (prev, next) => {
 })
 
 export interface CarouselBaseRef {
-  current: (Partial<View> & {
-    scrollTo: (index: number) => void
-    scrollToNext: () => number
-    scrollToPrev: () => number
-    scrollToRandom: () => number
-  }) | null
+  scrollTo: (index: number) => void
+  scrollToNext: () => number
+  scrollToPrev: () => number
+  scrollToRandom: () => number
 }
 
 export type CarouselBase = CarouselBaseRef

@@ -1,6 +1,6 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react-native';
-import { Easing, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { ChoiceSlider } from '@monthem/muix';
 import WebColors from '@monthem/web-color';
 
@@ -21,9 +21,12 @@ const choices = [
 const largeChoices = Array(1000).fill(0).map(() => choices.slice(0)).reduce((acc, ele) => acc.concat(ele))
 
 const ChoiceSliderStory = () => {
+	const sliderRef = React.useRef<ChoiceSlider>(null)
+
 	return (
 		<View>
 			<ChoiceSlider
+				ref={sliderRef}
 				alignChunks={"center"}
 				vertical
 				auto

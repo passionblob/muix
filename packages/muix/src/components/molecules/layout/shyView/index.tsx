@@ -7,6 +7,7 @@ export const ShyView: React.FC<ShyViewProps> = (props) => {
 
   return (
     <TouchableStyle
+      {..._props}
       fallbackStyle={StyleSheet.flatten([
         {
           shadowOffset: {

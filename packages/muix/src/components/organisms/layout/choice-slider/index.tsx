@@ -1,5 +1,5 @@
 import { textStyleProperties } from '@monthem/utils'
-import React from 'react'
+import React, { forwardRef } from 'react'
 import { TextStyle, View, ViewProps, Text, ViewStyle } from 'react-native'
 import { animated, Interpolation } from "react-spring/native"
 import { SpringConfig, useChain, useSpring, useSpringRef, useSprings, useTrail } from "react-spring"
@@ -37,7 +37,9 @@ const defaultChunkInterpolatorVertical: ChunkInterpolatorFn<any> = ({ info }) =>
   }
 }
 
-export const ChoiceSlider = <T extends any>(props: ChoiceSliderProps<T>) => {
+export const ChoiceSlider
+: <T extends any>(props: ChoiceSliderProps<T>) => (React.ReactElement<any, string | React.JSXElementConstructor<any>> | null)
+= forwardRef<CarouselBase, ChoiceSliderProps<any>>((props, ref) => {
   const {
     choices,
     microChunkInterpolator = defaultMicroChunkInterpolator,
@@ -47,9 +49,11 @@ export const ChoiceSlider = <T extends any>(props: ChoiceSliderProps<T>) => {
     alignChunks,
     ..._props
   } = props
+  
   return (
     <CarouselBase
       {..._props}
+      ref={ref}
       items={choices}
       infinite={false}
       frontPaddingRenderCount={2}
@@ -161,7 +165,7 @@ export const ChoiceSlider = <T extends any>(props: ChoiceSliderProps<T>) => {
       }}
     />
   )
-}
+})
 
 const fontWeightToNumber = (weight: TextStyle["fontWeight"]) => {
   if (weight === "bold") return 700
@@ -415,6 +419,8 @@ type Choice<T> = (ChunkBase<T> | ChunkBase<T>[])[]
 type MicronChunkInterpolatorFn<T> = (info: ChoiceChunkInterpolatorInfo<T>) => MicroChunkInterpolatorConfig
 type ChunkInterpolatorFn<T> = (info: ChoiceChunkInterpolatorInfo<T>) => ChunkInterpolatorConfig
 
+type ChoiceSliderRef = CarouselBase
+export type ChoiceSlider = ChoiceSliderRef
 
 export type ChoiceSliderProps<T> = {
   alignChunks?: ViewStyle["alignItems"]

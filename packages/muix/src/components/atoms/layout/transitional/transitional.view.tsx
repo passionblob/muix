@@ -12,6 +12,7 @@ import {
   InterpolatedViewStyle,
   defaultFlatTransform,
 } from "../../../../utils"
+import chroma from "chroma-js"
 
 export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
   const {
