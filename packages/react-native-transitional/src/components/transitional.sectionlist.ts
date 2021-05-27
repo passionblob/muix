@@ -1,15 +1,15 @@
 import React, { Component } from 'react'
-import { Animated, ImageProps } from 'react-native'
-import { SpringConfig, StyleHolderOf, TransitionConfig } from './types'
-import { createStyleHolder, getTransitionalStyles, imageStyleInterpolator } from "./interpolator"
+import { Animated, SectionListProps } from 'react-native'
+import { createStyleHolder, getTransitionalStyles, viewStyleInterpolator } from '../interpolator'
+import { SpringConfig, StyleHolderOf, TransitionConfig } from '../types'
 
-export class TransitionalImage extends Component<ImageProps & { config?: TransitionConfig }> {
+export class TransitionalSectionList<Item> extends Component<SectionListProps<Item> & { config?: TransitionConfig }> {
   private anim = new Animated.Value(1)
-  private styleHolder: StyleHolderOf<ImageProps> = {
+  private styleHolder: StyleHolderOf<SectionListProps<Item>> = {
     style: createStyleHolder(),
   }
   private progress = 0
-  constructor(props: Readonly<ImageProps & { config?: TransitionConfig }>) {
+  constructor(props: Readonly<SectionListProps<Item> & { config?: TransitionConfig }>) {
     super(props)
     this.anim.addListener(({ value }) => {
       this.progress = value
@@ -37,24 +37,26 @@ export class TransitionalImage extends Component<ImageProps & { config?: Transit
       }).start(config?.onTransitionEnd)
     }
   }
-  
+
   render(): React.ReactNode {
     const { children, ..._props } = this.props
-    const transitionalStyles = getTransitionalStyles<ImageProps>({
+    const transitionalStyles = getTransitionalStyles<SectionListProps<Item>>({
       anim: this.anim,
-      interpolator: imageStyleInterpolator,
+      interpolator: viewStyleInterpolator,
       progress: this.progress,
       props: this.props,
       styleHolder: this.styleHolder,
-      targets: ["style"]
+      targets: [
+        "style",
+      ]
     })
 
     return React.createElement(
-      Animated.Image,
+      Animated.SectionList,
       { ..._props, ...transitionalStyles },
       children,
     )
   }
 }
 
-export default TransitionalImage
+export default TransitionalSectionList

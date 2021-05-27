@@ -1,16 +1,16 @@
 import React, { Component } from 'react'
-import { Animated, TextProps } from 'react-native'
-import { createStyleHolder, getTransitionalStyles, textStyleInterpolator } from './interpolator'
-import { SpringConfig, StyleHolderOf, TransitionConfig } from './types'
+import { Animated, FlatListProps } from 'react-native'
+import { createStyleHolder, getTransitionalStyles, viewStyleInterpolator } from '../interpolator'
+import { SpringConfig, StyleHolderOf, TransitionConfig } from '../types'
 
-export class TransitionalText extends Component<TextProps & { config?: TransitionConfig }> {
+export class TransitionalFlatList<Item> extends Component<FlatListProps<Item> & { config?: TransitionConfig }> {
   private anim = new Animated.Value(1)
-  private styleHolder: StyleHolderOf<TextProps> = {
+  private styleHolder: StyleHolderOf<FlatListProps<Item>> = {
     style: createStyleHolder(),
   }
 
   private progress = 0
-  constructor(props: Readonly<TextProps & { config?: TransitionConfig }>) {
+  constructor(props: Readonly<FlatListProps<Item> & { config?: TransitionConfig }>) {
     super(props)
     this.anim.addListener(({ value }) => {
       this.progress = value
@@ -41,21 +41,23 @@ export class TransitionalText extends Component<TextProps & { config?: Transitio
 
   render(): React.ReactNode {
     const { children, ..._props } = this.props
-    const transitionalStyles = getTransitionalStyles<TextProps>({
+    const transitionalStyles = getTransitionalStyles<FlatListProps<Item>>({
       anim: this.anim,
-      interpolator: textStyleInterpolator,
+      interpolator: viewStyleInterpolator,
       progress: this.progress,
       props: this.props,
       styleHolder: this.styleHolder,
-      targets: ["style"]
+      targets: [
+        "style"
+      ]
     })
 
     return React.createElement(
-      Animated.Text,
+      Animated.FlatList,
       { ..._props, ...transitionalStyles },
       children,
     )
   }
 }
 
-export default TransitionalText
+export default TransitionalFlatList

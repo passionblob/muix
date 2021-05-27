@@ -1,15 +1,15 @@
 import React, { Component } from 'react'
-import { Animated, SectionListProps } from 'react-native'
-import { createStyleHolder, getTransitionalStyles, viewStyleInterpolator } from './interpolator'
-import { SpringConfig, StyleHolderOf, TransitionConfig } from './types'
+import { Animated, ViewProps, ScrollViewProps } from 'react-native'
+import { createStyleHolder, getTransitionalStyles, viewStyleInterpolator } from '../interpolator'
+import { SpringConfig, StyleHolderOf, TransitionConfig } from '../types'
 
-export class TransitionalSectionList<Item> extends Component<SectionListProps<Item> & { config?: TransitionConfig }> {
+export class TransitionalScrollView extends Component<ScrollViewProps & { config?: TransitionConfig }> {
   private anim = new Animated.Value(1)
-  private styleHolder: StyleHolderOf<SectionListProps<Item>> = {
+  private styleHolder: StyleHolderOf<ScrollViewProps> = {
     style: createStyleHolder(),
   }
   private progress = 0
-  constructor(props: Readonly<SectionListProps<Item> & { config?: TransitionConfig }>) {
+  constructor(props: Readonly<ViewProps & { config?: TransitionConfig }>) {
     super(props)
     this.anim.addListener(({ value }) => {
       this.progress = value
@@ -40,7 +40,7 @@ export class TransitionalSectionList<Item> extends Component<SectionListProps<It
 
   render(): React.ReactNode {
     const { children, ..._props } = this.props
-    const transitionalStyles = getTransitionalStyles<SectionListProps<Item>>({
+    const transitionalStyles = getTransitionalStyles<ScrollViewProps>({
       anim: this.anim,
       interpolator: viewStyleInterpolator,
       progress: this.progress,
@@ -52,11 +52,11 @@ export class TransitionalSectionList<Item> extends Component<SectionListProps<It
     })
 
     return React.createElement(
-      Animated.SectionList,
+      Animated.ScrollView,
       { ..._props, ...transitionalStyles },
       children,
     )
   }
 }
 
-export default TransitionalSectionList
+export default TransitionalScrollView

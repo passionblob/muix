@@ -26,11 +26,11 @@ import {
 type TransitionalInterpolatorProps<T> = {
 	default?: T
 	properties: {
-		color: string[],
-		number: string[],
-		length: string[],
-		layout: string[],
-		nonInterpolable: string[],
+		color: Readonly<string[]>,
+		number: Readonly<string[]>,
+		length: Readonly<string[]>,
+		layout: Readonly<string[]>,
+		nonInterpolable: Readonly<string[]>,
 	}
 }
 

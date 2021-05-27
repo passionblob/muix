@@ -1,10 +1,10 @@
-import TransitionalView from "./transitional.view"
-import TransitionalText from "./transitional.text"
-import TransitionalImage from "./transitional.image"
-import TransitionalFlatList from "./transitional.flatlist"
-import TransitionalSectionList from "./transitional.sectionlist"
-import TransitionalScrollView from "./transitional.scrollview"
-import TransitionalTextInput from "./transitional.textinput"
+import TransitionalView from "./components/transitional.view"
+import TransitionalText from "./components/transitional.text"
+import TransitionalImage from "./components/transitional.image"
+import TransitionalFlatList from "./components/transitional.flatlist"
+import TransitionalSectionList from "./components/transitional.sectionlist"
+import TransitionalScrollView from "./components/transitional.scrollview"
+import TransitionalTextInput from "./components/transitional.textinput"
 
 export class Transitional {
   static Text = TransitionalText

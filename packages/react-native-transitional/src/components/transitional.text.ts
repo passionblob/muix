@@ -1,15 +1,16 @@
 import React, { Component } from 'react'
-import { Animated, ViewProps, ScrollViewProps } from 'react-native'
-import { createStyleHolder, getTransitionalStyles, viewStyleInterpolator } from './interpolator'
-import { SpringConfig, StyleHolderOf, TransitionConfig } from './types'
+import { Animated, TextProps } from 'react-native'
+import { createStyleHolder, getTransitionalStyles, textStyleInterpolator } from '../interpolator'
+import { SpringConfig, StyleHolderOf, TransitionConfig } from '../types'
 
-export class TransitionalScrollView extends Component<ScrollViewProps & { config?: TransitionConfig }> {
+export class TransitionalText extends Component<TextProps & { config?: TransitionConfig }> {
   private anim = new Animated.Value(1)
-  private styleHolder: StyleHolderOf<ScrollViewProps> = {
+  private styleHolder: StyleHolderOf<TextProps> = {
     style: createStyleHolder(),
   }
+
   private progress = 0
-  constructor(props: Readonly<ViewProps & { config?: TransitionConfig }>) {
+  constructor(props: Readonly<TextProps & { config?: TransitionConfig }>) {
     super(props)
     this.anim.addListener(({ value }) => {
       this.progress = value
@@ -40,23 +41,21 @@ export class TransitionalScrollView extends Component<ScrollViewProps & { config
 
   render(): React.ReactNode {
     const { children, ..._props } = this.props
-    const transitionalStyles = getTransitionalStyles<ScrollViewProps>({
+    const transitionalStyles = getTransitionalStyles<TextProps>({
       anim: this.anim,
-      interpolator: viewStyleInterpolator,
+      interpolator: textStyleInterpolator,
       progress: this.progress,
       props: this.props,
       styleHolder: this.styleHolder,
-      targets: [
-        "style",
-      ]
+      targets: ["style"]
     })
 
     return React.createElement(
-      Animated.ScrollView,
+      Animated.Text,
       { ..._props, ...transitionalStyles },
       children,
     )
   }
 }
 
-export default TransitionalScrollView
+export default TransitionalText

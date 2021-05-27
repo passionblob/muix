@@ -1,16 +1,15 @@
 import React, { Component } from 'react'
-import { Animated, TextInput, TextInputProps } from 'react-native'
-import { createStyleHolder, getTransitionalStyles, textStyleInterpolator } from './interpolator'
-import { SpringConfig, StyleHolderOf, TransitionConfig } from './types'
+import { Animated, ImageProps } from 'react-native'
+import { SpringConfig, StyleHolderOf, TransitionConfig } from '../types'
+import { createStyleHolder, getTransitionalStyles, imageStyleInterpolator } from "../interpolator"
 
-export class TransitionalTextInput extends Component<TextInputProps & { config?: TransitionConfig }> {
+export class TransitionalImage extends Component<ImageProps & { config?: TransitionConfig }> {
   private anim = new Animated.Value(1)
-  private styleHolder: StyleHolderOf<TextInputProps> = {
+  private styleHolder: StyleHolderOf<ImageProps> = {
     style: createStyleHolder(),
   }
-
   private progress = 0
-  constructor(props: Readonly<TextInputProps & { config?: TransitionConfig }>) {
+  constructor(props: Readonly<ImageProps & { config?: TransitionConfig }>) {
     super(props)
     this.anim.addListener(({ value }) => {
       this.progress = value
@@ -38,12 +37,12 @@ export class TransitionalTextInput extends Component<TextInputProps & { config?:
       }).start(config?.onTransitionEnd)
     }
   }
-
+  
   render(): React.ReactNode {
     const { children, ..._props } = this.props
-    const transitionalStyles = getTransitionalStyles<TextInputProps>({
+    const transitionalStyles = getTransitionalStyles<ImageProps>({
       anim: this.anim,
-      interpolator: textStyleInterpolator,
+      interpolator: imageStyleInterpolator,
       progress: this.progress,
       props: this.props,
       styleHolder: this.styleHolder,
@@ -51,11 +50,11 @@ export class TransitionalTextInput extends Component<TextInputProps & { config?:
     })
 
     return React.createElement(
-      Animated.createAnimatedComponent(TextInput),
+      Animated.Image,
       { ..._props, ...transitionalStyles },
       children,
     )
   }
 }
 
-export default TransitionalTextInput
+export default TransitionalImage

@@ -9,7 +9,6 @@ export const ShyView: React.FC<ShyViewProps> = (props) => {
     <TouchableStyle
       fallbackStyle={StyleSheet.flatten([
         {
-          borderRadius: 0,
           shadowOffset: {
             width: 0,
             height: 0,
@@ -43,8 +42,7 @@ export const ShyView: React.FC<ShyViewProps> = (props) => {
           {
             shadowOpacity: 0.3,
             shadowRadius: 10,
-            borderRadius: 40,
-            elevation: 5,
+            elevation: 20,
             shadowOffset: {
               width: ratioX * -offsetX,
               height: ratioY * -offsetY,

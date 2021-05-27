@@ -1,16 +1,16 @@
 import React, { Component } from 'react'
-import { Animated, ViewProps } from 'react-native'
-import { createStyleHolder, getTransitionalStyles, viewStyleInterpolator } from './interpolator'
-import { SpringConfig, StyleHolderOf, TransitionConfig } from './types'
+import { Animated, TextInput, TextInputProps } from 'react-native'
+import { createStyleHolder, getTransitionalStyles, textStyleInterpolator } from '../interpolator'
+import { SpringConfig, StyleHolderOf, TransitionConfig } from '../types'
 
-export class TransitionalView extends Component<ViewProps & { config?: TransitionConfig }> {
+export class TransitionalTextInput extends Component<TextInputProps & { config?: TransitionConfig }> {
   private anim = new Animated.Value(1)
-  private styleHolder: StyleHolderOf<ViewProps> = {
+  private styleHolder: StyleHolderOf<TextInputProps> = {
     style: createStyleHolder(),
   }
 
   private progress = 0
-  constructor(props: Readonly<ViewProps & { config?: TransitionConfig }>) {
+  constructor(props: Readonly<TextInputProps & { config?: TransitionConfig }>) {
     super(props)
     this.anim.addListener(({ value }) => {
       this.progress = value
@@ -41,9 +41,9 @@ export class TransitionalView extends Component<ViewProps & { config?: Transitio
 
   render(): React.ReactNode {
     const { children, ..._props } = this.props
-    const transitionalStyles = getTransitionalStyles<ViewProps>({
+    const transitionalStyles = getTransitionalStyles<TextInputProps>({
       anim: this.anim,
-      interpolator: viewStyleInterpolator,
+      interpolator: textStyleInterpolator,
       progress: this.progress,
       props: this.props,
       styleHolder: this.styleHolder,
@@ -51,11 +51,11 @@ export class TransitionalView extends Component<ViewProps & { config?: Transitio
     })
 
     return React.createElement(
-      Animated.View,
+      Animated.createAnimatedComponent(TextInput),
       { ..._props, ...transitionalStyles },
       children,
     )
   }
 }
 
-export default TransitionalView
+export default TransitionalTextInput
