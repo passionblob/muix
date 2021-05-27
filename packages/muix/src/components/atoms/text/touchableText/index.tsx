@@ -1,0 +1,222 @@
+import React from 'react';
+import {
+  GestureResponderEvent,
+  LayoutChangeEvent,
+  PanResponder,
+  Pressable,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextProps,
+  TextStyle,
+  ViewStyle
+} from 'react-native';
+import {
+  animated,
+  SpringConfig,
+  useSpring,
+  to,
+} from '@react-spring/native';
+import {
+  flattenTextStyle,
+  FlatTransform,
+  FlatTextStyle,
+  InterpolatedTransform,
+  InterpolatedTextStyle,
+  normalizeFlattenedTextStyle
+} from '@monthem/muix/src/utils';
+import { wholeStyleProperties } from '@monthem/utils';
+
+export const TouchableText: React.FC<TouchableTextProps> = (props) => {
+  const {
+    style = {},
+    fallbackStyle = {},
+    styleOnTouch = {},
+    springConfig = {},
+    children,
+    onPress,
+    onPressIn,
+    onPressOut,
+    containerStyle,
+    ..._textProps
+  } = props
+  const _springConfig = "in" in springConfig
+    ? springConfig
+    : { in: springConfig, out: springConfig }
+
+  const info = React.useRef<TouchStyleCalcInfo>({
+    layout: { width: 0, height: 0 }
+  })
+
+  const [spring, api] = useSpring(() => ({
+    progress: 0,
+    locationX: 0,
+    locationY: 0,
+  }))
+
+  const shouldUpdateTouchStyle = React.useRef(true)
+  const touchStyle = React.useRef<FlatTextStyle>()
+
+  const flatFallback = StyleSheet.flatten(fallbackStyle)
+  const flatStyle = StyleSheet.flatten(style)
+  const flatWhole = flattenTextStyle(StyleSheet.flatten([fallbackStyle, flatStyle]))
+  const flattenedFallback = flattenTextStyle(flatFallback)
+  const flattenedStyle = flattenTextStyle(flatStyle)
+
+  const transformOnStatic = flattenedStyle.transform || {}
+  const transformFallback = flattenedFallback.transform || {}
+
+  const interpolatedTransform = Object.keys(flatWhole.transform || {}).map((transformKey) => {
+    const assertedKey = transformKey as keyof FlatTransform
+    const fallback = transformFallback[assertedKey]
+    const from = transformOnStatic[assertedKey] || transformFallback[assertedKey]
+    const interpolation = to([spring.progress, spring.locationX, spring.locationY], () => {
+      if (typeof styleOnTouch === "function") {
+        if (shouldUpdateTouchStyle.current) {
+          shouldUpdateTouchStyle.current = false
+          const _s = styleOnTouch(info.current) || {}
+          touchStyle.current = flattenTextStyle(StyleSheet.flatten(_s))
+        }
+      } else {
+        touchStyle.current = flattenTextStyle(StyleSheet.flatten(styleOnTouch)) || {}
+      }
+
+      const flatTransform = touchStyle.current?.transform || {}
+      let end: Partial<FlatTransform>[keyof FlatTransform]
+      end = flatTransform[assertedKey] || fallback
+      end = flatTransform[assertedKey] || fallback
+
+      return to([spring.progress, spring.locationX, spring.locationY], () => {
+        return spring.progress.to({
+          //@ts-ignore
+          range: [0, 1],
+          output: [from, end],
+        }).get()
+      }).get()
+    })
+    return [assertedKey, interpolation] as const
+  })
+    .reduce((acc, [key, interpolation]) => {
+      //@ts-ignore
+      acc[key] = interpolation
+      return acc
+    }, {} as InterpolatedTransform)
+
+  const interpolatedStyle = Object.keys(flatWhole).map((styleKey) => {
+    const isNonInterpolableKey = wholeStyleProperties
+      .nonInterpolable
+      .filter((key) => key === styleKey)
+      .length !== 0
+
+    const assertedKey = styleKey as keyof FlatTextStyle
+    if (assertedKey === "transform") {
+      return [assertedKey, interpolatedTransform] as const
+    }
+
+    const fallback = flattenedFallback[assertedKey]
+    const from = flattenedStyle[assertedKey] || fallback
+
+    const interpolation = to([spring.progress, spring.locationX, spring.locationY], (_progress) => {
+      const index = Math.max(0, Math.min(_progress, 1))
+
+      if (typeof styleOnTouch === "function") {
+        if (shouldUpdateTouchStyle.current) {
+          shouldUpdateTouchStyle.current = false
+          const _s = styleOnTouch(info.current) || {}
+          touchStyle.current = flattenTextStyle(StyleSheet.flatten(_s))
+        }
+      } else {
+        touchStyle.current = flattenTextStyle(StyleSheet.flatten(styleOnTouch))
+      }
+
+      const valueOnTouch = (touchStyle.current as FlatTextStyle)[assertedKey] || fallback
+
+      if (isNonInterpolableKey) return index === 0 ? from : valueOnTouch
+
+      return to([spring.progress, spring.locationX, spring.locationY], () => {
+        return spring.progress.to({
+          //@ts-ignore
+          range: [0, 1],
+          output: [from, valueOnTouch]
+        }).get()
+      }).get()
+    })
+    return [assertedKey, interpolation] as const
+  }).reduce((acc, [key, interpolation]) => {
+    //@ts-ignore
+    acc[key] = interpolation
+    return acc
+  }, {} as InterpolatedTextStyle)
+
+  const _onPressIn = (e: GestureResponderEvent) => {
+    info.current.e = e
+
+    api.start({
+      progress: 1,
+      config: _springConfig.in,
+    })
+
+    if (typeof styleOnTouch === "function") {
+      shouldUpdateTouchStyle.current = true
+    }
+
+    if (onPressIn) onPressIn(e)
+  }
+
+  const _onPressOut = (e: GestureResponderEvent) => {
+    api.start({
+      progress: 0,
+      config: _springConfig.out,
+    })
+
+    if (onPressOut) onPressOut(e)
+  }
+
+  const onLayout = (e: LayoutChangeEvent) => {
+    info.current.layout = e.nativeEvent.layout
+  }
+
+  const normalizedStyle = normalizeFlattenedTextStyle(interpolatedStyle)
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onPressIn={_onPressIn}
+      onPressOut={_onPressOut}
+      //@ts-ignore
+      style={[{userSelect: "none"}, containerStyle]}
+    >
+      <animated.Text
+        onLayout={onLayout}
+        //@ts-ignore
+        style={normalizedStyle}
+        {..._textProps}
+      >
+        {children}
+      </animated.Text>
+    </Pressable>
+  )
+}
+
+type TouchStyleCalcInfo = {
+  e?: GestureResponderEvent
+  layout: {
+    width: number,
+    height: number,
+  }
+}
+
+export interface TouchableTextProps extends Omit<TextProps, "style"> {
+  fallbackStyle?: StyleProp<TextStyle>
+  containerStyle?: StyleProp<ViewStyle>
+  style?: StyleProp<TextStyle>
+  styleOnTouch?: StyleProp<TextStyle> | ((info: TouchStyleCalcInfo) => StyleProp<TextStyle>)
+  continuous?: boolean
+  onPressIn?: (e: GestureResponderEvent) => void
+  onPress?: (e: GestureResponderEvent) => void
+  onPressOut?: (e: GestureResponderEvent) => void
+  springConfig?: SpringConfig | {
+    in: SpringConfig
+    out: SpringConfig
+  }
+}
