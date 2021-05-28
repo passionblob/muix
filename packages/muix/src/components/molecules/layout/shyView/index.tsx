@@ -1,6 +1,6 @@
 import React from 'react'
 import { StyleSheet } from 'react-native';
-import { TouchableStyle, TouchableStyleProps } from "../../../"
+import { TouchableStyle, TouchableStyleProps } from "@monthem/muix"
 
 export const ShyView: React.FC<ShyViewProps> = (props) => {
   const { children, onLayout, styleOnTouch, fallbackStyle, style, ..._props } = props;

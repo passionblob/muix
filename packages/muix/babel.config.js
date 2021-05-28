@@ -9,7 +9,7 @@ module.exports = {
     ["module-resolver", {
       root: ["./"],
       alias: {
-        "@monthem/muix/src": "@monthem/muix",
+        "@monthem/muix": "./",
       }
     }],
     ["@babel/plugin-proposal-private-methods", { "loose": true }]

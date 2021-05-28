@@ -1,6 +1,6 @@
 import React from "react"
 import { StyleProp, TextStyle, View, ViewProps } from "react-native"
-import { TransitionalText } from "../../../atoms/layout"
+import { TransitionalText } from "@monthem/muix"
 import { SpringConfig, Interpolation, SpringValue, useSpring } from "react-spring"
 
 export const Typewriter = (props: TypewriterProps) => {

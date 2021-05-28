@@ -1,6 +1,6 @@
 {
   "name": "@monthem/muix",
-  "version": "1.13.45",
+  "version": "1.13.46",
   "dependencies": {
     "@monthem/web-color": "^1.0.3",
     "chroma-js": "^2.1.1",

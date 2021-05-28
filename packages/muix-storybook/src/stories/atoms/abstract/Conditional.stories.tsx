@@ -13,7 +13,7 @@ const Dummy = Styled(View)`
     background-color: ${chroma.random().hex()};
 `;
 
-const ConditionalStory: StoryFn<JSX.Element> = (p) => {
+const ConditionalStory = () => {
     return (
         <View>
             <Conditional
@@ -55,4 +55,4 @@ const ConditionalStory: StoryFn<JSX.Element> = (p) => {
 
 storiesOf("Atoms/Abstract", module)
     .addDecorator(withKnobs)
-    .add("Conditional", ConditionalStory)
+    .add("Conditional", () => <ConditionalStory/>)

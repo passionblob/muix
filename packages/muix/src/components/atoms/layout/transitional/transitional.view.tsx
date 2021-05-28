@@ -11,7 +11,7 @@ import {
   normalizeFlattenedViewStyle,
   InterpolatedViewStyle,
   defaultFlatTransform,
-} from "../../../../utils"
+} from "@monthem/muix"
 import chroma from "chroma-js"
 
 export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
@@ -23,6 +23,7 @@ export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
     onStyleChange,
     springConfig,
     fallbackStyle = {},
+    ..._props
   } = props
 
   const flattenedFallback = flattenViewStyle(StyleSheet.flatten(fallbackStyle))
@@ -134,7 +135,7 @@ export const TransitionalView: React.FC<TransitionalViewProps> = (props) => {
 
   return (
     //@ts-ignore
-    <animated.View style={normalizedStyle}>
+    <animated.View {..._props} style={normalizedStyle}>
       {children}
     </animated.View>
   )

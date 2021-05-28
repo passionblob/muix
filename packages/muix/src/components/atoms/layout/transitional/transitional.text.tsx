@@ -10,7 +10,7 @@ import {
   InterpolatedTextStyle,
   normalizeFlattenedTextStyle,
   defaultFlatTransform,
-} from "../../../../utils"
+} from "@monthem/muix"
 import { getRange, wholeStyleProperties } from "@monthem/utils"
 import chroma from "chroma-js"
 
@@ -23,6 +23,7 @@ export const TransitionalText: React.FC<TransitionalTextProps> = (props) => {
     onStyleChange,
     springConfig,
     fallbackStyle = {},
+    ..._props
   } = props
 
   const flattenedFallback = flattenTextStyle(StyleSheet.flatten(fallbackStyle))
@@ -135,7 +136,7 @@ export const TransitionalText: React.FC<TransitionalTextProps> = (props) => {
 
   return (
     //@ts-ignore
-    <animated.Text style={normalizedStyle}>
+    <animated.Text {..._props} style={normalizedStyle}>
       {children}
     </animated.Text>
   )

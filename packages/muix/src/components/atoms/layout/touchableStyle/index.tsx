@@ -23,7 +23,7 @@ import {
   InterpolatedTransform,
   InterpolatedViewStyle,
   normalizeFlattenedViewStyle
-} from '@monthem/muix/src/utils';
+} from '@monthem/muix';
 import { wholeStyleProperties } from '@monthem/utils';
 
 export const TouchableStyle: React.FC<TouchableStyleProps> = (props) => {

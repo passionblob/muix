@@ -1,5 +1,5 @@
 import React from 'react'
-import {Identity} from '../identity';
+import {Identity} from "@monthem/muix";
 import deepmerge from 'deepmerge';
 
 export class Conditional<C extends React.ComponentType<any>> extends React.Component<ConditionalProps<C>> {

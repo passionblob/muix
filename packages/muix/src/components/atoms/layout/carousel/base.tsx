@@ -40,10 +40,12 @@ export const CarouselNumberPager: CarouselCustomComponent = (props) => {
             output: [0, 1, 0],
           }),
           transform: [
-            {translateY: relativePosition.to({
-              range: [-1, 0, 1],
-              output: [-30, 0, 30],
-            })}
+            {
+              translateY: relativePosition.to({
+                range: [-1, 0, 1],
+                output: [-30, 0, 30],
+              })
+            }
           ]
         }}>
           {page}
@@ -94,6 +96,7 @@ export const CarouselBase
       onChange,
       infinite = true,
       customComponent = CarouseldefaultCustomComponent,
+      disableGesture,
       ..._props
     } = props;
 
@@ -317,41 +320,43 @@ export const CarouselBase
       return randomIndex
     }
 
-    const panResponder = PanResponder.create({
-      onStartShouldSetPanResponder: () => true,
-      onPanResponderStart: (e) => {
-        if (touchID.current !== "-1") return;
-        const { identifier, pageX, pageY } = e.nativeEvent
-        touchID.current = identifier
+    const panResponder = disableGesture
+      ? { panHandlers: {} }
+      : PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onPanResponderStart: (e) => {
+          if (touchID.current !== "-1") return;
+          const { identifier, pageX, pageY } = e.nativeEvent
+          touchID.current = identifier
 
-        touchStart.current = vertical ? pageY : pageX
-        virtualTranslateStart.current = spring.virtualTranslate.get()
-      },
-      onPanResponderMove: (e) => {
-        const { identifier, pageX, pageY } = e.nativeEvent
-        if (touchID.current !== identifier) return
+          touchStart.current = vertical ? pageY : pageX
+          virtualTranslateStart.current = spring.virtualTranslate.get()
+        },
+        onPanResponderMove: (e) => {
+          const { identifier, pageX, pageY } = e.nativeEvent
+          if (touchID.current !== identifier) return
 
-        updateSlideTimestamp()
+          updateSlideTimestamp()
 
-        const touchDiff = vertical
-          ? pageY - touchStart.current
-          : pageX - touchStart.current
+          const touchDiff = vertical
+            ? pageY - touchStart.current
+            : pageX - touchStart.current
 
-        const nextVirtualTranslate = virtualTranslateStart.current + touchDiff
+          const nextVirtualTranslate = virtualTranslateStart.current + touchDiff
 
-        springApi.set({
-          virtualTranslate: nextVirtualTranslate,
-        })
-      },
-      onPanResponderEnd: (e) => {
-        const { identifier, pageY, pageX } = e.nativeEvent
-        if (touchID.current !== identifier) return
-        touchID.current = "-1"
+          springApi.set({
+            virtualTranslate: nextVirtualTranslate,
+          })
+        },
+        onPanResponderEnd: (e) => {
+          const { identifier, pageY, pageX } = e.nativeEvent
+          if (touchID.current !== identifier) return
+          touchID.current = "-1"
 
-        const index = calcIndex()
-        scrollToIndex(index)
-      }
-    })
+          const index = calcIndex()
+          scrollToIndex(index)
+        }
+      })
 
     React.useImperativeHandle(ref, () => {
       return {
@@ -547,15 +552,15 @@ const CarouselBaseItem: <TItem>(props: CarouselBaseItemProps<TItem>) => React.Re
       ? (originalIndex - value + info.itemLength) % info.itemLength
       : Math.max(0, Math.min(info.itemLength, originalIndex - value))
   })
-  
-  const relativePosition = itemPosition.to((value) => value - 1)
+
+  const minusOne = itemPosition.to((value) => value - 1)
 
   return (
     <>
       {renderItem({
         item,
         index: originalIndex,
-        itemPosition: relativePosition,
+        itemPosition: minusOne,
         info,
       })}
     </>
@@ -596,6 +601,9 @@ export type CarouselBaseRenderItemInfo<TItem> = {
 
 export interface CarouselBaseProps<TItem extends any> extends ViewProps {
   items: TItem[]
+  /**
+   * when rendering item, it is recommended to use position aboslute for the container.
+   */
   renderItem: (info: CarouselBaseRenderItemInfo<TItem>) => React.ReactNode
   ref?: React.Ref<CarouselBase>
   auto?: boolean
@@ -606,6 +614,7 @@ export interface CarouselBaseProps<TItem extends any> extends ViewProps {
   backPaddingRenderCount?: number
   onChange?: (index: number) => void
   customComponent?: CarouselCustomComponent
+  disableGesture?: boolean
 }
 
 export type CarouselCustomComponent = (props: CarouselCustomComponentProps) => JSX.Element

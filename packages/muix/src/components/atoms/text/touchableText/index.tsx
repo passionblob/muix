@@ -24,7 +24,7 @@ import {
   InterpolatedTransform,
   InterpolatedTextStyle,
   normalizeFlattenedTextStyle
-} from '@monthem/muix/src/utils';
+} from '@monthem/muix';
 import { wholeStyleProperties } from '@monthem/utils';
 
 export const TouchableText: React.FC<TouchableTextProps> = (props) => {
