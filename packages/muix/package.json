@@ -1,10 +1,11 @@
 {
   "name": "@monthem/muix",
-  "version": "1.13.46",
+  "version": "1.13.47",
   "dependencies": {
     "@monthem/web-color": "^1.0.3",
     "chroma-js": "^2.1.1",
     "deepmerge": "^4.2.2",
+    "react-native-svg": "^12.1.1",
     "react-native-transitional": "latest",
     "react-spring": "^9.1.2",
     "styled-components": "^5.2.3"
@@ -45,16 +46,20 @@
     "typescript": "^4.2.2"
   },
   "peerDependencies": {
+    "@monthem/utils": "latest",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-native": "^0.64.0",
-    "@monthem/utils": "latest"
+    "react-native": "^0.64.0"
   },
-  "publishConfig": {"access": "public"},
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/passionblob/muix.git"
   },
-  "bugs": {"url": "https://github.com/passionblob/muix/issues"},
+  "bugs": {
+    "url": "https://github.com/passionblob/muix/issues"
+  },
   "homepage": "https://github.com/passionblob/muix#readme"
 }

@@ -24,6 +24,10 @@ module.exports = ({ config }) => {
 		{
 			test: /\.(js|jsx)$/,
 			use: 'babel-loader'
+		},
+		{
+			test: /\.ttf$/,
+			loader: "url-loader",
 		}
 	);
 	

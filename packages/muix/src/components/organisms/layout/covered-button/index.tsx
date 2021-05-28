@@ -1,8 +1,24 @@
 import React from 'react';
-import { View, Text, ViewProps, StyleProp, ViewStyle, TextStyle } from 'react-native';
-import { TouchableStyle, TransitionalText, TransitionalView } from '@monthem/muix';
+import {
+  View,
+  Text,
+  ViewProps,
+  StyleProp,
+  ViewStyle,
+  TextStyle
+} from 'react-native';
+import {
+  SpringToggleHookReturnType,
+  TouchableStyle,
+  TransitionalText,
+  TransitionalView
+} from '@monthem/muix';
 import { useSpringToggle } from '@monthem/muix';
-import { SpringValue } from '@react-spring/core';
+
+const buttonSpringConfig = {
+  tension: 2500,
+  bounce: 0,
+}
 
 export const CoveredButton = (props: CoveredButtonProps) => {
   const {
@@ -61,6 +77,7 @@ export const CoveredButton = (props: CoveredButtonProps) => {
         ]}
       >
         <TouchableStyle
+          springConfig={buttonSpringConfig}
           fallbackStyle={[{
             width: "100%",
             height: "100%",
@@ -114,15 +131,15 @@ export const CoveredButton = (props: CoveredButtonProps) => {
               styles={[
                 {
                   transform: [
-                    {scaleY: 1},
-                    {translateY: 0}
+                    { scaleY: 1 },
+                    { translateY: 0 }
                   ]
                 },
                 {
                   opacity: 0,
                   transform: [
-                    {scaleY: 0},
-                    {translateY: size.subTextHeight / 2}
+                    { scaleY: 0 },
+                    { translateY: size.subTextHeight / 2 }
                   ],
                 }
               ]}
@@ -199,9 +216,10 @@ export const CoveredButton = (props: CoveredButtonProps) => {
               { scale: 1.05 }
             ]
           }}
+          springConfig={buttonSpringConfig}
           onPress={onPressButton}
         >
-          <Text style={[{color: "white"}, buttonTextStyle]}>
+          <Text style={[{ color: "white" }, buttonTextStyle]}>
             {buttonText}
           </Text>
         </TouchableStyle>
@@ -219,7 +237,7 @@ export interface CoveredButtonProps extends ViewProps {
   buttonTextStyle?: StyleProp<TextStyle>
   buttonText?: string
   onPressButton?: () => void
-  coverContent?: JSX.Element | ((progress: SpringValue<number>, toggle: () => void) => JSX.Element)
+  coverContent?: JSX.Element | ((progress: SpringToggleHookReturnType[0], toggle: () => void) => JSX.Element)
   coverStyle?: StyleProp<ViewStyle>
   onToggle?: (toggled: boolean) => void
 }

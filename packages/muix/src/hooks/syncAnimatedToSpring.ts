@@ -10,7 +10,13 @@ export const syncAnimatedToSpring = (params: SpringAnimatedHookParams) => {
 
   React.useEffect(() => {
     const unsubscribe = listenerAppened.addListner("change", (value) => {
-      params.anim.setValue(value)
+      if (params.config?.delay !== undefined) {
+        setTimeout(() => {
+          params.anim.setValue(value)
+        }, params.config.delay)
+      } else {
+        params.anim.setValue(value)
+      }
     })
 
     return unsubscribe
@@ -22,4 +28,7 @@ export const syncAnimatedToSpring = (params: SpringAnimatedHookParams) => {
 type SpringAnimatedHookParams = {
   spring: SpringValue<number>
   anim: Animated.Value
+  config?: {
+    delay?: number
+  }
 }

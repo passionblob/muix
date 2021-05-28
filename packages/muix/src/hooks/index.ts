@@ -1,3 +1,3 @@
 export * from "./useListener"
 export * from "./useSpringToggle"
-export * from "./syndAnimatedToSpring"
+export * from "./syncAnimatedToSpring"

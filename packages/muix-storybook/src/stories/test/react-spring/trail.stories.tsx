@@ -73,5 +73,5 @@ const TrailStory = () => {
 	)
 }
 
-storiesOf("Test/ReactSpring", module)
+storiesOf("Test/React Spring", module)
 	.add("Trail", () => <TrailStory/>)

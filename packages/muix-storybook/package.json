@@ -16,18 +16,23 @@
   },
   "dependencies": {
     "@monthem/muix": "*",
+    "@monthem/react-native-vector-icons": "^1.0.3",
     "@monthem/web-color": "^1.0.3",
     "@react-native-community/slider": "^3.0.3",
     "chroma-js": "^2.1.1",
     "expo-font": "^9.1.0",
     "expo-gl": "^10.2.0",
     "pixi.js": "^6.0.2",
+    "polymorph-js": "^1.0.2",
     "react-native": "^0.64.0",
+    "react-native-svg": "^12.1.1",
     "react-native-unimodules": "^0.13.3",
+    "react-native-vector-icons": "^8.1.0",
     "react-native-web": "^0.15.0",
     "react-native-webview": "^11.4.4",
     "react-spring": "^9.1.2",
     "styled-components": "^5.2.1",
+    "svgpath": "^2.3.1",
     "three": "^0.128.0"
   },
   "devDependencies": {
@@ -66,6 +71,7 @@
     "react-test-renderer": "16.13.1",
     "ts-loader": "^8.0.17",
     "typescript": "^3.8.3",
+    "url-loader": "^4.1.1",
     "webpack": "4.46.0",
     "webpack-cli": "^4.6.0",
     "webpack-dev-server": "^3.11.2"
