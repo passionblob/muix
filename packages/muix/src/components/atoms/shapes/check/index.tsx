@@ -14,8 +14,8 @@ export const Check = (props: CheckProps) => {
   const fill = props.anim.interpolate({
     inputRange: [0, 1],
     outputRange: [
-      `rgba(${chroma(props.inactiveColor || WebColors.Grey).rgba()}`,
-      `rgba(${chroma(props.activeColor || WebColors.LimeGreen).rgba()}`
+      `rgba(${chroma(props.inactiveColor || WebColors.Grey).rgba()})`,
+      `rgba(${chroma(props.activeColor || WebColors.LimeGreen).rgba()})`
     ]
   })
   

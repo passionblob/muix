@@ -1,6 +1,6 @@
 {
   "name": "@monthem/muix",
-  "version": "1.13.47",
+  "version": "1.13.48",
   "dependencies": {
     "@monthem/web-color": "^1.0.3",
     "chroma-js": "^2.1.1",
@@ -51,15 +51,11 @@
     "react-dom": "^17.0.2",
     "react-native": "^0.64.0"
   },
-  "publishConfig": {
-    "access": "public"
-  },
+  "publishConfig": {"access": "public"},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/passionblob/muix.git"
   },
-  "bugs": {
-    "url": "https://github.com/passionblob/muix/issues"
-  },
+  "bugs": {"url": "https://github.com/passionblob/muix/issues"},
   "homepage": "https://github.com/passionblob/muix#readme"
 }

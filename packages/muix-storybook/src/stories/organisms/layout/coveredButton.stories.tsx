@@ -8,8 +8,6 @@ import { Check, syncAnimatedToSpring } from '@monthem/muix/src';
 import chroma from 'chroma-js';
 import WebColors from '@monthem/web-color';
 
-const AnimatedPath = Animated.createAnimatedComponent(Path)
-
 const CoveredButtonStory = () => {
   const anim = React.useRef(new Animated.Value(0)).current
 
@@ -41,10 +39,12 @@ const CoveredButtonStory = () => {
                     output: [0, 1]
                   }),
                   borderRadius: 50,
-                  backgroundColor: chroma(WebColors.Black).alpha(0.4).hex()
+                  backgroundColor: chroma(WebColors.Black).alpha(0.4).hex(),
+                  alignItems: "center",
+                  justifyContent: "center"
                 }}
               >
-                <Check anim={anim} />
+                <Check style={{width: 20, height: 20}} anim={anim} />
               </animated.View>
             </View>
           )

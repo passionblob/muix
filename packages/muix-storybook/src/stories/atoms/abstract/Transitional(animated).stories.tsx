@@ -1,14 +1,12 @@
 import React from "react"
-import { View, StyleProp, ViewStyle, Animated } from "react-native"
+import { View, Text, StyleProp, ViewStyle, StyleSheet, Animated } from "react-native"
 import Slider from "@react-native-community/slider"
-import { useSpring } from "@react-spring/native"
 import { storiesOf } from "@storybook/react-native"
-import { TransitionalView } from "@monthem/muix"
+import { TransitionalAnimatedView } from "@monthem/muix"
 import { getRange } from "@monthem/utils"
-import { Flex } from "@monthem/muix/src"
 
 storiesOf("Atoms/Abstract", module)
-  .add("Transitional(spring)", () => <TransitionalStory />)
+  .add("Transitional(animated)", () => <TransitionalStory />)
 
 const viewStyles: StyleProp<ViewStyle>[] = [
   { width: 100, height: 100, backgroundColor: "grey", transform: [{ rotateY: "-180deg" }] },
@@ -20,34 +18,28 @@ const viewStyles: StyleProp<ViewStyle>[] = [
 ]
 
 const TransitionalStory = () => {
-  const [spring, api] = useSpring(() => ({
-    progress: 0
-  }))
+  const anim = React.useRef(new Animated.Value(0)).current
 
   React.useEffect(() => {
-    const startToEnd = () => {
-      api.start({
-        progress: viewStyles.length - 1,
-        onRest: endToStart,
-      })
-    }
-
-    const endToStart = () => {
-      api.start({
-        progress: 0,
-        onRest: startToEnd,
-      })
-    }
-
-    startToEnd()
-
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(anim, {
+          toValue: viewStyles.length - 1,
+          useNativeDriver: false,
+        }),
+        Animated.timing(anim, {
+          toValue: 0,
+          useNativeDriver: false,
+        })
+      ])
+    ).start()
   }, [])
 
   return (
     <View style={{ flex: 1 }}>
       <View style={{flexDirection: "row"}}>
         {getRange(0, 10).map((i) => (
-          <TransitionalView
+          <TransitionalAnimatedView
             key={i}
             fallbackStyle={{
               transform: [
@@ -63,7 +55,7 @@ const TransitionalStory = () => {
             }}
             //@ts-ignore
             styles={viewStyles}
-            progress={spring.progress}
+            progress={anim}
             extrapolate={"clamp"}
           />
         ))}
@@ -72,7 +64,7 @@ const TransitionalStory = () => {
       <Slider
         value={0}
         onValueChange={(value) => {
-          api.set({ progress: value })
+          anim.setValue(value)
         }}
         style={{ height: 40, maxWidth: 300 }}
         minimumValue={0}

@@ -1,5 +1,5 @@
 import { anyOf, makeRecords, viewStyleProperties } from "@monthem/utils"
-import { TextStyle, TransformsStyle, ViewStyle } from "react-native"
+import { Animated, TextStyle, TransformsStyle, ViewStyle } from "react-native"
 import { Interpolation } from "react-spring"
 
 export type FlatTransform = {

@@ -39,7 +39,7 @@ const TouchableStyleStory = () => {
           return {
             backgroundColor: "red",
             borderRadius: 40,
-            elevation: 5,
+            elevation: 0,
             shadowOffset: {
               width: ratioX * -30,
               height: ratioY * -30,

@@ -43,7 +43,7 @@ export const ShyView: React.FC<ShyViewProps> = (props) => {
           {
             shadowOpacity: 0.3,
             shadowRadius: 10,
-            elevation: 20,
+            elevation: 0,
             shadowOffset: {
               width: ratioX * -offsetX,
               height: ratioY * -offsetY,
