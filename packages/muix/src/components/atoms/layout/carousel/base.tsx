@@ -97,6 +97,7 @@ export const CarouselBase
       infinite = true,
       customComponent = CarouseldefaultCustomComponent,
       disableGesture,
+      initialIndex = 0,
       ..._props
     } = props;
 
@@ -113,6 +114,7 @@ export const CarouselBase
     const slicer = React.useRef(getSlicer(0))
     const initialized = React.useRef(false)
     const timer = React.useRef<number>();
+    const shouldScrollImmediately = React.useRef(false);
     const [newDestination, setNewDestination] = React.useState(0)
     const [dummyState, setDummyState] = React.useState(0)
 
@@ -151,6 +153,13 @@ export const CarouselBase
     function getSlicer(index: number) {
       const pureStart = index - frontPaddingRenderCount
       const pureEnd = index + backPaddingRenderCount
+      const totalCount = frontPaddingRenderCount + backPaddingRenderCount + 1
+
+      if (totalCount >= items.length) return {
+        start: 0,
+        end: items.length - 1
+      }
+
       const start = infinite
         ? (pureStart + items.length) % items.length
         : Math.max(0, pureStart)
@@ -209,7 +218,9 @@ export const CarouselBase
       setTimeout(enableScroll, 0)
 
       if (!initialized.current) {
+        shouldScrollImmediately.current = true
         initialized.current = true
+        scrollToIndex(initialIndex, true)
         forceUpdate()
       }
     }
@@ -290,7 +301,7 @@ export const CarouselBase
       return index
     }
 
-    const scrollToIndex = (index: number) => {
+    const scrollToIndex = (index: number, immediate?: boolean) => {
       const curDestination = calcDestination()
       const curIndex = convertDestinationToIndex(curDestination)
       const diff = index - curIndex
@@ -298,13 +309,17 @@ export const CarouselBase
 
       slicer.current = getSlicer(index)
 
+      if (immediate) {
+        shouldScrollImmediately.current = true
+      }
+
       if (onChange && index !== prevScrollIndex.current) {
         prevScrollIndex.current = index
         onChange(index)
       }
 
       if (nextDestination === newDestination) {
-        scrollToPosition(nextDestination)
+        scrollToPosition(nextDestination, immediate)
       } else {
         setNewDestination(nextDestination)
       }
@@ -389,7 +404,13 @@ export const CarouselBase
     })
 
     React.useEffect(() => {
-      scrollToPosition(newDestination)
+      const immediate = shouldScrollImmediately.current
+
+      if (shouldScrollImmediately.current) {
+        shouldScrollImmediately.current = false
+      }
+
+      scrollToPosition(newDestination, immediate)
     }, [newDestination])
 
     React.useEffect(() => {
@@ -450,7 +471,7 @@ const CustomComponent = (
     info,
     customComponent,
     transitionPosition,
-    virtualTranslate
+    virtualTranslate,
   } = props
 
   const prevVirtualTranslate = React.useRef(0);
@@ -550,7 +571,7 @@ const CarouselBaseItem: <TItem>(props: CarouselBaseItemProps<TItem>) => React.Re
   const itemPosition = transitionPosition.to((value) => {
     return infinite
       ? (originalIndex - value + info.itemLength) % info.itemLength
-      : Math.max(0, Math.min(info.itemLength, originalIndex - value))
+      : originalIndex - value
   })
 
   const minusOne = itemPosition.to((value) => value - 1)
@@ -615,6 +636,7 @@ export interface CarouselBaseProps<TItem extends any> extends ViewProps {
   onChange?: (index: number) => void
   customComponent?: CarouselCustomComponent
   disableGesture?: boolean
+  initialIndex?: number
 }
 
 export type CarouselCustomComponent = (props: CarouselCustomComponentProps) => JSX.Element

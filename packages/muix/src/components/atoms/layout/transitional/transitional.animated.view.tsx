@@ -11,7 +11,7 @@ import {
 } from "@monthem/muix"
 import chroma from "chroma-js"
 
-export const TransitionalAnimatedView: React.FC<TransitionalViewProps> = (props) => {
+export const _TransitionalAnimatedView: React.FC<TransitionalViewProps> = (props) => {
   const {
     extrapolate = "clamp",
     progress,

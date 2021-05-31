@@ -2,7 +2,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react-native';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import WebColors from '@monthem/web-color';
-import monthem from "@monthem/utils"
+import utils from "@monthem/utils"
 import { Carousel, CarouselScrollInterpolator } from "@monthem/muix"
 import { animated } from '@react-spring/native';
 
@@ -20,7 +20,7 @@ const exampleInterpolator: CarouselScrollInterpolator = {
 }
 
 const RandomColorBox = ({ index }: { index: number }) => {
-  const color = React.useRef(monthem.obejct.getRandomEntry(WebColors).value);
+  const color = React.useRef(utils.obejct.getRandomEntry(WebColors).value);
   return (
     <View
       key={index}
@@ -76,6 +76,7 @@ const CarouselStory = () => {
         items={indice}
         renderItem={({item, index}) => <RandomColorBox index={index} />}
         vertical
+        initialIndex={100}
         style={{ height: 100, backgroundColor: "lightgrey", marginBottom: 20 }}
       />
       <Carousel

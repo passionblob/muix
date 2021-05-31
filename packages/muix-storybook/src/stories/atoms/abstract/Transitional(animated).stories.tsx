@@ -2,7 +2,7 @@ import React from "react"
 import { View, Text, StyleProp, ViewStyle, StyleSheet, Animated } from "react-native"
 import Slider from "@react-native-community/slider"
 import { storiesOf } from "@storybook/react-native"
-import { TransitionalAnimatedView } from "@monthem/muix"
+import { _TransitionalAnimatedView as TransitionalAnimatedView } from "@monthem/muix"
 import { getRange } from "@monthem/utils"
 
 storiesOf("Atoms/Abstract", module)
