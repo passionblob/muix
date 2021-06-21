@@ -25,7 +25,10 @@ function loadStories() {
   require('./stories/molecules/shape/badge/Badge.stories');
   require('./stories/organisms/layout/choiceSlider.stories');
   require('./stories/organisms/layout/coveredButton.stories');
-  require('./stories/test/gl/lineGL.stories');
+  require('./stories/test/gl/BurningShader.stories');
+  require('./stories/test/gl/NoiseShader.stories');
+  require('./stories/test/gl/RippleShader.stories');
+  require('./stories/test/gl/ShapeShader.stories');
   require('./stories/test/gl/simpleGL.stories');
   require('./stories/test/react-native-svg/AnimatedPath.stories');
   require('./stories/test/react-spring/trail.stories');
@@ -53,7 +56,10 @@ const stories = [
   './stories/molecules/shape/badge/Badge.stories',
   './stories/organisms/layout/choiceSlider.stories',
   './stories/organisms/layout/coveredButton.stories',
-  './stories/test/gl/lineGL.stories',
+  './stories/test/gl/BurningShader.stories',
+  './stories/test/gl/NoiseShader.stories',
+  './stories/test/gl/RippleShader.stories',
+  './stories/test/gl/ShapeShader.stories',
   './stories/test/gl/simpleGL.stories',
   './stories/test/react-native-svg/AnimatedPath.stories',
   './stories/test/react-spring/trail.stories',

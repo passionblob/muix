@@ -21,8 +21,11 @@ module.exports = {
     getTransformOptions: async () => ({
       transform: {
         experimentalImportSupport: false,
-        inlineRequires: true,
+        inlineRequires: false,
       },
     }),
   },
+  resolver: {
+    assetExts: ['db', 'mp3', 'ttf', 'obj', 'png', 'jpg', 'json', 'gif', 'mp4']
+  }
 };

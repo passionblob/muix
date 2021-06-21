@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react'
 import { View, ViewStyle, LayoutChangeEvent, PanResponder, ViewProps, Text } from 'react-native'
-import { animated, Interpolation } from "react-spring/native"
+import { animated, Interpolation } from "@react-spring/native"
 import { useSpring, to, InterpolatorConfig, SpringValue } from "react-spring"
 import { anyOf, isAllTrue } from "@monthem/utils"
 import { WebColors } from "@monthem/web-color"
@@ -98,11 +98,12 @@ export const CarouselBase
       customComponent = CarouseldefaultCustomComponent,
       disableGesture,
       initialIndex = 0,
+      startDelay,
+      sensitivity = 1,
       ..._props
     } = props;
 
     const touchID = React.useRef("-1");
-    const touchStart = React.useRef(0);
     const virtualTranslateStart = React.useRef(0);
     const layoutSize = React.useRef(0);
     const layout = React.useRef({ width: 0, height: 0 });
@@ -111,7 +112,7 @@ export const CarouselBase
     const scrollBlocked = React.useRef(false);
     const prevScrollIndex = React.useRef(0);
     const containerRef = React.useRef<View>(null);
-    const slicer = React.useRef(getSlicer(0))
+    const slicer = React.useRef(getSlicer(initialIndex))
     const initialized = React.useRef(false)
     const timer = React.useRef<number>();
     const shouldScrollImmediately = React.useRef(false);
@@ -122,10 +123,11 @@ export const CarouselBase
 
     const [spring, springApi] = useSpring(() => ({
       virtualTranslate: 0,
+      opacity: 0,
     }))
 
     const virtualIndex = spring.virtualTranslate.to((value) => {
-      if (layoutSize.current <= 0) return 0
+      if (layoutSize.current <= 0) return initialIndex
       const translatePosition = -value / layoutSize.current
 
       const deviation = (() => {
@@ -157,7 +159,7 @@ export const CarouselBase
 
       if (totalCount >= items.length) return {
         start: 0,
-        end: items.length - 1
+        end: items.length
       }
 
       const start = infinite
@@ -218,10 +220,11 @@ export const CarouselBase
       setTimeout(enableScroll, 0)
 
       if (!initialized.current) {
-        shouldScrollImmediately.current = true
         initialized.current = true
+        // When initial index is not zero, it updates state.nextIndex which leads to re-render.
         scrollToIndex(initialIndex, true)
-        forceUpdate()
+        // When initial index is zero, layout is not update, which requires force re-render.
+        if (initialIndex === 0) forceUpdate()
       }
     }
 
@@ -275,12 +278,16 @@ export const CarouselBase
 
       const virtualTranslate = -translatePosition * layoutSize.current
 
-      if (immediate) {
-        springApi.set({ virtualTranslate })
-      } else {
-        springApi.start({
-          virtualTranslate,
-        })
+      springApi.start({
+        virtualTranslate,
+        immediate,
+      })
+
+      // after scrolling to initial index, set opacity to 1
+      if (spring.opacity.get() === 0) {
+        setTimeout(() => {
+          springApi.start({opacity: 1})
+        }, startDelay)
       }
     }
 
@@ -309,10 +316,6 @@ export const CarouselBase
 
       slicer.current = getSlicer(index)
 
-      if (immediate) {
-        shouldScrollImmediately.current = true
-      }
-
       if (onChange && index !== prevScrollIndex.current) {
         prevScrollIndex.current = index
         onChange(index)
@@ -321,6 +324,7 @@ export const CarouselBase
       if (nextDestination === newDestination) {
         scrollToPosition(nextDestination, immediate)
       } else {
+        shouldScrollImmediately.current = !!immediate
         setNewDestination(nextDestination)
       }
     }
@@ -341,30 +345,29 @@ export const CarouselBase
         onStartShouldSetPanResponder: () => true,
         onPanResponderStart: (e) => {
           if (touchID.current !== "-1") return;
-          const { identifier, pageX, pageY } = e.nativeEvent
+          const { identifier } = e.nativeEvent
           touchID.current = identifier
-
-          touchStart.current = vertical ? pageY : pageX
           virtualTranslateStart.current = spring.virtualTranslate.get()
         },
-        onPanResponderMove: (e) => {
-          const { identifier, pageX, pageY } = e.nativeEvent
+        onPanResponderMove: (e, gestureState) => {
+          const { identifier } = e.nativeEvent
+          const { dx, dy } = gestureState
           if (touchID.current !== identifier) return
 
+          
           updateSlideTimestamp()
 
-          const touchDiff = vertical
-            ? pageY - touchStart.current
-            : pageX - touchStart.current
-
+          const touchDiff = vertical ? dy : dx
           const nextVirtualTranslate = virtualTranslateStart.current + touchDiff
 
           springApi.set({
             virtualTranslate: nextVirtualTranslate,
           })
         },
-        onPanResponderEnd: (e) => {
-          const { identifier, pageY, pageX } = e.nativeEvent
+        onPanResponderEnd: (e, gestureState) => {
+          const { identifier } = e.nativeEvent
+          const { vx, vy } = gestureState
+
           if (touchID.current !== identifier) return
           touchID.current = "-1"
 
@@ -428,7 +431,7 @@ export const CarouselBase
     }
 
     return (
-      <View
+      <animated.View
         {..._props}
         {...panResponder.panHandlers}
         ref={containerRef}
@@ -437,29 +440,32 @@ export const CarouselBase
           //@ts-ignore
           userSelect: "none",
           overflow: "hidden",
+          opacity: spring.opacity,
         }, style]}
       >
-        {slicedItems.map(({ item, originalIndex }) => {
-          return (
-            <MemoizedItem
-              item={item}
-              key={originalIndex}
-              renderItem={renderItem}
-              infinite={infinite}
-              originalIndex={originalIndex}
-              transitionPosition={transitionPosition}
-              info={carouselBaseInterpolatorInfo}
-            />
-          )
-        })}
-        <MemoizedCustomComponent
-          customComponent={customComponent}
-          infinite={infinite}
-          info={carouselBaseInterpolatorInfo}
-          virtualTranslate={spring.virtualTranslate}
-          transitionPosition={transitionPosition}
-        />
-      </View>
+        <>
+          {slicedItems.map(({ item, originalIndex }) => {
+            return (
+              <MemoizedItem
+                item={item}
+                key={originalIndex}
+                renderItem={renderItem}
+                infinite={infinite}
+                originalIndex={originalIndex}
+                transitionPosition={transitionPosition}
+                info={carouselBaseInterpolatorInfo}
+              />
+            )
+          })}
+          <MemoizedCustomComponent
+            customComponent={customComponent}
+            infinite={infinite}
+            info={carouselBaseInterpolatorInfo}
+            virtualTranslate={spring.virtualTranslate}
+            transitionPosition={transitionPosition}
+          />
+        </>
+      </animated.View>
     )
   })
 
@@ -600,7 +606,7 @@ const MemoizedItem = React.memo(CarouselBaseItem, (prev, next) => {
 })
 
 export interface CarouselBaseRef {
-  scrollTo: (index: number) => void
+  scrollTo: (index: number, immediate?: boolean) => void
   scrollToNext: () => number
   scrollToPrev: () => number
   scrollToRandom: () => number
@@ -637,6 +643,8 @@ export interface CarouselBaseProps<TItem extends any> extends ViewProps {
   customComponent?: CarouselCustomComponent
   disableGesture?: boolean
   initialIndex?: number
+  startDelay?: number
+  sensitivity?: number
 }
 
 export type CarouselCustomComponent = (props: CarouselCustomComponentProps) => JSX.Element

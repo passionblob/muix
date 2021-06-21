@@ -2,7 +2,7 @@ import React from 'react';
 import { storiesOf } from '@storybook/react-native';
 import { ScrollView, Text, View } from 'react-native';
 import { DraggableView } from '@monthem/muix';
-import { useSpring, animated } from "react-spring/native"
+import { useSpring, animated } from "@react-spring/native"
 
 storiesOf("Atoms/Layout", module)
   .add(

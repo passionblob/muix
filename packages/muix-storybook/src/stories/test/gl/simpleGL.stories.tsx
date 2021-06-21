@@ -49,7 +49,13 @@ function onContextCreate(gl: ExpoWebGLRenderingContext) {
     `
     const vert = createShader(gl.VERTEX_SHADER, vertSource);
     const frag = createShader(gl.FRAGMENT_SHADER, fragSource);
+
+    if (!vert || !frag) return null
+
     const program = createProgram(vert, frag)
+
+    if (!program) return null
+
     gl.useProgram(program);
 
     const resolutionUniformLocation = gl.getUniformLocation(program, "u_resolution")
@@ -87,6 +93,9 @@ function onContextCreate(gl: ExpoWebGLRenderingContext) {
 
     function createShader(type: number, source: string) {
         const shader = gl.createShader(type)
+
+        if (!shader) return null
+
         gl.shaderSource(shader, source);
         gl.compileShader(shader);
 
@@ -101,6 +110,9 @@ function onContextCreate(gl: ExpoWebGLRenderingContext) {
 
     function createProgram(vert: WebGLShader, frag: WebGLShader) {
         const program = gl.createProgram();
+
+        if (!program) return null
+
         gl.attachShader(program, vert);
         gl.attachShader(program, frag);
         gl.linkProgram(program);
@@ -113,7 +125,7 @@ function onContextCreate(gl: ExpoWebGLRenderingContext) {
         gl.deleteProgram(program);
     }
 
-    function randomInt(range) {
+    function randomInt(range: number) {
         return Math.floor(Math.random() * range);
     }
 
