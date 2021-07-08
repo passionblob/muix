@@ -5,7 +5,6 @@ import { GLView, ExpoWebGLRenderingContext } from "expo-gl"
 import { THREE, Renderer, TextureLoader } from "expo-three"
 import ViewShot from "react-native-view-shot"
 import WebColors from '@monthem/web-color'
-import { Asset } from 'expo-asset';
 
 storiesOf("Test/WebGL", module)
 	.add("BurningShader", () => <SimpleGLStory />);
@@ -140,6 +139,7 @@ const SimpleGLStory = () => {
 		scene.add(camera)
 
 		const geometrySize = 2;
+
 		const geometry = new THREE.PlaneGeometry(geometrySize, geometrySize);
 		const material = new THREE.ShaderMaterial({
 			uniforms,

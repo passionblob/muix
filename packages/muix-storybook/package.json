@@ -32,6 +32,7 @@
     "html2canvas": "^1.0.0-rc.7",
     "pixi.js": "^6.0.4",
     "polymorph-js": "^1.0.2",
+    "popmotion": "^9.4.0",
     "react-native": "^0.64.0",
     "react-native-svg": "^12.1.1",
     "react-native-unimodules": "^0.13.3",
