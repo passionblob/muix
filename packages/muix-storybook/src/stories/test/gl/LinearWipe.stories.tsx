@@ -8,7 +8,7 @@ import { animate } from 'popmotion';
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass";
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { CopyShader } from 'three/examples/jsm/shaders/CopyShader'
-import { LinearTransitionShader } from './LinearTransitionShader';
+import { LinearWipeShader } from './LinearWipeShader';
 
 const textures = [
 	new TextureLoader().load(require("./tex1.jpg")),
@@ -22,7 +22,7 @@ const textures = [
 global.THREE = global.THREE || THREE
 
 storiesOf("Test/WebGL", module)
-	.add("LinearTransition", () => <SimpleGLStory />);
+	.add("LinearWipe", () => <SimpleGLStory />);
 
 const SimpleGLStory = () => {
 	const animation = React.useRef<{ stop: () => void }>();
@@ -58,19 +58,21 @@ const SimpleGLStory = () => {
 		const composer = new EffectComposer(renderer);
 
 		const renderPass = new RenderPass(scene, camera)
-		const linearTransitionPass1 = new ShaderPass(LinearTransitionShader({
+		const linearWipePass1 = new ShaderPass(LinearWipeShader({
 			angle: 45,
-			progress: 1,
+			progress: 0.5,
+			feather: 0.1,
 		}));
 
-		const linearTransitionPass2 = new ShaderPass(LinearTransitionShader({
+		const linearWipePass2 = new ShaderPass(LinearWipeShader({
 			angle: 225,
 			progress: 1,
+			feather: 0.1,
 		}));
 		
 		composer.addPass(renderPass);
-		composer.addPass(linearTransitionPass1);
-		composer.addPass(linearTransitionPass2);
+		composer.addPass(linearWipePass1);
+		composer.addPass(linearWipePass2);
 
 		let repeatCount = 0;
 
@@ -79,7 +81,7 @@ const SimpleGLStory = () => {
 			to: 1,
 			repeat: Infinity,
 			repeatType: "reverse",
-			duration: 500,
+			duration: 2000,
 			onRepeat() {
 				repeatCount += 1;
 
@@ -88,10 +90,10 @@ const SimpleGLStory = () => {
 				}
 			},
 			onUpdate(latest) {
-				linearTransitionPass1.uniforms.angle.value += 1;
-				linearTransitionPass2.uniforms.angle.value += 1;
-				linearTransitionPass1.uniforms.progress.value = 1 - latest * 0.5;
-				linearTransitionPass2.uniforms.progress.value = 1 - latest * 0.5;
+				linearWipePass1.uniforms.angle.value += 1;
+				linearWipePass2.uniforms.angle.value += 1;
+				linearWipePass1.uniforms.progress.value = 1 - latest * 0.55;
+				linearWipePass2.uniforms.progress.value = 1 - latest * 0.55;
 				composer.render();
 				gl.endFrameEXP();
 			}
@@ -103,7 +105,7 @@ const SimpleGLStory = () => {
 		return () => {
 			animation.current?.stop()
 		}
-	})
+	}, [])
 
 	return (
 		<ScrollView>

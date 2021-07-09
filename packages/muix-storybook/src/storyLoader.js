@@ -27,7 +27,7 @@ function loadStories() {
   require('./stories/organisms/layout/coveredButton.stories');
   require('./stories/test/gl/BurningShader.stories');
   require('./stories/test/gl/GPGPU-birds.stories');
-  require('./stories/test/gl/LinearTransition.stories');
+  require('./stories/test/gl/LinearWipe.stories');
   require('./stories/test/gl/NoiseShader.stories');
   require('./stories/test/gl/RippleShader.stories');
   require('./stories/test/gl/ShapeShader.stories');
@@ -60,7 +60,7 @@ const stories = [
   './stories/organisms/layout/coveredButton.stories',
   './stories/test/gl/BurningShader.stories',
   './stories/test/gl/GPGPU-birds.stories',
-  './stories/test/gl/LinearTransition.stories',
+  './stories/test/gl/LinearWipe.stories',
   './stories/test/gl/NoiseShader.stories',
   './stories/test/gl/RippleShader.stories',
   './stories/test/gl/ShapeShader.stories',
