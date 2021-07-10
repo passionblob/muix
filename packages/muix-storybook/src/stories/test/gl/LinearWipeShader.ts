@@ -48,15 +48,14 @@ void main() {
 	vec2 uv = v_uv;
 	vec4 tex = texture2D(tDiffuse, uv);
 	vec4 transparent = vec4(0.0, 0.0, 0.0, 0.0);
-	float reversed = 1.0 - progress;
 
 	vec2 direction = getDirection();
   vec2 v = normalize(direction);
   v /= abs(v.x)+abs(v.y);
   float d = v.x * center.x + v.y * center.y;
   float m =
-    (1.0-step(reversed, 0.0)) * 
-    (1.0 - smoothstep(-feather, 0.0, v.x * uv.x + v.y * uv.y - (d-0.5+reversed*(1.+feather))));
+    (1.0-step(progress, 0.0)) * 
+    (1.0 - smoothstep(-feather, 0.0, v.x * uv.x + v.y * uv.y - (d-0.5+progress*(1.+feather))));
   gl_FragColor = mix(tex, transparent, m);
 	
 	if (direction.x == 1.0 && direction.y == 1.0) {

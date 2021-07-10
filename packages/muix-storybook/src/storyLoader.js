@@ -25,11 +25,16 @@ function loadStories() {
   require('./stories/molecules/shape/badge/Badge.stories');
   require('./stories/organisms/layout/choiceSlider.stories');
   require('./stories/organisms/layout/coveredButton.stories');
-  require('./stories/test/gl/BurningShader.stories');
+  require('./stories/test/gl/Blur.stories');
+  require('./stories/test/gl/Burning.stories');
+  require('./stories/test/gl/BurnPaper.stories');
+  require('./stories/test/gl/Displacement.stories');
+  require('./stories/test/gl/FBMNoise.stories');
   require('./stories/test/gl/GPGPU-birds.stories');
   require('./stories/test/gl/LinearWipe.stories');
   require('./stories/test/gl/NoiseShader.stories');
   require('./stories/test/gl/RippleShader.stories');
+  require('./stories/test/gl/Saturation.stories');
   require('./stories/test/gl/ShapeShader.stories');
   require('./stories/test/gl/simpleGL.stories');
   require('./stories/test/react-native-svg/AnimatedPath.stories');
@@ -58,11 +63,16 @@ const stories = [
   './stories/molecules/shape/badge/Badge.stories',
   './stories/organisms/layout/choiceSlider.stories',
   './stories/organisms/layout/coveredButton.stories',
-  './stories/test/gl/BurningShader.stories',
+  './stories/test/gl/Blur.stories',
+  './stories/test/gl/Burning.stories',
+  './stories/test/gl/BurnPaper.stories',
+  './stories/test/gl/Displacement.stories',
+  './stories/test/gl/FBMNoise.stories',
   './stories/test/gl/GPGPU-birds.stories',
   './stories/test/gl/LinearWipe.stories',
   './stories/test/gl/NoiseShader.stories',
   './stories/test/gl/RippleShader.stories',
+  './stories/test/gl/Saturation.stories',
   './stories/test/gl/ShapeShader.stories',
   './stories/test/gl/simpleGL.stories',
   './stories/test/react-native-svg/AnimatedPath.stories',
