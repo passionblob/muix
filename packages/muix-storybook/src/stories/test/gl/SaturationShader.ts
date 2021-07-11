@@ -29,8 +29,8 @@ export function SaturationShader({amount = 1}: SaturationProperty) {
 
     void main() {
       vec2 uv = v_uv;
-      vec3 color = texture2D(tDiffuse, uv).rgb;
-      gl_FragColor = vec4(czm_saturation(color, amount), 1.0);
+      vec4 color = texture2D(tDiffuse, uv);
+      gl_FragColor = vec4(czm_saturation(color.rgb, amount), color.a);
     }
     `,
   }

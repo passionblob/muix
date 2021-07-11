@@ -1,11 +1,18 @@
 
 type DisplacementProperty = {
-	texture: THREE.Texture
-	map: THREE.Texture
-	strength: number
+	texture?: THREE.Texture
+	map?: THREE.Texture
+	strength?: {x: number, y: number}
 }
 
-export function DisplacementShader({texture, map, strength}: DisplacementProperty) {
+export function DisplacementShader({
+	texture,
+	map,
+	strength = {
+		x: 0.5,
+		y: 0.5,
+	}
+}: DisplacementProperty) {
 	return {
 		uniforms: {
 			tDiffuse: {value: texture},
@@ -21,7 +28,7 @@ export function DisplacementShader({texture, map, strength}: DisplacementPropert
     }
 		`,
 		fragmentShader: `
-		uniform float strength;
+		uniform vec2 strength;
 		uniform sampler2D tDiffuse;
 		uniform sampler2D map;
 
@@ -32,13 +39,10 @@ export function DisplacementShader({texture, map, strength}: DisplacementPropert
 			vec2 uvForP = origuv;
 
 			vec3 textDisp = texture(map, origuv).xyz;
-			uvForP -= (textDisp[0]-0.5)*strength;
+			uvForP.x -= (textDisp[0]-0.5)*strength.x;
+			uvForP.y -= (textDisp[0]-0.5)*strength.y;
 			
-			vec3 textCol = texture(tDiffuse, uvForP).xyz;
-
-			vec4 p = vec4(textCol.xyz,1.0);
-
-			gl_FragColor = p;
+			gl_FragColor = texture(tDiffuse, uvForP);
 		}
 		`,
 	}

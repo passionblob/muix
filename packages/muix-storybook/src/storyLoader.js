@@ -29,6 +29,7 @@ function loadStories() {
   require('./stories/test/gl/Burning.stories');
   require('./stories/test/gl/BurnPaper.stories');
   require('./stories/test/gl/Displacement.stories');
+  require('./stories/test/gl/FastNoise.stories');
   require('./stories/test/gl/FBMNoise.stories');
   require('./stories/test/gl/GPGPU-birds.stories');
   require('./stories/test/gl/LinearWipe.stories');
@@ -67,6 +68,7 @@ const stories = [
   './stories/test/gl/Burning.stories',
   './stories/test/gl/BurnPaper.stories',
   './stories/test/gl/Displacement.stories',
+  './stories/test/gl/FastNoise.stories',
   './stories/test/gl/FBMNoise.stories',
   './stories/test/gl/GPGPU-birds.stories',
   './stories/test/gl/LinearWipe.stories',

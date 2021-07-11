@@ -49,7 +49,6 @@ const SimpleGLStory = () => {
 		const material = new THREE.ShaderMaterial(DisplacementShader({
 			texture: textures[0],
 			map: noiseFBO.texture,
-			strength: 0.5,
 		}))
 
 		const mesh = new THREE.Mesh(geometry, material);
