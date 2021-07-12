@@ -2,6 +2,7 @@ type LinearWipeProperty = {
 	angle?: number
 	progress?: number
 	feather?: number
+	wave?: number
 }
 
 const vertexShader = `
@@ -20,9 +21,14 @@ uniform float angle;
 uniform float progress;
 uniform float feather;
 uniform float u_direction;
+uniform float wave;
 varying vec2 v_uv;
  
 const vec2 center = vec2(0.5, 0.5);
+
+float random (vec2 st) {
+	return fract(sin(dot(st.xy,vec2(12.9898,78.233)))*43758.5453123);
+}
 
 vec2 getDirection() {
 	float degree = mod(angle, 360.0);
@@ -50,9 +56,12 @@ void main() {
 	vec4 transparent = vec4(0.0, 0.0, 0.0, 0.0);
 
 	vec2 direction = getDirection();
+	direction.x += sin(uv.x * wave);
+	direction.y += cos(radians(90.0) + uv.y * wave);
   vec2 v = normalize(direction);
   v /= abs(v.x)+abs(v.y);
-  float d = v.x * center.x + v.y * center.y;
+
+	float d = v.x * center.x + v.y * center.y;
   float m =
     (1.0-step(progress, 0.0)) * 
     (1.0 - smoothstep(-feather, 0.0, v.x * uv.x + v.y * uv.y - (d-0.5+progress*(1.+feather))));
@@ -75,6 +84,7 @@ export function LinearWipeShader(property: LinearWipeProperty) {
 		// feather radius
 		feather: { value: property.feather || 0 },
 		tDiffuse: { value: null },
+		wave: { value: property.wave || 0 },
 	}
 	
 	return {

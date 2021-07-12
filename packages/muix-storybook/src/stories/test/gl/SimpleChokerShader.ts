@@ -19,12 +19,11 @@ export const SimpleChokerShader = {
   void main() {
     vec2 uv = v_uv;
 		vec4 color = texture(tDiffuse, v_uv);
-		if (color.a < threshold) {
-			color = vec4(0.0, 0.0, 0.0, 0.0);
-		} else {
-			// color.a = 1.0;
-			color = vec4(1.0, 1.0, 1.0, 1.0);
+
+    if (color.a < threshold) {
+      color = vec4(0.0, 0.0, 0.0, 0.0);
 		}
+    
     gl_FragColor = color;
   }
   `,

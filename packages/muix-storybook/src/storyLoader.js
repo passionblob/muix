@@ -34,6 +34,7 @@ function loadStories() {
   require('./stories/test/gl/GPGPU-birds.stories');
   require('./stories/test/gl/LinearWipe.stories');
   require('./stories/test/gl/NoiseShader.stories');
+  require('./stories/test/gl/Particle.stories');
   require('./stories/test/gl/RippleShader.stories');
   require('./stories/test/gl/Saturation.stories');
   require('./stories/test/gl/ShapeShader.stories');
@@ -73,6 +74,7 @@ const stories = [
   './stories/test/gl/GPGPU-birds.stories',
   './stories/test/gl/LinearWipe.stories',
   './stories/test/gl/NoiseShader.stories',
+  './stories/test/gl/Particle.stories',
   './stories/test/gl/RippleShader.stories',
   './stories/test/gl/Saturation.stories',
   './stories/test/gl/ShapeShader.stories',

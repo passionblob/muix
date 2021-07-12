@@ -61,13 +61,14 @@ const SimpleGLStory = () => {
 		const linearWipePass1 = new ShaderPass(LinearWipeShader({
 			angle: 45,
 			progress: 0.5,
-			feather: 0.1,
+			feather: 0.0,
+			wave: 0,
 		}));
 
 		const linearWipePass2 = new ShaderPass(LinearWipeShader({
 			angle: 225,
-			progress: 1,
-			feather: 0.1,
+			progress: 0,
+			feather: 0.0,
 		}));
 		
 		composer.addPass(renderPass);
@@ -90,10 +91,16 @@ const SimpleGLStory = () => {
 				}
 			},
 			onUpdate(latest) {
-				linearWipePass1.uniforms.angle.value += 1;
-				linearWipePass2.uniforms.angle.value += 1;
-				linearWipePass1.uniforms.progress.value = 1 - latest * 0.55;
-				linearWipePass2.uniforms.progress.value = 1 - latest * 0.55;
+				linearWipePass1.uniforms.wave.value = 4 * latest;
+				// linearWipePass1.uniforms.angle.value += 1;
+				linearWipePass1.uniforms.progress.value = latest * 1.05;
+
+				// linearWipePass1.uniforms.wave.value += 1;
+				// linearWipePass2.uniforms.wave.value += 1;
+				// linearWipePass1.uniforms.angle.value += 1;
+				// linearWipePass2.uniforms.angle.value += 1;
+				// linearWipePass1.uniforms.progress.value = latest * 0.55;
+				// linearWipePass2.uniforms.progress.value = latest * 0.55;
 				composer.render();
 				gl.endFrameEXP();
 			}
