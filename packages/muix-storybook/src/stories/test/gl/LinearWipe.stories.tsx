@@ -91,7 +91,7 @@ const SimpleGLStory = () => {
 				}
 			},
 			onUpdate(latest) {
-				linearWipePass1.uniforms.wave.value = 4 * latest;
+				linearWipePass1.uniforms.wave.value = - 0.5 - 3.5 * latest;
 				// linearWipePass1.uniforms.angle.value += 1;
 				linearWipePass1.uniforms.progress.value = latest * 1.05;
 
@@ -121,7 +121,7 @@ const SimpleGLStory = () => {
 					width: "100%",
 					height: undefined,
 					aspectRatio: 1 / 1,
-					backgroundColor: "transparent"
+					backgroundColor: "cyan"
 				}}
 				onContextCreate={onContextCreate}
 			/>

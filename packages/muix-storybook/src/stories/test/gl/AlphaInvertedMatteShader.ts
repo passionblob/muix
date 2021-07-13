@@ -31,10 +31,10 @@ export function AlphaInvertedMatteShader({map, inverted = false}: AlphaMatteProp
 			vec4 texMap = texture(map, v_uv);
 
 			if (inverted) {
-				texMap *= (1.0 - texCol.a);
+				texMap.a *= (1.0 - texCol.a);
 				gl_FragColor = texMap;
 			} else {
-				texCol *= (1.0 - texMap.a);
+				texCol.a *= (1.0 - texMap.a);
 				gl_FragColor = texCol;
 			}
 		}

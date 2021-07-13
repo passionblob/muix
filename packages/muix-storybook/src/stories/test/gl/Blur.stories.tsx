@@ -14,6 +14,7 @@ import { HorizontalBlurShader } from "three/examples/jsm/shaders/HorizontalBlurS
 import { TriangleBlurShader } from "three/examples/jsm/shaders/TriangleBlurShader"
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { GaussianBlurShader } from './GaussianBlurShader';
+import { ScaleShader } from './ScaleShader';
 
 const textures = [
 	new TextureLoader().load(require("./tex1.jpg")),
@@ -49,15 +50,20 @@ const SimpleGLStory = () => {
     const composer = new EffectComposer(renderer);
     
     const renderPass = new RenderPass(scene, camera);
+		const scalePass = new ShaderPass(ScaleShader);
+		scalePass.uniforms.scale.value = {x: 0.5, y: 0.5};
+
+		composer.addPass(renderPass);
+		composer.addPass(scalePass);
+
 		const iterations = 8;
 		const strength = 2.0;
-    composer.addPass(renderPass);
 		for (let i = 0; i < 8; i += 1) {
 			const radius = (iterations - i - 1) * strength;
 			const blurPass = new ShaderPass(GaussianBlurShader);
 			blurPass.uniforms.direction.value = i % 2 === 0
-				? {x: radius, y: 0}
-				: {x: 0, y: radius};
+			? {x: radius, y: 0}
+			: {x: 0, y: radius};
 			composer.addPass(blurPass);
 		}
 

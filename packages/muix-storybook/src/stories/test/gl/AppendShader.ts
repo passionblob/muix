@@ -1,4 +1,4 @@
-export const AppendTextureShader: {
+export const AppendShader: {
   uniforms: {
     tDiffuse: {value: null | THREE.Texture},
     map: {value: null | THREE.Texture},
@@ -27,14 +27,7 @@ export const AppendTextureShader: {
     vec2 uv = v_uv;
     vec4 texOrigin = texture2D(tDiffuse, uv);
     vec4 texAppended = texture2D(map, uv);
-
-    if (texAppended.a <= 0.0) {
-      gl_FragColor = texOrigin;
-    } else if (texAppended.a < 1.0) {
-      gl_FragColor = texOrigin + texAppended;
-    } else {
-      gl_FragColor = texAppended;
-    }
+    gl_FragColor = texOrigin * (1.0 - texAppended.a) + texAppended;
   }
   `,
 }

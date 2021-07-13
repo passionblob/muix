@@ -4,6 +4,7 @@ export const FastNoiseShader = {
     resolution: {value: {x: 512, y: 512}},
     evolution: {value: 0},
     translate: {value: {x: 0, y: 0}},
+    scale: {value: {x: 16, y: 16}},
   },
   vertexShader: `
   varying vec2 v_uv;
@@ -15,6 +16,7 @@ export const FastNoiseShader = {
   fragmentShader: `
   uniform vec2 resolution;
   uniform vec2 translate;
+  uniform vec2 scale;
   uniform float evolution;
 
   varying vec2 v_uv;
@@ -46,7 +48,7 @@ export const FastNoiseShader = {
   void main() {
     vec2 uv = gl_FragCoord.xy / resolution.yy;
     uv += translate;
-    vec3 p = vec3(uv*16., 0.);
+    vec3 p = vec3(uv*scale, 0.);
     float result = fnoise(p + evolution);
     gl_FragColor = vec4(vec3(result),1.0);
   }

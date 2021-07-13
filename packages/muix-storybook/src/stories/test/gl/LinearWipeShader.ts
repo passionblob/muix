@@ -66,10 +66,6 @@ void main() {
     (1.0-step(progress, 0.0)) * 
     (1.0 - smoothstep(-feather, 0.0, v.x * uv.x + v.y * uv.y - (d-0.5+progress*(1.+feather))));
   gl_FragColor = mix(tex, transparent, m);
-	
-	if (direction.x == 1.0 && direction.y == 1.0) {
-		gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-	}
 }
 `
 
