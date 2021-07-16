@@ -31,9 +31,11 @@ function loadStories() {
   require('./stories/test/gl/Displacement.stories');
   require('./stories/test/gl/FastNoise.stories');
   require('./stories/test/gl/FBMNoise.stories');
-  require('./stories/test/gl/GPGPU-birds.stories');
+  require('./stories/test/gl/GPGPU-Particles.stories');
+  require('./stories/test/gl/GPGPU-Test.stories');
   require('./stories/test/gl/LinearWipe.stories');
   require('./stories/test/gl/NoiseShader.stories');
+  require('./stories/test/gl/PametricGeometry.stories');
   require('./stories/test/gl/Particle.stories');
   require('./stories/test/gl/RippleShader.stories');
   require('./stories/test/gl/Saturation.stories');
@@ -71,9 +73,11 @@ const stories = [
   './stories/test/gl/Displacement.stories',
   './stories/test/gl/FastNoise.stories',
   './stories/test/gl/FBMNoise.stories',
-  './stories/test/gl/GPGPU-birds.stories',
+  './stories/test/gl/GPGPU-Particles.stories',
+  './stories/test/gl/GPGPU-Test.stories',
   './stories/test/gl/LinearWipe.stories',
   './stories/test/gl/NoiseShader.stories',
+  './stories/test/gl/PametricGeometry.stories',
   './stories/test/gl/Particle.stories',
   './stories/test/gl/RippleShader.stories',
   './stories/test/gl/Saturation.stories',

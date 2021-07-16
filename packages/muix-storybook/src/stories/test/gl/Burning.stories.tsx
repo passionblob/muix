@@ -10,7 +10,11 @@ import { ClearPass } from 'three/examples/jsm/postprocessing/ClearPass';
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
+import { OutlinePass } from 'three/examples/jsm/postprocessing/OutlinePass';
 import { TexturePass } from 'three/examples/jsm/postprocessing/TexturePass';
+import { VignetteShader } from 'three/examples/jsm/shaders/VignetteShader';
+import { ColorifyShader } from 'three/examples/jsm/shaders/ColorifyShader';
+import { BrightnessContrastShader } from 'three/examples/jsm/shaders/BrightnessContrastShader';
 
 import { DisplacementShader } from './DisplacementShader';
 import { LinearWipeShader } from './LinearWipeShader';
@@ -29,8 +33,8 @@ import { ColorShader } from './ColorShader';
 import { ChromaKeyShader } from './ChromaKeyShader';
 import { CopyShader } from 'three/examples/jsm/shaders/CopyShader';
 import { AlphaCheckShader } from './AlphaCheckShader';
-import { BCShader } from './BCShader';
 import { SaturationShader } from './SaturationShader';
+import { CustomVignetteShader } from './CustomVignetteShader';
 
 const written = new TextureLoader().load(require("./written.jpg"))
 
@@ -102,18 +106,23 @@ const SimpleGLStory = () => {
 
 		const composers: EffectComposer[] = [];
 
-		const linearWipePass = new ShaderPass(LinearWipeShader({
-			angle: 75 + Math.random() * 45,
-			feather: 0.01,
-			progress: 0.0,
-			wave: 0.2 + Math.random() * 0.3,
-		}));
+		const burningDuration = 20000;
+
+		const linearWipePass = new ShaderPass(LinearWipeShader);
+		linearWipePass.uniforms.angle.value = 75 + Math.random() * 45;
+		linearWipePass.uniforms.feather.value = 0.01;
+		linearWipePass.uniforms.progress.value = 0.00;
+		linearWipePass.uniforms.wave.value = 0.5 + Math.random() * 1.5;
+		linearWipePass.uniforms.scale.value = 1.0 + Math.random() * 7.0;
 
 		const scalePass = new ShaderPass(ScaleShader);
 		scalePass.uniforms.scale.value = { x: 0.8, y: 0.8 };
-		const clearPass = new ClearPass();
 
-		const whiteSavePass = new SavePass(blackFBO);
+		const vignettePass = new ShaderPass(CustomVignetteShader);
+		vignettePass.uniforms.darkness.value = 1.5;
+		vignettePass.uniforms.offset.value = 0.85;
+		vignettePass.uniforms.translate.value = {x: 0, y: 0};
+
 		const noiseSavePass = new SavePass(noiseFBO);
 		const wipeSavePass = new SavePass(wipeFBO);
 		const burningSavePass = new SavePass(burningFBO);
@@ -131,7 +140,7 @@ const SimpleGLStory = () => {
 				x: 0.0,
 				y: 0.0,
 				z: 0.0,
-				w: 0.5,
+				w: 1.0,
 			}
 		}))
 
@@ -150,23 +159,15 @@ const SimpleGLStory = () => {
 		const noiseMultiplyPass = new ShaderPass(MultiplyShader);
 		const noiseAdditivePass = new ShaderPass(AdditiveShader);
 		const saturationPass = new ShaderPass(SaturationShader({amount: 2.0}));
-		const BCPass = new ShaderPass(BCShader);
-		BCPass.uniforms.brightness.value = 0.0;
-		BCPass.uniforms.contrast.value = 1.5;
+		const BCPass = new ShaderPass(BrightnessContrastShader);
+		BCPass.uniforms.brightness.value = 0.1;
+		BCPass.uniforms.contrast.value = 0.5;
 
-		const burningFillPass = new ShaderPass(ColorFillShader("orange"));
+		const burningFillPass = new ShaderPass(ColorFillShader("cyan"));
 
 		const fireRenderPass = new RenderPass(fireScene, fireCamera);
 		const fireChokerPass = new ShaderPass(SimpleChokerShader);
 		fireChokerPass.uniforms.threshold.value = 0.01;
-
-		const blackPass = new ShaderPass(ColorShader("black"));
-
-		const blankComposer = new EffectComposer(renderer);
-		blankComposer.renderToScreen = false;
-		composers.push(blankComposer);
-		blankComposer.addPass(blackPass);
-		blankComposer.addPass(whiteSavePass);
 
 		const noiseComposer = new EffectComposer(renderer);
 		noiseComposer.renderToScreen = false;
@@ -182,9 +183,10 @@ const SimpleGLStory = () => {
 		wipeComposer.addPass(linearWipePass);
 		wipeComposer.addPass(displacementPass);
 		wipeComposer.addPass(simpleChokerPass);
-		const some = new ShaderPass(MultiplyShader);
-		some.uniforms.map.value = written;
-		wipeComposer.addPass(some);
+		wipeComposer.addPass(vignettePass);
+		const letter = new ShaderPass(MultiplyShader);
+		letter.uniforms.map.value = written;
+		wipeComposer.addPass(letter);
 		wipeComposer.addPass(scalePass);
 		wipeComposer.addPass(wipeSavePass);
 
@@ -281,7 +283,6 @@ const SimpleGLStory = () => {
 		composer.addPass(burningBlurAppendPass);
 		composer.addPass(fireBlurAppendPass);
 		composer.addPass(bloomAppendPass);
-
 		
 		let particles: { [key: string]: Particle } = {};
 
@@ -339,13 +340,14 @@ const SimpleGLStory = () => {
 			ease: Easing.linear,
 			repeat: Infinity,
 			repeatType: "loop",
-			duration: 40000,
+			duration: burningDuration,
 			onUpdate(latest) {
 				count += 1;
-				if (count % 2) return; 
+				if (count % 2 !== 0) return; 
 
 				// scalePass.uniforms.scale.value = latest;
 				// noisePass.uniforms.evolution.value += 0.01;
+				// vignettePass.uniforms.translate.value.y = 1 - latest * 2;
 				linearWipePass.uniforms.angle.value = 90 + Math.sin(latest * 360 * Math.PI / 180) * 15;
 				linearWipePass.uniforms.progress.value = latest * 1.1;
 				displacementPass.uniforms.map.value = noiseFBO.texture;
@@ -390,7 +392,7 @@ const SimpleGLStory = () => {
 						particle.mesh.scale.y *= 0.98;
 
 						if (particle.appeared) {
-							particle.velocity.x += (-0.5 + Math.random()) * 0.02;
+							particle.velocity.x += (-0.5 + Math.random()) * 0.01;
 							// @ts-ignore
 							particle.mesh.material.opacity *= 0.98;
 						}
