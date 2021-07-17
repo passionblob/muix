@@ -19,21 +19,19 @@ global.THREE = global.THREE || THREE
 const WIDTH = 32;
 
 const PARTICLE_MAX_COUNT = WIDTH * WIDTH;
-
 const PARTICLE_PER_EMIT = WIDTH;
 
 const SimpleGLStory = () => {
 	const animation = React.useRef({stop() {}});
-	const layout = React.useRef<LayoutRectangle>({
-		x: 0, y: 0, width: 0, height: 0
-	})
-	const touchInfo = React.useRef({
-		x: 0,
-		y: 0,
-		timestamp: 0,
-	});
+	const layout = React.useRef<LayoutRectangle>({ x: 0, y: 0, width: 0, height: 0 });
+	const touchInfo = React.useRef({x: 0, y: 0, timestamp: 0});
 	const startIndex = React.useRef(0);
-	const endIndex = React.useRef(PARTICLE_PER_EMIT);
+	const endIndex = React.useRef(0);
+
+	function incrementIndex(indexRef: {current: number}) {
+		indexRef.current += PARTICLE_PER_EMIT;
+		indexRef.current %= PARTICLE_MAX_COUNT;
+	}
 
 	async function onContextCreate(gl: ExpoWebGLRenderingContext) {
 		const { drawingBufferHeight: height, drawingBufferWidth: width } = gl
@@ -54,13 +52,6 @@ const SimpleGLStory = () => {
 		const dtSelect = gpuCompute.createTexture();
 		const dtToggle = gpuCompute.createTexture();
 		const dtComplete = gpuCompute.createTexture();
-
-		for (let i = 0; i < dtComplete.image.data.length; i += 1) {
-			dtComplete.image.data[i * 4 + 0] = 1.0;
-			dtComplete.image.data[i * 4 + 0] = 0.0;
-			dtComplete.image.data[i * 4 + 0] = 0.0;
-			dtComplete.image.data[i * 4 + 0] = 1.0;
-		}
 
 		const touchShader = `
 		uniform vec2 touch;
@@ -136,6 +127,10 @@ const SimpleGLStory = () => {
 				if (index >= startIndex || index < endIndex) {
 					result = 1.0;
 				}
+			}
+
+			if (floor(startIndex) == floor(endIndex)) {
+				result = 0.0;
 			}
 
 			return result;
@@ -353,7 +348,7 @@ const SimpleGLStory = () => {
 		const afterImagePass = new CustomAfterimagePass();
 
 		composer.addPass(renderPass);
-		composer.addPass(afterImagePass);
+		// composer.addPass(afterImagePass);
 		// composer.addPass(progressPass);
 		// composer.addPass(positionPass);
 		// composer.addPass(selectPass);
@@ -414,10 +409,12 @@ const SimpleGLStory = () => {
 				timestamp,
 			}
 
-			startIndex.current += PARTICLE_PER_EMIT;
-			endIndex.current += PARTICLE_PER_EMIT;
-			startIndex.current %= PARTICLE_MAX_COUNT;
-			endIndex.current %= PARTICLE_MAX_COUNT;
+			if (startIndex.current == endIndex.current) {
+				incrementIndex(endIndex);
+			} else {
+				incrementIndex(startIndex);
+				incrementIndex(endIndex);
+			}
 		},
 	})
 
