@@ -10,7 +10,7 @@ import { TexturePass } from 'three/examples/jsm/postprocessing/TexturePass';
 import { CustomAfterimagePass } from './CustomAfterimagePass';
 
 storiesOf("Test/WebGL", module)
-	.add("GPGPU-Particles", () => <SimpleGLStory />);
+	.add("GPGPU-Particles(Continuous)", () => <SimpleGLStory />);
 
 //@ts-ignore
 global.THREE = global.THREE || THREE
@@ -20,7 +20,7 @@ const WIDTH = 32;
 
 const PARTICLE_MAX_COUNT = WIDTH * WIDTH;
 
-const PARTICLE_PER_EMIT = WIDTH;
+const PARTICLE_PER_EMIT = 10;
 
 const SimpleGLStory = () => {
 	const animation = React.useRef({stop() {}});
@@ -405,7 +405,7 @@ const SimpleGLStory = () => {
 
 	const panResponder = PanResponder.create({
 		onStartShouldSetPanResponder: () => true,
-		onPanResponderStart: (e) => {
+		onPanResponderMove: (e) => {
 			const {locationX, locationY, timestamp} = e.nativeEvent;
 
 			touchInfo.current = {

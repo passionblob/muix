@@ -32,6 +32,7 @@ function loadStories() {
   require('./stories/test/gl/FastNoise.stories');
   require('./stories/test/gl/FBMNoise.stories');
   require('./stories/test/gl/GPGPU-Particles.stories');
+  require('./stories/test/gl/GPGPU-Particles(Continuous).stories');
   require('./stories/test/gl/GPGPU-Test.stories');
   require('./stories/test/gl/LinearWipe.stories');
   require('./stories/test/gl/NoiseShader.stories');
@@ -74,6 +75,7 @@ const stories = [
   './stories/test/gl/FastNoise.stories',
   './stories/test/gl/FBMNoise.stories',
   './stories/test/gl/GPGPU-Particles.stories',
+  './stories/test/gl/GPGPU-Particles(Continuous).stories',
   './stories/test/gl/GPGPU-Test.stories',
   './stories/test/gl/LinearWipe.stories',
   './stories/test/gl/NoiseShader.stories',
