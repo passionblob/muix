@@ -12,7 +12,7 @@ import { CustomAfterimagePass } from './CustomAfterimagePass';
 storiesOf("Test/WebGL", module)
 	.add("GPGPU-Particles(Continuous)", () => <SimpleGLStory />);
 
-//@ts-ignore
+// @ts-ignore
 global.THREE = global.THREE || THREE
 
 // GPGPU texture size

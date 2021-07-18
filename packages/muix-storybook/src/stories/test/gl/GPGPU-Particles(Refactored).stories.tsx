@@ -27,16 +27,38 @@ const SimpleGLStory = () => {
 		const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
 		camera.position.set(0, 0, 10);
 		
-		const gpgpuParticle = new GPGPUParticle({renderer});
+		// 지금은 const로 변수들을 처리하고 있지만 uniform으로 처리하면 동적으로 변화를 줄 수 있다.
+		const gpgpuParticle = new GPGPUParticle({
+			renderer,
+			size: 0.01,
+			rate: 4,
+			sizeRandomiser: 0.00,
+			sprayCone: 45,
+			angle: 45,
+			lifetime: 1000,
+			growRate: 0.005,
+			growRateRandomiser: 0.00,
+			xRandomiser: 0.1,
+			yRandomiser: 0.1,
+			opacity: 0.0,
+			opacityRate: 1.0,
+			initialVelocity: 0.5,
+			acc: -0.15,
+			gravity: 0.2,
+			angleRandomiser: 120,
+		});
 		gpgpuParticleRef.current = gpgpuParticle;
 		
 		scene.add(gpgpuParticle);
 
 		const composer = new EffectComposer(renderer);
 		const renderPass = new RenderPass(scene, camera);
+		const testPass = new TexturePass(gpgpuParticle.toggleFBO.texture);
 		const afterImagePass = new CustomAfterimagePass();
 
 		composer.addPass(renderPass);
+		composer.addPass(afterImagePass);
+		// composer.addPass(testPass);
 
 		let shouldStop = false;
 		animation.current.stop = () => {shouldStop = true};
@@ -54,7 +76,7 @@ const SimpleGLStory = () => {
 
 	const panResponder = PanResponder.create({
 		onStartShouldSetPanResponder: () => true,
-		onPanResponderStart: (e) => {
+		onPanResponderMove: (e) => {
 			const {locationX, locationY, timestamp} = e.nativeEvent;
 			let x = locationX / layout.current.width;
 			let y = locationY / layout.current.height;

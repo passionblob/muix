@@ -5,11 +5,35 @@ type GPGPUParticleParams = {
   renderer: THREE.WebGLRenderer
   // power of two is recommended as a input for this.
   fboWidth?: number
-  countPerEmit?: number
   positionShader?: string
   colorShader?: string
-  lifetime?: number
   dt?: number
+  // particle properties
+  rate?: number
+  lifetime?: number
+  sprayCone?: number
+  angle?: number
+  size?: number
+  initialVelocity?: number
+  opacity?: number
+  growRate?: number
+  xRandomiser?: number
+  yRandomiser?: number
+  velocityRandomiser?: number
+  whirlAngle?: number
+  whirlDiversion?: boolean
+  sizeRandomiser?: number
+  growRateRandomiser?: number
+  angleRandomiser?: number
+  opacityRandomiser?: number
+  opacityRate?: number
+  gravity?: number
+  acc?: number
+  // works when physics is false.
+  windX?: number
+  windY?: number
+  windXRandomiser?: number
+  windYRandomiser?: number
 }
 
 export class GPGPUParticle extends THREE.Mesh {
@@ -17,7 +41,7 @@ export class GPGPUParticle extends THREE.Mesh {
   private WIDTH = 32;
 
   private PARTICLE_MAX_COUNT = this.WIDTH * this.WIDTH;
-  private PARTICLE_PER_EMIT = this.WIDTH;
+  private PARTICLE_PER_EMIT = this.WIDTH / 4;
 
   gpuCompute: GPUComputationRenderer
 
@@ -28,6 +52,8 @@ export class GPGPUParticle extends THREE.Mesh {
   dtSelect: THREE.DataTexture;
   dtToggle: THREE.DataTexture;
   dtComplete: THREE.DataTexture;
+  dtVelocity?: THREE.DataTexture;
+  dtAcc?: THREE.DataTexture;
 
   emitPositionVariable: Variable
   positionVariable: Variable
@@ -36,6 +62,8 @@ export class GPGPUParticle extends THREE.Mesh {
   toggleVariable: Variable
   completeVariable: Variable
   colorVariable: Variable
+  velocityVariable?: Variable;
+  accVariable?: Variable;
 
   startIndex = 0;
   endIndex = 0;
@@ -47,23 +75,47 @@ export class GPGPUParticle extends THREE.Mesh {
   emitPositionFBO: THREE.WebGLRenderTarget;
   selectFBO: THREE.WebGLRenderTarget;
   completeFBO: THREE.WebGLRenderTarget;
+  velocityFBO?: THREE.WebGLRenderTarget;
+  accFBO?: THREE.WebGLRenderTarget;
 
   compute: GPUComputationRenderer["compute"]
 
   constructor({
     renderer,
     fboWidth = 32,
-    countPerEmit = 16,
-    colorShader: _colorShader = colorShader,
-    positionShader: _positionShader = positionShader,
-    lifetime,
-    dt,
+    rate = 8,
+    colorShader: _colorShader,
+    positionShader: _positionShader,
+    lifetime = 1000,
+    dt = 1 / 60,
+    size = 0.05,
+    sizeRandomiser = 0.03,
+    sprayCone = 360,
+    angle = 0,
+    growRate = -0.04,
+    growRateRandomiser = 0.03,
+    whirlAngle = 0,
+    whirlDiversion = false,
+    xRandomiser = 0.1,
+    yRandomiser = 0.1,
+    opacity = 0.5,
+    opacityRandomiser = 0,
+    opacityRate = 0.1,
+    gravity = 0.0,
+    initialVelocity = 0.1,
+    velocityRandomiser = 0.05,
+    windX = 0.0,
+    windXRandomiser = 0.0,
+    windY = 0.0,
+    windYRandomiser = 0.0,
+    acc = 0.01,
+    angleRandomiser = 0.0,
   }: GPGPUParticleParams) {
     super();
 
     this.WIDTH = fboWidth;
     this.PARTICLE_MAX_COUNT = fboWidth * fboWidth;
-    this.PARTICLE_PER_EMIT = countPerEmit;
+    this.PARTICLE_PER_EMIT = rate;
 
     this.gpuCompute = new GPUComputationRenderer(fboWidth, fboWidth, renderer);
     this.compute = this.gpuCompute.compute.bind(this.gpuCompute);
@@ -77,12 +129,37 @@ export class GPGPUParticle extends THREE.Mesh {
     this.dtComplete = this.gpuCompute.createTexture();
 
     this.emitPositionVariable = this.gpuCompute.addVariable("textureTouch", emitPositionShader, this.dtEmitPosition);
-    this.positionVariable = this.gpuCompute.addVariable("texturePosition", _positionShader, this.dtPosition);
+    this.positionVariable = this.gpuCompute.addVariable("texturePosition",
+      _positionShader || positionShader({
+        angle,
+        sprayCone,
+        whirlAngle,
+        whirlDiversion,
+        angleRandomiser,
+        gravity,
+        windX,
+        windXRandomiser,
+        windY,
+        windYRandomiser,
+        initialVelocity,
+        velocityRandomiser,
+        lifetime,
+        acc,      
+      }),
+      this.dtPosition);
     this.progressVariable = this.gpuCompute.addVariable("textureProgress", progressShader(lifetime, dt), this.dtProgress);
     this.selectVariable = this.gpuCompute.addVariable("textureSelect", selectShader, this.dtSelect);
     this.toggleVariable = this.gpuCompute.addVariable("textureToggle", toggleShader, this.dtToggle);
     this.completeVariable = this.gpuCompute.addVariable("textureComplete", completeShader, this.dtComplete);
-    this.colorVariable = this.gpuCompute.addVariable("textureColor", _colorShader, this.dtColor);
+    this.colorVariable = this.gpuCompute.addVariable("textureColor",
+      _colorShader || colorShader({
+        opacity,
+        opacityRandomiser,
+        opacityRate,
+        lifetime,
+      }),
+      this.dtColor)
+      ;
 
     this.gpuCompute.setVariableDependencies(this.positionVariable, [this.positionVariable, this.progressVariable, this.emitPositionVariable]);
     this.gpuCompute.setVariableDependencies(this.progressVariable, [this.progressVariable, this.toggleVariable, this.completeVariable]);
@@ -119,14 +196,30 @@ export class GPGPUParticle extends THREE.Mesh {
       attribute vec2 reference;
       varying vec2 vReference;
 
+      const float lifetime = ${lifetime.toPrecision(5)};
+      const float growRate = ${growRate.toPrecision(5)};
+      const float growRateRandomiser = ${growRateRandomiser.toPrecision(5)};
+      const float size = ${size.toPrecision(5)};
+      const vec2 xyRandomiser = vec2(${xRandomiser.toPrecision(5)}, ${yRandomiser.toPrecision(5)});
+
+      float random(vec2 st) {
+        return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+      }
+
       void main() {
         vReference = reference;
         float progress = texture(textureProgress, reference).x;
         vec2 translate = texture(texturePosition, reference).xy * 2.0 - 1.0;
-        float scale = 1.0 - progress;
+        float elapsed = lifetime * progress;
+        float growRateRandomiserFactor = -growRateRandomiser/2.0 + random(vReference) * growRateRandomiser;
+        float growRateScale = (growRate + sign(growRate) * growRateRandomiserFactor) / size;
+        float scale = max(1.0 + growRateScale * elapsed / 1000.0, 0.0);
+
+        vec2 xyRandomiserFactor = -xyRandomiser/2.0 + vec2(random(vReference), random(vReference + 1.0)) * xyRandomiser;
 
         vec2 tmpPos = position.xy;
         tmpPos.xy *= scale;
+        tmpPos.xy += xyRandomiserFactor;
 
         vec2 newPos = tmpPos.xy + translate;
 
@@ -146,8 +239,14 @@ export class GPGPUParticle extends THREE.Mesh {
       transparent: true
     });
 
-    const circleGeometry = new THREE.CircleGeometry(0.05);
-    this.geometry = this.getParticleGeometry(circleGeometry);
+    const circleGeometry = new THREE.CircleGeometry(size);
+    this.geometry = this.getParticleGeometry({
+      count: this.PARTICLE_MAX_COUNT,
+      particleGeometry: circleGeometry,
+      referenceFBOSize: { x: this.WIDTH, y: this.WIDTH },
+      size,
+      sizeRandomiser,
+    });
     this.material = material;
 
     this.positionVariable.material.uniforms['emitPosition'] = {
@@ -195,16 +294,7 @@ export class GPGPUParticle extends THREE.Mesh {
     }
   }
 
-  getParticleGeometry(particleGeometry: THREE.BufferGeometry, itemSize = 3) {
-    const cloned = cloneGeometryToBuffer(
-      particleGeometry,
-      this.PARTICLE_MAX_COUNT,
-      { x: this.WIDTH, y: this.WIDTH },
-      itemSize
-    );
-
-    return cloned
-  }
+  getParticleGeometry = cloneGeometryToBuffer
 }
 
 
@@ -226,35 +316,110 @@ void main() {
 }
 `;
 
-const positionShader = `
-const float dt = 0.016;
-
-float easeOutCubic(float x) {
-  return 1.0 - pow(1.0 - x, 3.0);
+interface PositionShaderParams {
+  angle: number,
+  sprayCone: number,
+  whirlAngle: number,
+  whirlDiversion: boolean,
+  angleRandomiser: number
+  gravity: number
+  windX: number
+  windY: number
+  windXRandomiser: number
+  windYRandomiser: number
+  initialVelocity: number,
+  velocityRandomiser: number,
+  lifetime: number,
+  acc: number,
 }
 
-float random(vec2 st) {
-  return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+function positionShader({
+  angle,
+  sprayCone,
+  whirlAngle,
+  whirlDiversion,
+  angleRandomiser,
+  gravity,
+  windX,
+  windXRandomiser,
+  windY,
+  windYRandomiser,
+  acc,
+  initialVelocity,
+  velocityRandomiser,
+  lifetime,
+}: PositionShaderParams) {
+  return `
+  const float dt = 0.016;
+  const float cone = ${sprayCone.toPrecision(5)};
+  const float angle = ${angle.toPrecision(5)};
+  const float whirlAngle = ${whirlAngle.toPrecision(5)};
+  const bool whirlDiversion = ${whirlDiversion};
+  
+  const float angleRandomiser = ${angleRandomiser.toPrecision(5)};
+  const float gravity = ${gravity.toPrecision(5)};
+  const float windX = ${windX.toPrecision(5)};
+  const float windY = ${windY.toPrecision(5)};
+  const float windXRandomiser = ${windXRandomiser.toPrecision(5)};
+  const float windYRandomiser = ${windYRandomiser.toPrecision(5)};
+
+  const float acc = ${acc.toPrecision(5)};
+  const float lifetime = ${lifetime.toPrecision(5)};
+  const float initialVelocity = ${initialVelocity.toPrecision(5)};
+  const float velocityRandomiser = ${velocityRandomiser.toPrecision(5)};
+  
+  float easeOutCubic(float x) {
+    return 1.0 - pow(1.0 - x, 3.0);
+  }
+  
+  float random(vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+  }
+  
+  void main() {
+    vec2 uv = gl_FragCoord.xy / resolution;
+    float progress = texture(textureProgress, uv).x;
+    vec2 emitPosition = texture(textureTouch, uv).xy;
+    vec2 prev = texture(texturePosition, uv).xy;
+    vec2 next = prev;
+
+    float coneAngleFactor = mod(random(uv)*360.0, cone) - cone / 2.0;
+    float whirlAngleFactor = whirlAngle;
+    
+    if (whirlDiversion) {
+      whirlAngleFactor *= (step(0.5, random(uv + 1.0)) * 2.0 - 1.0);
+    }
+
+    float randomAngle = -angleRandomiser/2.0 + angleRandomiser * random(uv + progress);
+
+    float angle = radians(angle + coneAngleFactor + whirlAngleFactor * progress + randomAngle);
+
+    vec2 angleVector = vec2(cos(angle), sin(angle));
+
+    float elapsed = progress * lifetime / 1000.0;
+    float randomVelocity = -velocityRandomiser/2.0 + velocityRandomiser * random(uv);
+    float velocity = initialVelocity + acc * elapsed + randomVelocity;
+ 
+    vec2 gravityVector = vec2(0.0, -gravity);
+
+    float windXFactor = windX - windXRandomiser + windXRandomiser * random(uv) * 2.0;
+    float windYFactor = windY - windYRandomiser + windYRandomiser * random(uv) * 2.0;
+
+    vec2 windVector = vec2(windXFactor, windYFactor);
+    
+    if (progress <= 0.0) {
+      next.xy = emitPosition;
+    } else {
+      next.xy +=
+      velocity * angleVector * dt
+      + gravityVector * dt
+      + windVector * dt;
+    }
+  
+    gl_FragColor = vec4(next, 0.0, 1.0);
+  }
+  `;
 }
-
-void main() {
-  vec2 uv = gl_FragCoord.xy / resolution;
-  float progress = texture(textureProgress, uv).x;
-  vec2 emitPosition = texture(textureTouch, uv).xy;
-  vec2 prev = texture(texturePosition, uv).xy;
-  vec2 next = prev;
-  vec2 destination = (vec2(random(uv), random(uv + emitPosition)) * 2.0 - 1.0);
-  float distanceFactor = 0.1;
-
-  next.xy = emitPosition
-    +	easeOutCubic(progress)
-    * destination
-    * distanceFactor;
-
-  gl_FragColor = vec4(next, 0.0, 1.0);
-}
-`;
-
 
 const selectShader = `
 uniform float startIndex;
@@ -356,38 +521,78 @@ function progressShader(duration = 1000, dt = 1 / 60) {
   `;
 }
 
-const colorShader = `
-const float dt = 0.016;
-
-float easeOutCubic(float x) {
-  return 1.0 - pow(1.0 - x, 3.0);
+type ColorShaderParams = {
+  opacity: number
+  opacityRandomiser: number
+  opacityRate: number
+  lifetime: number
 }
 
-float random(vec2 st) {
-  return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
-}
-
-void main() {
-  vec2 uv = gl_FragCoord.xy / resolution;
-  float progress = texture(textureProgress, uv).x;
-  bool completed = texture(textureComplete, uv).x >= 1.0;
-  vec3 prev = texture(textureColor, uv).xyz;
-  vec3 next = prev;
-
-  float alpha;
-  if (!completed) {
-    alpha = 1.0 - (1.0 - easeOutCubic(progress));
-  } else {
-    alpha = 0.0;
+function colorShader({
+  opacity,
+  opacityRandomiser,
+  opacityRate,
+  lifetime,
+}: ColorShaderParams) {
+  return `
+  const float dt = 0.016;
+  const float opacity = ${opacity.toPrecision(5)};
+  const float opacityRandomiser = ${opacityRandomiser.toPrecision(5)};
+  const float opacityRate = ${opacityRate.toPrecision(5)};
+  const float lifetime = ${lifetime.toPrecision(5)};
+  
+  float easeOutCubic(float x) {
+    return 1.0 - pow(1.0 - x, 3.0);
   }
+  
+  float random(vec2 st) {
+    return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+  }
+  
+  void main() {
+    vec2 uv = gl_FragCoord.xy / resolution;
+    float progress = texture(textureProgress, uv).x;
+    bool completed = texture(textureComplete, uv).x >= 1.0;
+    vec3 prev = texture(textureColor, uv).xyz;
+    vec3 next = prev;
+    float baseOpacity = opacity - opacityRandomiser/2.0 + random(uv) * opacityRandomiser;
+    float rateMultiplier = easeOutCubic(progress) * lifetime / 1000.0;
+  
+    float alpha;
+    if (!completed) {
+      alpha = baseOpacity + rateMultiplier * opacityRate;
+    } else {
+      alpha = 0.0;
+    }
 
-  vec3 color = vec3(random(uv), random(uv + 0.1), random(uv + 0.2));
-
-  gl_FragColor = vec4(color, alpha);
+    if (progress <= 0.0) {
+      alpha = 0.0;
+    }
+  
+    vec3 color = vec3(random(uv), random(uv + 0.1), random(uv + 0.2));
+  
+    gl_FragColor = vec4(color, alpha);
+  }
+  `;
 }
-`;
 
-function cloneGeometryToBuffer(particleGeometry: THREE.BufferGeometry, count: number, referenceFBOSize: { x: number, y: number }, itemSize = 3) {
+type CloneGeometryToBufferParams = {
+  particleGeometry: THREE.BufferGeometry,
+  count: number,
+  referenceFBOSize: { x: number, y: number },
+  size?: number,
+  sizeRandomiser?: number,
+  itemSize?: number
+}
+
+function cloneGeometryToBuffer({
+  count,
+  particleGeometry,
+  referenceFBOSize,
+  sizeRandomiser = 0,
+  size = 0.05,
+  itemSize = 3,
+}: CloneGeometryToBufferParams) {
   const basePositionBuffer = Array.from(particleGeometry.getAttribute("position").array);
   const baseVertexCount = basePositionBuffer.length / itemSize;
   const baseIndice = particleGeometry.index as THREE.BufferAttribute;
@@ -396,10 +601,15 @@ function cloneGeometryToBuffer(particleGeometry: THREE.BufferGeometry, count: nu
   const positionBuffer = [];
   const referenceBuffer = [];
 
+  const randomiserScale = sizeRandomiser / size;
+
   for (let i = 0; i < count; i += 1) {
     const random = Math.random();
 
-    positionBuffer.push(...basePositionBuffer.map((val) => val * random));
+    positionBuffer.push(...basePositionBuffer.map((val) => {
+      const randomScale = Math.max(1 - randomiserScale / 2 + random * randomiserScale, 0);
+      return val * randomScale
+    }));
 
     for (let j = 0; j < baseIndice.array.length; j += 1) {
       const index = baseIndice.array[j];
@@ -416,6 +626,26 @@ function cloneGeometryToBuffer(particleGeometry: THREE.BufferGeometry, count: nu
   const geometry = new THREE.BufferGeometry();
   geometry.setIndex(indice);
   geometry.setAttribute("position", new THREE.Float32BufferAttribute(positionBuffer, itemSize));
+  geometry.setAttribute("reference", new THREE.Float32BufferAttribute(referenceBuffer, 2));
+
+  return geometry;
+}
+
+
+function getPointGeometry(count: number, referenceFBOSize: { x: number, y: number }) {
+  const positionBuffer = [];
+  const referenceBuffer = [];
+
+  for (let i = 0; i < count; i += 1) {
+    positionBuffer.push(0, 0, 0);
+
+    const x = (i % referenceFBOSize.x) / referenceFBOSize.x;
+    const y = Math.floor(i / referenceFBOSize.y) / referenceFBOSize.y;
+    referenceBuffer.push(x, y);
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positionBuffer, 3));
   geometry.setAttribute("reference", new THREE.Float32BufferAttribute(referenceBuffer, 2));
 
   return geometry;
