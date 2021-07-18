@@ -15,7 +15,7 @@ type GPGPUParticleParams = {
   angle?: number
   size?: number
   initialVelocity?: number
-  opacity?: number
+  initialOpacity?: number
   growRate?: number
   xRandomiser?: number
   yRandomiser?: number
@@ -98,17 +98,17 @@ export class GPGPUParticle extends THREE.Mesh {
     whirlDiversion = false,
     xRandomiser = 0.1,
     yRandomiser = 0.1,
-    opacity = 0.5,
+    initialOpacity = 1.0,
     opacityRandomiser = 0,
-    opacityRate = 0.1,
+    opacityRate = 1.0,
     gravity = 0.0,
-    initialVelocity = 0.1,
+    initialVelocity = 0.15,
     velocityRandomiser = 0.05,
     windX = 0.0,
     windXRandomiser = 0.0,
     windY = 0.0,
     windYRandomiser = 0.0,
-    acc = 0.01,
+    acc = -0.15,
     angleRandomiser = 0.0,
   }: GPGPUParticleParams) {
     super();
@@ -153,7 +153,7 @@ export class GPGPUParticle extends THREE.Mesh {
     this.completeVariable = this.gpuCompute.addVariable("textureComplete", completeShader, this.dtComplete);
     this.colorVariable = this.gpuCompute.addVariable("textureColor",
       _colorShader || colorShader({
-        opacity,
+        initialOpacity,
         opacityRandomiser,
         opacityRate,
         lifetime,
@@ -522,21 +522,21 @@ function progressShader(duration = 1000, dt = 1 / 60) {
 }
 
 type ColorShaderParams = {
-  opacity: number
+  initialOpacity: number
   opacityRandomiser: number
   opacityRate: number
   lifetime: number
 }
 
 function colorShader({
-  opacity,
+  initialOpacity,
   opacityRandomiser,
   opacityRate,
   lifetime,
 }: ColorShaderParams) {
   return `
   const float dt = 0.016;
-  const float opacity = ${opacity.toPrecision(5)};
+  const float opacity = ${initialOpacity.toPrecision(5)};
   const float opacityRandomiser = ${opacityRandomiser.toPrecision(5)};
   const float opacityRate = ${opacityRate.toPrecision(5)};
   const float lifetime = ${lifetime.toPrecision(5)};
