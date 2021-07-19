@@ -4,7 +4,7 @@ export const FastNoiseShader = {
     resolution: {value: {x: 512, y: 512}},
     evolution: {value: 0},
     translate: {value: {x: 0, y: 0}},
-    scale: {value: {x: 16, y: 16}},
+    scale: {value: {x: 5, y: 5}},
   },
   vertexShader: `
   varying vec2 v_uv;

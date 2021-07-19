@@ -3,16 +3,20 @@ import { storiesOf } from '@storybook/react-native';
 import { Easing, ScrollView } from 'react-native';
 import { GLView, ExpoWebGLRenderingContext } from "expo-gl"
 import { THREE, Renderer, TextureLoader } from "expo-three"
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer"
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { animate } from 'popmotion';
-import { FastNoiseShader } from './FastNoiseShader';
+import { FBMNoiseShader } from './FBMNoiseShader';
+import { DisplacementShader } from './DisplacementShader';
+import { DissolveShader } from './DissolveShader';
+
+const textures = [
+	new TextureLoader().load(require("./tex1.jpg")),
+]
 
 //@ts-ignore
 global.THREE = global.THREE || THREE
 
 storiesOf("Test/WebGL", module)
-	.add("FastNoise", () => <SimpleGLStory />);
+	.add("Dissolve", () => <SimpleGLStory />);
 
 const SimpleGLStory = () => {
 	const animation = React.useRef<{ stop: () => void }>();
@@ -26,23 +30,27 @@ const SimpleGLStory = () => {
 		const scene = new THREE.Scene();
 		scene.add(camera);
 
-    const composer = new EffectComposer(renderer);
-    const noisePass = new ShaderPass(FastNoiseShader);
+		const geometry = new THREE.PlaneGeometry(2, 2);
+		const material = new THREE.ShaderMaterial(DissolveShader)
+		const mesh = new THREE.Mesh(geometry, material);
+		scene.add(mesh);
 
-    composer.addPass(noisePass);
-
-    animate({
-      from: 0,
-      to: 1,
-      duration: 10000,
-			repeat: Infinity,
-      onUpdate() {
-        noisePass.uniforms.evolution.value += 0.01;
-        composer.render();
-        gl.endFrameEXP();    
+    let shouldStop = false;
+    animation.current = {
+      stop() {
+        shouldStop = true;
       }
-    })
-  }
+    }
+
+    function tick(time: number) {
+      if (shouldStop) return;
+			renderer.render(scene, camera);
+      gl.endFrameEXP();
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick)
+
+	}
 
 	React.useEffect(() => {
 		return () => {
@@ -56,7 +64,7 @@ const SimpleGLStory = () => {
 				style={{
 					width: "100%",
 					height: undefined,
-					aspectRatio: 3 / 4,
+					aspectRatio: 1 / 1,
 					backgroundColor: "transparent"
 				}}
 				onContextCreate={onContextCreate}

@@ -30,22 +30,26 @@ const SimpleGLStory = () => {
 		// 지금은 const로 변수들을 처리하고 있지만 uniform으로 처리하면 동적으로 변화를 줄 수 있다.
 		const gpgpuParticle = new GPGPUParticle({
 			renderer,
-			size: 0.01,
-			rate: 4,
+			size: 0.05,
+			rate: 8,
 			sizeRandomiser: 0.00,
-			sprayCone: 360,
-			angle: 0,
+			sprayCone: 30,
+			angle: 90,
 			lifetime: 1000,
-			growRate: 0.005,
+			growRate: -0.05,
 			growRateRandomiser: 0.00,
 			xRandomiser: 0.1,
 			yRandomiser: 0.1,
 			initialOpacity: 0.0,
 			opacityRate: 1.0,
 			initialVelocity: 0.15,
-			acc: -0.15,
+			acc: 0.15,
 			gravity: 0.0,
-			angleRandomiser: 120,
+			angleRandomiser: 30,
+			whirlAngle: 30,
+			whirlDiversion: true,
+			hueRandomiser: 1.0,
+			lightnessRandomiser: 0.0,
 		});
 		gpgpuParticleRef.current = gpgpuParticle;
 		

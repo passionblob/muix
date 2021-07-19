@@ -5,8 +5,6 @@ type GPGPUParticleParams = {
   renderer: THREE.WebGLRenderer
   // power of two is recommended as a input for this.
   fboWidth?: number
-  positionShader?: string
-  colorShader?: string
   dt?: number
   // particle properties
   rate?: number
@@ -29,11 +27,16 @@ type GPGPUParticleParams = {
   opacityRate?: number
   gravity?: number
   acc?: number
-  // works when physics is false.
   windX?: number
   windY?: number
   windXRandomiser?: number
   windYRandomiser?: number
+  hue?: number
+  saturation?: number
+  lightness?: number
+  hueRandomiser?: number
+  saturationRandomiser?: number
+  lightnessRandomiser?: number
 }
 
 export class GPGPUParticle extends THREE.Mesh {
@@ -84,8 +87,6 @@ export class GPGPUParticle extends THREE.Mesh {
     renderer,
     fboWidth = 32,
     rate = 8,
-    colorShader: _colorShader,
-    positionShader: _positionShader,
     lifetime = 1000,
     dt = 1 / 60,
     size = 0.05,
@@ -100,7 +101,7 @@ export class GPGPUParticle extends THREE.Mesh {
     yRandomiser = 0.1,
     initialOpacity = 1.0,
     opacityRandomiser = 0,
-    opacityRate = 1.0,
+    opacityRate = -1.0,
     gravity = 0.0,
     initialVelocity = 0.15,
     velocityRandomiser = 0.05,
@@ -110,6 +111,12 @@ export class GPGPUParticle extends THREE.Mesh {
     windYRandomiser = 0.0,
     acc = -0.15,
     angleRandomiser = 0.0,
+    hue = 0.0,
+    saturation = 1.0,
+    lightness = 0.5,
+    hueRandomiser = 1.0,
+    saturationRandomiser = 0,
+    lightnessRandomiser = 0,
   }: GPGPUParticleParams) {
     super();
 
@@ -130,7 +137,7 @@ export class GPGPUParticle extends THREE.Mesh {
 
     this.emitPositionVariable = this.gpuCompute.addVariable("textureTouch", emitPositionShader, this.dtEmitPosition);
     this.positionVariable = this.gpuCompute.addVariable("texturePosition",
-      _positionShader || positionShader({
+      positionShader({
         angle,
         sprayCone,
         whirlAngle,
@@ -152,11 +159,17 @@ export class GPGPUParticle extends THREE.Mesh {
     this.toggleVariable = this.gpuCompute.addVariable("textureToggle", toggleShader, this.dtToggle);
     this.completeVariable = this.gpuCompute.addVariable("textureComplete", completeShader, this.dtComplete);
     this.colorVariable = this.gpuCompute.addVariable("textureColor",
-      _colorShader || colorShader({
+      colorShader({
         initialOpacity,
         opacityRandomiser,
         opacityRate,
         lifetime,
+        hue,
+        saturation,
+        lightness,
+        hueRandomiser,
+        saturationRandomiser,
+        lightnessRandomiser,
       }),
       this.dtColor)
       ;
@@ -196,7 +209,7 @@ export class GPGPUParticle extends THREE.Mesh {
       attribute vec2 reference;
       varying vec2 vReference;
 
-      const float lifetime = ${lifetime.toPrecision(5)};
+      const float lifetime = ${lifetime}.0;
       const float growRate = ${growRate.toPrecision(5)};
       const float growRateRandomiser = ${growRateRandomiser.toPrecision(5)};
       const float size = ${size.toPrecision(5)};
@@ -364,7 +377,7 @@ function positionShader({
   const float windYRandomiser = ${windYRandomiser.toPrecision(5)};
 
   const float acc = ${acc.toPrecision(5)};
-  const float lifetime = ${lifetime.toPrecision(5)};
+  const float lifetime = ${lifetime}.0;
   const float initialVelocity = ${initialVelocity.toPrecision(5)};
   const float velocityRandomiser = ${velocityRandomiser.toPrecision(5)};
   
@@ -498,7 +511,7 @@ void main() {
 
 function progressShader(duration = 1000, dt = 1 / 60) {
   return `
-  const float duration = ${duration.toPrecision(5)};
+  const float duration = ${duration}.0;
   const float dt = ${dt.toPrecision(5)};
   
   void main() {
@@ -526,6 +539,12 @@ type ColorShaderParams = {
   opacityRandomiser: number
   opacityRate: number
   lifetime: number
+  hue: number
+  saturation: number
+  lightness: number
+  hueRandomiser: number
+  saturationRandomiser: number
+  lightnessRandomiser: number
 }
 
 function colorShader({
@@ -533,13 +552,94 @@ function colorShader({
   opacityRandomiser,
   opacityRate,
   lifetime,
+  hue,
+  saturation,
+  lightness,
+  hueRandomiser,
+  lightnessRandomiser,
+  saturationRandomiser,
 }: ColorShaderParams) {
   return `
   const float dt = 0.016;
   const float opacity = ${initialOpacity.toPrecision(5)};
   const float opacityRandomiser = ${opacityRandomiser.toPrecision(5)};
   const float opacityRate = ${opacityRate.toPrecision(5)};
-  const float lifetime = ${lifetime.toPrecision(5)};
+  const float lifetime = ${lifetime}.0;
+  const float hueRandomiser = ${hueRandomiser.toPrecision(5)};
+  const float lightnessRandomiser = ${lightnessRandomiser.toPrecision(5)};
+  const float saturationRandomiser = ${saturationRandomiser.toPrecision(5)};
+  const float hue = ${hue.toPrecision(5)};
+  const float saturation = ${saturation.toPrecision(5)};
+  const float lightness = ${lightness.toPrecision(5)};
+
+  vec3 rgbToHsl(float r, float g, float b){
+    float maxColor = max(max(r, g), b);
+    float minColor = min(min(r, g), b);
+    float h, s, l = (maxColor + minColor) / 2.0;
+
+    if (maxColor == minColor) {
+      h = s = 0.0;
+    } else {
+      float d = maxColor - minColor;
+
+      if (l > 0.5) {
+        s = d / (2.0 - maxColor - minColor);
+      } else {
+        s = d / (maxColor + minColor);
+      }
+
+      if (maxColor == r) {
+        float constant;
+        if (g < b) {
+          constant = 6.0;
+        } else {
+          constant = 0.0;
+        }
+        h = (g-b)/d + constant;
+      } else if (maxColor == g) {
+        h = (b-r)/d + 2.0;
+      } else if (maxColor == b) {
+        h = (r-g)/d + 4.0;
+      }
+  
+      h /= 6.0;
+    }
+
+    return vec3(h, s, l);
+  }
+
+  float hueToRgb(float p, float q, float t) {
+    if (t < 0.0) t += 1.0;
+    if (t > 1.0) t -= 1.0;
+    if (t < 1.0/6.0) return p + (q-p) * 6.0 * t;
+    if (t < 1.0/2.0) return q;
+    if (t < 2.0/3.0) return p + (q-p) * (2.0/3.0 - t) * 6.0;
+    return p;
+  }
+
+  vec3 hslToRgb(float h, float s, float l) {
+    float r, g, b;
+
+    if (s == 0.0) {
+      r = g = b = l;
+    } else {
+      float q;
+
+      if (l < 0.5) {
+        q = l * (1.0 + s);
+      } else {
+        q = l + s - l * s;
+      }
+
+      float p = 2.0 * l - q;
+
+      r = hueToRgb(p, q, h + 1.0/3.0);
+      g = hueToRgb(p, q, h);
+      b = hueToRgb(p, q, h - 1.0/3.0);
+    }
+
+    return vec3(r, g, b);
+  }
   
   float easeOutCubic(float x) {
     return 1.0 - pow(1.0 - x, 3.0);
@@ -548,6 +648,16 @@ function colorShader({
   float random(vec2 st) {
     return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
   }
+
+  float normalizeRandomiser(float randomiser, float offset) {
+    vec2 uv = gl_FragCoord.xy / resolution;
+    return -randomiser / 2.0 + randomiser * random(uv + offset);
+  }
+
+  float normalizeRandomiser(float randomiser) {
+    vec2 uv = gl_FragCoord.xy / resolution;
+    return -randomiser / 2.0 + randomiser * random(uv);
+  }
   
   void main() {
     vec2 uv = gl_FragCoord.xy / resolution;
@@ -555,8 +665,13 @@ function colorShader({
     bool completed = texture(textureComplete, uv).x >= 1.0;
     vec3 prev = texture(textureColor, uv).xyz;
     vec3 next = prev;
-    float baseOpacity = opacity - opacityRandomiser/2.0 + random(uv) * opacityRandomiser;
+    float baseOpacity = opacity - normalizeRandomiser(opacityRandomiser);
     float rateMultiplier = easeOutCubic(progress) * lifetime / 1000.0;
+
+    float h = hue + normalizeRandomiser(hueRandomiser, 1.0);
+    float s = saturation + normalizeRandomiser(saturationRandomiser, -1.0);
+    float l = lightness + normalizeRandomiser(lightnessRandomiser, 0.5);
+    vec3 rgb = hslToRgb(h, s, l);
   
     float alpha;
     if (!completed) {
@@ -568,10 +683,8 @@ function colorShader({
     if (progress <= 0.0) {
       alpha = 0.0;
     }
-  
-    vec3 color = vec3(random(uv), random(uv + 0.1), random(uv + 0.2));
-  
-    gl_FragColor = vec4(color, alpha);
+    
+    gl_FragColor = vec4(rgb, alpha);
   }
   `;
 }

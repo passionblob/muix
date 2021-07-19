@@ -113,7 +113,7 @@ const SimpleGLStory = () => {
 		linearWipePass.uniforms.feather.value = 0.01;
 		linearWipePass.uniforms.progress.value = 0.00;
 		linearWipePass.uniforms.wave.value = 0.5 + Math.random() * 1.5;
-		linearWipePass.uniforms.scale.value = 1.0 + Math.random() * 7.0;
+		// linearWipePass.uniforms.scale.value = 1.0 + Math.random() * 7.0;
 
 		const scalePass = new ShaderPass(ScaleShader);
 		scalePass.uniforms.scale.value = { x: 0.8, y: 0.8 };
