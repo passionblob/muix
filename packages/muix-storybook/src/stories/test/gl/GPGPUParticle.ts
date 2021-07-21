@@ -20,6 +20,10 @@ type GPGPUParticleParams = {
   velocityRandomiser?: number
   whirlAngle?: number
   whirlDiversion?: boolean
+  swingAngle?: number
+  swingCount?: number
+  swingCountRandomiser?: number
+  swingAngleRandomiser?: number
   sizeRandomiser?: number
   growRateRandomiser?: number
   angleRandomiser?: number
@@ -117,6 +121,10 @@ export class GPGPUParticle extends THREE.Mesh {
     hueRandomiser = 1.0,
     saturationRandomiser = 0,
     lightnessRandomiser = 0,
+    swingAngle = 30.0,
+    swingCount = 1.0,
+    swingCountRandomiser = 0.0,
+    swingAngleRandomiser = 10.0,
   }: GPGPUParticleParams) {
     super();
 
@@ -151,7 +159,11 @@ export class GPGPUParticle extends THREE.Mesh {
         initialVelocity,
         velocityRandomiser,
         lifetime,
-        acc,      
+        acc,
+        swingCount,
+        swingAngle,
+        swingCountRandomiser,
+        swingAngleRandomiser,
       }),
       this.dtPosition);
     this.progressVariable = this.gpuCompute.addVariable("textureProgress", progressShader(lifetime, dt), this.dtProgress);
@@ -344,6 +356,10 @@ interface PositionShaderParams {
   velocityRandomiser: number,
   lifetime: number,
   acc: number,
+  swingAngle: number,
+  swingCount: number,
+  swingAngleRandomiser: number,
+  swingCountRandomiser: number,
 }
 
 function positionShader({
@@ -361,6 +377,10 @@ function positionShader({
   initialVelocity,
   velocityRandomiser,
   lifetime,
+  swingAngle,
+  swingCount,
+  swingAngleRandomiser,
+  swingCountRandomiser,
 }: PositionShaderParams) {
   return `
   const float dt = 0.016;
@@ -380,6 +400,11 @@ function positionShader({
   const float lifetime = ${lifetime}.0;
   const float initialVelocity = ${initialVelocity.toPrecision(5)};
   const float velocityRandomiser = ${velocityRandomiser.toPrecision(5)};
+
+  const float swingAngle = ${swingAngle.toPrecision(5)};
+  const float swingCount = ${swingCount.toPrecision(5)};
+  const float swingAngleRandomiser = ${swingAngleRandomiser.toPrecision(5)};
+  const float swingCountRandomiser = ${swingCountRandomiser.toPrecision(5)};
   
   float easeOutCubic(float x) {
     return 1.0 - pow(1.0 - x, 3.0);
@@ -387,6 +412,10 @@ function positionShader({
   
   float random(vec2 st) {
     return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
+  }
+
+  float randomise(float randomiser, vec2 randomVec2) {
+    return -randomiser / 2.0 + random(randomVec2) * randomiser;
   }
   
   void main() {
@@ -403,9 +432,13 @@ function positionShader({
       whirlAngleFactor *= (step(0.5, random(uv + 1.0)) * 2.0 - 1.0);
     }
 
-    float randomAngle = -angleRandomiser/2.0 + angleRandomiser * random(uv + progress);
+    float randomAngle = randomise(angleRandomiser, uv + progress);
 
-    float angle = radians(angle + coneAngleFactor + whirlAngleFactor * progress + randomAngle);
+    float randomisedSwingAngle = swingAngle + randomise(swingAngleRandomiser, uv + 0.123);
+    float randomisedSwingCount = swingCount + randomise(swingCountRandomiser, uv - 0.325);
+    float swingAngleFactor = sin(progress * radians(360.0 * 2.0 * randomisedSwingCount)) * randomisedSwingAngle;
+
+    float angle = radians(angle + coneAngleFactor + whirlAngleFactor * progress + randomAngle + swingAngleFactor);
 
     vec2 angleVector = vec2(cos(angle), sin(angle));
 
@@ -429,7 +462,7 @@ function positionShader({
       + windVector * dt;
     }
   
-    gl_FragColor = vec4(next, 0.0, 1.0);
+    gl_FragColor = vec4(next, 1.0 - progress, 1.0);
   }
   `;
 }

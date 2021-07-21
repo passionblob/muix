@@ -9,6 +9,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { TexturePass } from 'three/examples/jsm/postprocessing/TexturePass';
 import { CustomAfterimagePass } from './CustomAfterimagePass';
 import {GPGPUParticle} from "./GPGPUParticle"
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 
 storiesOf("Test/WebGL", module)
 	.add("GPGPU-Particles(Refactor)", () => <SimpleGLStory />);
@@ -30,26 +31,31 @@ const SimpleGLStory = () => {
 		// 지금은 const로 변수들을 처리하고 있지만 uniform으로 처리하면 동적으로 변화를 줄 수 있다.
 		const gpgpuParticle = new GPGPUParticle({
 			renderer,
-			size: 0.05,
-			rate: 8,
+			size: 0.03,
+			rate: 1,
 			sizeRandomiser: 0.00,
 			sprayCone: 30,
 			angle: 90,
-			lifetime: 1000,
-			growRate: -0.05,
+			lifetime: 3000,
+			growRate: -0.01,
 			growRateRandomiser: 0.00,
 			xRandomiser: 0.1,
 			yRandomiser: 0.1,
 			initialOpacity: 0.0,
 			opacityRate: 1.0,
 			initialVelocity: 0.15,
-			acc: 0.15,
+			acc: -0.04,
 			gravity: 0.0,
+			windX: 0.01,
 			angleRandomiser: 30,
-			whirlAngle: 30,
-			whirlDiversion: true,
-			hueRandomiser: 1.0,
+			// whirlAngle: 30,
+			// whirlDiversion: true,
+			hueRandomiser: 0.3,
 			lightnessRandomiser: 0.0,
+			swingAngle: 30,
+			swingAngleRandomiser: 5,
+			swingCount: 3,
+			swingCountRandomiser: 3,
 		});
 		gpgpuParticleRef.current = gpgpuParticle;
 		
@@ -59,9 +65,11 @@ const SimpleGLStory = () => {
 		const renderPass = new RenderPass(scene, camera);
 		const testPass = new TexturePass(gpgpuParticle.toggleFBO.texture);
 		const afterImagePass = new CustomAfterimagePass();
+		const bloomPass = new UnrealBloomPass(new THREE.Vector2(gl.drawingBufferWidth, gl.drawingBufferHeight), 1.5, 1.0, 0.2)
 
 		composer.addPass(renderPass);
 		composer.addPass(afterImagePass);
+		composer.addPass(bloomPass);
 		// composer.addPass(testPass);
 
 		let shouldStop = false;

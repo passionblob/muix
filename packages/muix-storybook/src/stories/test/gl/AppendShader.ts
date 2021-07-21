@@ -23,11 +23,18 @@ export const AppendShader: {
 
   varying vec2 v_uv;
   
+  float getLuminance(vec3 rgb) {
+    return dot(rgb, vec3(0.375, 0.5, 0.125));
+  }
+
   void main() {
     vec2 uv = v_uv;
     vec4 texOrigin = texture2D(tDiffuse, uv);
     vec4 texAppended = texture2D(map, uv);
-    gl_FragColor = texOrigin * (1.0 - texAppended.a) + texAppended;
+
+    float luminance = getLuminance(texAppended.rgb);
+
+    gl_FragColor = texOrigin * (1.0 - luminance) + texAppended;
   }
   `,
 }

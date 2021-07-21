@@ -27,6 +27,7 @@ export const AdditiveShader: {
     vec2 uv = v_uv;
     vec4 texOrigin = texture2D(tDiffuse, uv);
     vec4 texMap = texture2D(map, uv);
+    
     if (texOrigin.a > 0.0) {
       gl_FragColor = texOrigin + texMap;
     } else {
