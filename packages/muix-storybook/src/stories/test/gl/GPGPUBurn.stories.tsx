@@ -505,7 +505,7 @@ const SimpleGLStory = () => {
 						float to1 = from + interval / 2.0;
 						float to2 = to1 + interval / 2.0;
 
-						float maxScale = 0.5 + random(reference) * 3.0;
+						float maxScale = 0.5 + random(reference) * 3.5;
 
 						if (progress >= from && progress < to1) {
 							float p = interpolate(progress, from, to1, 0.0, 1.0);
@@ -841,7 +841,6 @@ const SimpleGLStory = () => {
 		const fireAppendPass = new ShaderPass(AppendShader);
 		fireAppendPass.uniforms.map = { value: fireFBO.texture };
 
-		// TODO: should find a way to remove all the other passes and remain only renderPass.
 		composer.addPass(paperMaskRenderPass);
 		appendBlurPass(composer, 1.0);
 		composer.addPass(paperMaskSavePass);
