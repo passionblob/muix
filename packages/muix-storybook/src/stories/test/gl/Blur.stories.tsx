@@ -1,6 +1,6 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react-native';
-import { Easing, ScrollView } from 'react-native';
+import { Easing, LayoutChangeEvent, ScrollView, View } from 'react-native';
 import { GLView, ExpoWebGLRenderingContext } from "expo-gl"
 import { THREE, Renderer, TextureLoader } from "expo-three"
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer"
@@ -15,6 +15,7 @@ import { TriangleBlurShader } from "three/examples/jsm/shaders/TriangleBlurShade
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { GaussianBlurShader } from './GaussianBlurShader';
 import { ScaleShader } from './ScaleShader';
+import { Responsive } from '@monthem/muix';
 
 const textures = [
 	new TextureLoader().load(require("./tex1.jpg")),
@@ -39,19 +40,19 @@ const SimpleGLStory = () => {
 		scene.add(camera);
 
 		const geometry = new THREE.PlaneGeometry(2, 2);
-		
+
 		const material = new THREE.MeshBasicMaterial({
-      map: textures[0]
-    })
+			map: textures[0]
+		})
 
 		const mesh = new THREE.Mesh(geometry, material);
 		scene.add(mesh);
 
-    const composer = new EffectComposer(renderer);
-    
-    const renderPass = new RenderPass(scene, camera);
+		const composer = new EffectComposer(renderer);
+
+		const renderPass = new RenderPass(scene, camera);
 		const scalePass = new ShaderPass(ScaleShader);
-		scalePass.uniforms.scale.value = {x: 0.5, y: 0.5};
+		scalePass.uniforms.scale.value = { x: 0.5, y: 0.5 };
 
 		composer.addPass(renderPass);
 		composer.addPass(scalePass);
@@ -62,13 +63,13 @@ const SimpleGLStory = () => {
 			const radius = (iterations - i - 1) * strength;
 			const blurPass = new ShaderPass(GaussianBlurShader);
 			blurPass.uniforms.direction.value = i % 2 === 0
-			? {x: radius, y: 0}
-			: {x: 0, y: radius};
+				? { x: radius, y: 0 }
+				: { x: 0, y: radius };
 			composer.addPass(blurPass);
 		}
 
-    composer.render();
-    gl.endFrameEXP();
+		composer.render();
+		gl.endFrameEXP();
 	}
 
 	React.useEffect(() => {
@@ -79,15 +80,18 @@ const SimpleGLStory = () => {
 
 	return (
 		<ScrollView>
-			<GLView
-				style={{
-					width: "100%",
-					height: undefined,
-					aspectRatio: 1 / 1,
-					backgroundColor: "transparent"
-				}}
-				onContextCreate={onContextCreate}
-			/>
+			<View style={{ alignItems: "center" }}>
+				<GLView
+					msaaSamples={4}
+					style={{
+						width: "100%",
+						height: undefined,
+						aspectRatio: 1 / 1,
+						backgroundColor: "black",
+					}}
+					onContextCreate={onContextCreate}
+				/>
+			</View>
 		</ScrollView>
 	)
 }

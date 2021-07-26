@@ -19,8 +19,8 @@ export class Responsive<C extends React.ComponentType<any>> extends Component<Re
 					const targetProps = (() => {
 						const _targetProps = breakpoints[targetPoint]
 						if (typeof _targetProps === "function") {
-							const getProps = _targetProps as (() => React.ComponentProps<C>)
-							return getProps() 
+							const getProps = _targetProps as ((width: number) => React.ComponentProps<C>)
+							return getProps(Number(targetPoint.replace(/\D/g, ""))) 
 						}
 						return _targetProps
 					})()
@@ -65,7 +65,7 @@ export type ResponsiveProps<C extends React.ComponentClass | React.FC> = {
 	 * "720px": props
 	 */
 	breakpoints: {
-		[index: string]: React.ComponentProps<C> | (() => React.ComponentProps<C>)
+		[index: string]: React.ComponentProps<C> | ((width: number) => React.ComponentProps<C>)
 	}
 }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react-native';
-import { View, Image, ScrollView, PanResponder, Dimensions, Constructor, Text, ImageBackground, TextInput, TouchableOpacity, ImageSourcePropType, ImageURISource, NativeTouchEvent, GestureResponderEvent, LayoutRectangle } from 'react-native';
+import { View, Image, ScrollView, PanResponder, Dimensions, Constructor, Text, ImageBackground, TextInput, TouchableOpacity, ImageSourcePropType, ImageURISource, NativeTouchEvent, GestureResponderEvent, LayoutRectangle, LayoutChangeEvent } from 'react-native';
 import { GLView, ExpoWebGLRenderingContext } from "expo-gl"
 import { THREE, Renderer, TextureLoader } from "expo-three"
 import { GPUComputationRenderer, Variable } from "three/examples/jsm/misc/GPUComputationRenderer"
@@ -8,8 +8,9 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { TexturePass } from 'three/examples/jsm/postprocessing/TexturePass';
 import { CustomAfterimagePass } from './CustomAfterimagePass';
-import {GPGPUParticle} from "./GPGPUParticle"
+import { GPGPUParticle } from "./GPGPUParticle"
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
+import { Responsive } from '@monthem/muix/src';
 
 storiesOf("Test/WebGL", module)
 	.add("GPGPU-Particles(Refactor)", () => <SimpleGLStory />);
@@ -18,16 +19,16 @@ storiesOf("Test/WebGL", module)
 global.THREE = global.THREE || THREE
 
 const SimpleGLStory = () => {
-	const animation = React.useRef({stop() {}});
+	const animation = React.useRef({ stop() { } });
 	const layout = React.useRef<LayoutRectangle>({ x: 0, y: 0, width: 0, height: 0 });
 	const gpgpuParticleRef = React.useRef<GPGPUParticle>();
 
 	async function onContextCreate(gl: ExpoWebGLRenderingContext) {
-		const renderer = new Renderer({gl});
+		const renderer = new Renderer({ gl });
 		const scene = new THREE.Scene();
 		const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
 		camera.position.set(0, 0, 10);
-		
+
 		// 지금은 const로 변수들을 처리하고 있지만 uniform으로 처리하면 동적으로 변화를 줄 수 있다.
 		const gpgpuParticle = new GPGPUParticle({
 			renderer,
@@ -58,7 +59,7 @@ const SimpleGLStory = () => {
 			swingCountRandomiser: 3,
 		});
 		gpgpuParticleRef.current = gpgpuParticle;
-		
+
 		scene.add(gpgpuParticle);
 
 		const composer = new EffectComposer(renderer);
@@ -73,7 +74,7 @@ const SimpleGLStory = () => {
 		// composer.addPass(testPass);
 
 		let shouldStop = false;
-		animation.current.stop = () => {shouldStop = true};
+		animation.current.stop = () => { shouldStop = true };
 
 		function tick(time: number) {
 			if (shouldStop) return;
@@ -89,7 +90,7 @@ const SimpleGLStory = () => {
 	const panResponder = PanResponder.create({
 		onStartShouldSetPanResponder: () => true,
 		onPanResponderMove: (e) => {
-			const {locationX, locationY, timestamp} = e.nativeEvent;
+			const { locationX, locationY, timestamp } = e.nativeEvent;
 			let x = locationX / layout.current.width;
 			let y = locationY / layout.current.height;
 			y *= 2.0;
@@ -110,17 +111,20 @@ const SimpleGLStory = () => {
 
 	return (
 		<ScrollView>
-			<GLView
-				onLayout={(e) => {layout.current = e.nativeEvent.layout}}
-				style={{
-					width: "100%",
-					height: undefined,
-					aspectRatio: 1 / 1,
-					backgroundColor: "black",
-				}}
-				{...panResponder.panHandlers}
-				onContextCreate={onContextCreate}
-			/>
+			<View style={{ alignItems: "center" }}>
+				<GLView
+					msaaSamples={4}
+					onLayout={(e: LayoutChangeEvent) => { layout.current = e.nativeEvent.layout }}
+					style={{
+						width: "100%",
+						height: undefined,
+						aspectRatio: 1 / 1,
+						backgroundColor: "black",
+					}}
+					{...panResponder.panHandlers}
+					onContextCreate={onContextCreate}
+				/>
+			</View>
 			<Text
 				style={{
 					color: "white",

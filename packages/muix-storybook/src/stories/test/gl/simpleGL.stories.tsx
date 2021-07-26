@@ -104,7 +104,6 @@ function onContextCreate(gl: ExpoWebGLRenderingContext) {
             return shader
         }
 
-        console.log(gl.getShaderInfoLog(shader));
         gl.deleteShader(shader);
     }
 

@@ -27,7 +27,6 @@ function loadStories() {
   require('./stories/organisms/layout/coveredButton.stories');
   require('./stories/test/gl/Blur.stories');
   require('./stories/test/gl/Burning.stories');
-  require('./stories/test/gl/BurnPaper.stories');
   require('./stories/test/gl/Displacement.stories');
   require('./stories/test/gl/Dissolve.stories');
   require('./stories/test/gl/FastNoise.stories');
@@ -73,7 +72,6 @@ const stories = [
   './stories/organisms/layout/coveredButton.stories',
   './stories/test/gl/Blur.stories',
   './stories/test/gl/Burning.stories',
-  './stories/test/gl/BurnPaper.stories',
   './stories/test/gl/Displacement.stories',
   './stories/test/gl/Dissolve.stories',
   './stories/test/gl/FastNoise.stories',

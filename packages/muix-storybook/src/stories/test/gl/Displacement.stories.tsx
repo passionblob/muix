@@ -46,10 +46,10 @@ const SimpleGLStory = () => {
 		const noiseMesh = new THREE.Mesh(geometry, noiseMaterial);
 		noiseScene.add(noiseMesh);
 		
-		const material = new THREE.ShaderMaterial(DisplacementShader({
-			texture: textures[0],
-			map: noiseFBO.texture,
-		}))
+		const material = new THREE.ShaderMaterial(DisplacementShader)
+		material.uniforms.tDiffuse.value = textures[0];
+		material.uniforms.map.value = noiseFBO.texture;
+		material.uniforms.strength.value = {x: 0.5, y: 0.5};
 
 		const mesh = new THREE.Mesh(geometry, material);
 		scene.add(mesh);

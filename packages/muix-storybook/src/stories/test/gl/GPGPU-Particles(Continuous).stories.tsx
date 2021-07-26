@@ -1,6 +1,6 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react-native';
-import { View, Image, ScrollView, PanResponder, Dimensions, Constructor, Text, ImageBackground, TextInput, TouchableOpacity, ImageSourcePropType, ImageURISource, NativeTouchEvent, GestureResponderEvent, LayoutRectangle } from 'react-native';
+import { View, Image, ScrollView, PanResponder, Dimensions, Constructor, Text, ImageBackground, TextInput, TouchableOpacity, ImageSourcePropType, ImageURISource, NativeTouchEvent, GestureResponderEvent, LayoutRectangle, LayoutChangeEvent } from 'react-native';
 import { GLView, ExpoWebGLRenderingContext } from "expo-gl"
 import { THREE, Renderer, TextureLoader } from "expo-three"
 import { GPUComputationRenderer, Variable } from "three/examples/jsm/misc/GPUComputationRenderer"
@@ -8,6 +8,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { TexturePass } from 'three/examples/jsm/postprocessing/TexturePass';
 import { CustomAfterimagePass } from './CustomAfterimagePass';
+import { Responsive } from '@monthem/muix';
 
 storiesOf("Test/WebGL", module)
 	.add("GPGPU-Particles(Continuous)", () => <SimpleGLStory />);
@@ -22,13 +23,13 @@ const PARTICLE_MAX_COUNT = WIDTH * WIDTH;
 const PARTICLE_PER_EMIT = WIDTH / 2;
 
 const SimpleGLStory = () => {
-	const animation = React.useRef({stop() {}});
+	const animation = React.useRef({ stop() { } });
 	const layout = React.useRef<LayoutRectangle>({ x: 0, y: 0, width: 0, height: 0 });
-	const touchInfo = React.useRef({x: 0, y: 0, timestamp: 0});
+	const touchInfo = React.useRef({ x: 0, y: 0, timestamp: 0 });
 	const startIndex = React.useRef(0);
 	const endIndex = React.useRef(0);
 
-	function incrementIndex(indexRef: {current: number}) {
+	function incrementIndex(indexRef: { current: number }) {
 		indexRef.current += PARTICLE_PER_EMIT;
 		indexRef.current %= PARTICLE_MAX_COUNT;
 	}
@@ -44,7 +45,7 @@ const SimpleGLStory = () => {
 		camera.position.set(0, 0, 10);
 
 		const gpuCompute = new GPUComputationRenderer(WIDTH, WIDTH, renderer);
-		
+
 		const dtTouch = gpuCompute.createTexture();
 		const dtPosition = gpuCompute.createTexture();
 		const dtProgress = gpuCompute.createTexture();
@@ -255,7 +256,7 @@ const SimpleGLStory = () => {
 		gpuCompute.setVariableDependencies(colorVariable, [colorVariable, progressVariable, completeVariable]);
 		gpuCompute.setVariableDependencies(touchVariable, [toggleVariable, selectVariable, touchVariable]);
 		gpuCompute.init();
-		
+
 		const positionFBO = gpuCompute.getCurrentRenderTarget(positionVariable) as THREE.WebGLRenderTarget;
 		const progressFBO = gpuCompute.getCurrentRenderTarget(progressVariable) as THREE.WebGLRenderTarget;
 		const colorFBO = gpuCompute.getCurrentRenderTarget(colorVariable) as THREE.WebGLRenderTarget;
@@ -297,9 +298,9 @@ const SimpleGLStory = () => {
 
 		const material = new THREE.ShaderMaterial({
 			uniforms: {
-				texturePosition: {value: positionFBO.texture},
-				textureColor: {value: colorFBO.texture},
-				textureProgress: {value: progressFBO.texture},
+				texturePosition: { value: positionFBO.texture },
+				textureColor: { value: colorFBO.texture },
+				textureProgress: { value: progressFBO.texture },
 			},
 			vertexShader: `
 			uniform sampler2D texturePosition;
@@ -356,36 +357,40 @@ const SimpleGLStory = () => {
 		// composer.addPass(completePass);
 
 		let shouldStop = false;
-		animation.current.stop = () => {shouldStop = true};
+		animation.current.stop = () => { shouldStop = true };
 
 		function tick(time: number) {
 			if (shouldStop) return;
 
-			const {x, y, timestamp} = touchInfo.current
+			const { x, y, timestamp } = touchInfo.current
 			Object.assign(positionVariable.material.uniforms, {
-				touch: {value: {
-					x: x / layout.current.width,
-					y: y / layout.current.height,
-				}},
+				touch: {
+					value: {
+						x: x / layout.current.width,
+						y: y / layout.current.height,
+					}
+				},
 			})
 
 			Object.assign(progressVariable.material.uniforms, {
-				timestamp: {value: timestamp},
-				time: {value: time},
-				startIndex: {value: startIndex.current},
-				endIndex: {value: endIndex.current},
+				timestamp: { value: timestamp },
+				time: { value: time },
+				startIndex: { value: startIndex.current },
+				endIndex: { value: endIndex.current },
 			})
 
 			Object.assign(selectVariable.material.uniforms, {
-				startIndex: {value: startIndex.current},
-				endIndex: {value: endIndex.current},
+				startIndex: { value: startIndex.current },
+				endIndex: { value: endIndex.current },
 			})
 
 			Object.assign(touchVariable.material.uniforms, {
-				touch: {value: {
-					x: x / layout.current.width,
-					y: y / layout.current.height,
-				}},
+				touch: {
+					value: {
+						x: x / layout.current.width,
+						y: y / layout.current.height,
+					}
+				},
 			})
 
 
@@ -401,7 +406,7 @@ const SimpleGLStory = () => {
 	const panResponder = PanResponder.create({
 		onStartShouldSetPanResponder: () => true,
 		onPanResponderMove: (e) => {
-			const {locationX, locationY, timestamp} = e.nativeEvent;
+			const { locationX, locationY, timestamp } = e.nativeEvent;
 
 			touchInfo.current = {
 				x: locationX,
@@ -426,17 +431,20 @@ const SimpleGLStory = () => {
 
 	return (
 		<ScrollView>
-			<GLView
-				onLayout={(e) => {layout.current = e.nativeEvent.layout}}
-				style={{
-					width: "100%",
-					height: undefined,
-					aspectRatio: 1 / 1,
-					backgroundColor: "black",
-				}}
-				{...panResponder.panHandlers}
-				onContextCreate={onContextCreate}
-			/>
+			<View style={{ alignItems: "center" }}>
+				<GLView
+					msaaSamples={4}
+					onLayout={(e: LayoutChangeEvent) => { layout.current = e.nativeEvent.layout }}
+					style={{
+						width: "100%",
+						height: undefined,
+						aspectRatio: 1 / 1,
+						backgroundColor: "black",
+					}}
+					{...panResponder.panHandlers}
+					onContextCreate={onContextCreate}
+				/>
+			</View>
 			<Text
 				style={{
 					color: "white",

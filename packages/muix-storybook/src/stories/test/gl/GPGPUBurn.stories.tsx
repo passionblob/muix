@@ -1,6 +1,6 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react-native';
-import { View, Image, ScrollView, PanResponder, Dimensions, Constructor, Text, ImageBackground, TextInput, TouchableOpacity, ImageSourcePropType, ImageURISource, NativeTouchEvent, GestureResponderEvent, LayoutRectangle } from 'react-native';
+import { View, Image, ScrollView, PanResponder, Dimensions, Constructor, Text, ImageBackground, TextInput, TouchableOpacity, ImageSourcePropType, ImageURISource, NativeTouchEvent, GestureResponderEvent, LayoutRectangle, LayoutChangeEvent } from 'react-native';
 import { GLView, ExpoWebGLRenderingContext } from "expo-gl"
 import { THREE, Renderer, TextureLoader } from "expo-three"
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
@@ -21,9 +21,12 @@ import { ChromaKeyShader } from './ChromaKeyShader';
 import { BrightnessContrastShader } from 'three/examples/jsm/shaders/BrightnessContrastShader';
 import { BufferGeometry, CircleGeometry } from 'three';
 import { SimpleChokerShader } from './SimpleChokerShader';
+import { Responsive } from '@monthem/muix/src';
+import { ClearPass } from 'three/examples/jsm/postprocessing/ClearPass';
+import { PlaneGeometry } from '@pixi/mesh-extras';
 
 function appendBlurPass(composer: EffectComposer, strength: number) {
-	const iterations = 8;
+	const iterations = 5;
 	for (let i = 0; i < iterations; i += 1) {
 		const radius = (iterations - i - 1) * strength;
 		const blurPass = new ShaderPass(GaussianBlurShader);
@@ -33,6 +36,8 @@ function appendBlurPass(composer: EffectComposer, strength: number) {
 		composer.addPass(blurPass);
 	}
 }
+
+const fireTexture = new TextureLoader().load(require("./fire_texture.jpg"))
 
 const textures = [
 	new TextureLoader().load(require("./tex1.jpg")),
@@ -44,24 +49,23 @@ storiesOf("Test/WebGL", module)
 //@ts-ignore
 global.THREE = global.THREE || THREE
 
-const BURN_SIZE = 256;
-const SLICE_MAX_COUNT = BURN_SIZE * BURN_SIZE;
-// for mapping plane to square;
+const GPGPU_TEXTURE_SIZE = 128;
+
 const SCREEN_ASPECT_RATIO = 3 / 4;
-const ROW_COUNT = Math.floor(BURN_SIZE * Math.sqrt(SCREEN_ASPECT_RATIO));
-const COLUMN_COUNT = Math.floor(BURN_SIZE / Math.sqrt(SCREEN_ASPECT_RATIO));
+const TEXTURE_ASPECT_RATIO = 3 / 4;
+const SCALE = 0.8;
+
+const ROW_COUNT = Math.floor(GPGPU_TEXTURE_SIZE * Math.sqrt(TEXTURE_ASPECT_RATIO));
+const COLUMN_COUNT = Math.floor(GPGPU_TEXTURE_SIZE / Math.sqrt(TEXTURE_ASPECT_RATIO));
 const BURNING_DURATION = 5000;
-const TIMING_ON_FIRE = 500;
+const TIMING_ON_FIRE = 0;
 const TIMING_ON_DYING = 1000;
 const TIMING_ON_DEAD = 3000;
 const POSITION_RESET_COUNT = 3;
 
-const PARTICLE_SIZE = 64;
-const PARITLCE_MAX_COUNT = PARTICLE_SIZE * PARTICLE_SIZE;
+const PARTICLE_TEXTURE_SIZE = 64;
+const PARITLCE_MAX_COUNT = PARTICLE_TEXTURE_SIZE * PARTICLE_TEXTURE_SIZE;
 
-
-const TEXTURE_ASPECT_RATIO = 16 / 9;
-const SCALE = 0.8;
 
 const SOOT_COLOR = { x: 150 / 255, y: 86 / 255, z: 56 / 255 };
 const BURNING_COLOR = { x: 255 / 255, y: 89 / 255, z: 0 / 255 };
@@ -96,7 +100,10 @@ const SimpleGLStory = () => {
 		const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 100);
 		camera.position.set(0, 0, 10);
 
-		const gpuCompute = new GPUComputationRenderer(BURN_SIZE, BURN_SIZE, renderer);
+		const fireFBO = new THREE.WebGLRenderTarget(gl.drawingBufferWidth, gl.drawingBufferHeight);
+		const paperMaskFBO = new THREE.WebGLRenderTarget(gl.drawingBufferWidth, gl.drawingBufferHeight);
+
+		const gpuCompute = new GPUComputationRenderer(GPGPU_TEXTURE_SIZE, GPGPU_TEXTURE_SIZE, renderer);
 
 		const variableTextures: THREE.DataTexture[] = [];
 
@@ -128,7 +135,10 @@ const SimpleGLStory = () => {
 			float prev = texture(textureSelect, uv).x;
 			float next = prev;
 			
-			vec2 scaledUV = uv*scale + 0.5 - scale/2.0;
+			vec2 scaleFactor = vec2(scale);
+			scaleFactor *= vec2(1.0, 1.0 * screen_aspect_ratio);
+			scaleFactor *= vec2(1.0, 1.0 / texture_aspect_ratio);
+			vec2 scaledUV = uv*scaleFactor + 0.5 - scaleFactor/2.0;
 
 			float d = distance(touch, scaledUV);
 
@@ -238,17 +248,11 @@ const SimpleGLStory = () => {
 			return value1 + (value2 - value1) * progress;
 		}
 
-		float getLuminance(vec3 rgb) {
-			return dot(rgb, vec3(0.375, 0.5, 0.125));
-		}
-
 		void main() {
 			vec2 uv = gl_FragCoord.xy / resolution;
 			float index = resolution.x * gl_FragCoord.y + gl_FragCoord.x;
 			bool toggled = texture(textureToggle, uv).x >= 1.0;
 			float progress = texture(textureProgress, uv).x;
-			vec4 color = texture(textureColor, uv);
-			float luminance = getLuminance(color.rgb);
 			vec3 prev = texture(texturePosition, uv).xyz;
 			vec3 next = prev;
 
@@ -258,7 +262,6 @@ const SimpleGLStory = () => {
 				float p = interpolate(progress, progress_on_fire, progress_on_dying, 0.0, 1.0);
 			} else if (progress < progress_on_dead) {
 				float p = interpolate(progress, progress_on_dying, progress_on_dead, 0.0, 1.0);
-
 				float swingAngle = 30.0;
 				float swingCount = 1.0;
 				float swingCountRandomiser = 0.5;
@@ -271,9 +274,9 @@ const SimpleGLStory = () => {
 				float angleRandomFactor = -angleRandomiser/2.0 + angleRandomiser * random(uv + 0.123);
 				float angle = radians(pureAngle + swingAngleFactor + angleRandomFactor);
 				
-				float acc = -0.0 * (1.0 + position_reset_count);
-				float initialVelocity = 0.15 * (1.0 + position_reset_count);
-				float initialVelocityRandomiser = 0.05 * (1.0 + position_reset_count);
+				float acc = -0.5 * (1.0 + position_reset_count);
+				float initialVelocity = 0.25 * (1.0 + position_reset_count);
+				float initialVelocityRandomiser = 0.10 * (1.0 + position_reset_count);
 				float randomisedInitialVelocity =
 					initialVelocity 
 					- initialVelocityRandomiser/2.0
@@ -291,119 +294,11 @@ const SimpleGLStory = () => {
 				}
 
 				next.xy += vec2(sin(angle), cos(angle)) * velocity * dt;
-				
-			} else if (luminance >= 0.2) {
-				next.xy = vec2(0.0);
+			} else {
+
 			}
 
 			gl_FragColor = vec4(next, 0.0);
-		}
-		`;
-
-		const colorShader = `
-		const float dt = 0.016666666;
-
-		uniform float progress_on_fire;
-		uniform float progress_on_dying;
-		uniform float progress_on_dead;
-		uniform float position_reset_count;
-
-		uniform vec3 burning_color;
-		uniform vec3 fire_color;
-		uniform vec3 weak_burn_color;
-		uniform vec3 weak_fire_color;
-		uniform vec3 ash_color;
-
-		float easeInOutCubic(float x) {
-			return x < 0.5 ? 4.0 * x * x * x : 1.0 - pow(-2.0 * x + 2.0, 3.0) / 2.0;
-		}
-
-		float getLuminance(vec3 rgb) {
-			return dot(rgb, vec3(0.375, 0.5, 0.125));
-		}
-
-		float interpolate(float t, float tMin, float tMax, float value1, float value2) {
-			if (t <= tMin) return value1;
-			if (t >= tMax) return value2;
-			float progress = (t - tMin) / (tMax - tMin);
-			return value1 + (value2 - value1) * progress;
-		}
-
-		void main() {
-			vec2 uv = gl_FragCoord.xy / resolution;
-			bool completed = texture(textureComplete, uv).x >= 1.0;
-			float progress = texture(textureProgress, uv).x;
-			vec4 prev = texture(textureColor, uv);
-			vec4 next = prev;
-			float luminance = getLuminance(prev.rgb);
-
-			if (progress < progress_on_fire) {
-				float from = 0.0;
-				float to1 = 0.0 + progress_on_fire / 3.0 * 1.0;
-				float to2 = to1 + progress_on_fire / 3.0 * 2.0;
-
-				if (progress >= from && progress < to1) {
-					float p = interpolate(progress, from, to1, 0.0, 1.0);
-					next = mix(
-						vec4(0.0),
-						vec4(weak_burn_color, 1.0),
-						p
-					);
-				} else if (progress >= to1 && progress < to2) {
-					float p = interpolate(progress, from, to1, 0.0, 1.0);
-					next = mix(
-						vec4(weak_burn_color, 1.0),
-						vec4(burning_color, 1.0),
-						p
-					);
-				}
-			} else if (progress < progress_on_dying) {
-				float p = interpolate(progress, progress_on_fire, progress_on_dying, 0.0, 1.0);
-				next = mix(
-					vec4(burning_color, 1.0),
-					vec4(fire_color, 1.0),
-					p
-				);
-			} else if (progress < progress_on_dead) {
-				float interval = (progress_on_dead - progress_on_dying) / (1.0 + position_reset_count);
-
-				for (float i=0.0; i<position_reset_count; i += 1.0) {
-					float from = progress_on_dying + interval * i;
-					float to1 = from + interval / 3.0 * 1.0;
-					float to2 = to1 + interval / 3.0 * 1.0;
-					float to3 = to2 + interval / 3.0 * 1.0;
-					if (progress >= from && progress < to1) {
-						float p = interpolate(progress, from, to1, 0.0, 1.0);
-						next = mix(
-							vec4(burning_color, 1.0),
-							vec4(fire_color, 1.0),
-							p
-						);
-					} else if (progress >= to1 && progress < to2) {
-						float p = interpolate(progress, to1, to2, 0.0, 1.0);
-						next = mix(
-							vec4(fire_color, 1.0),
-							vec4(weak_fire_color, 1.0),
-							p
-						);
-					} else if (progress >= to2 && progress < to3) {
-						float p = interpolate(progress, to2, to3, 0.0, 1.0);
-						next = mix(
-							vec4(weak_fire_color, 1.0),
-							vec4(ash_color, 1.0),
-							p
-						);
-					}
-				} 
-			} else {
-				next.rgb *= 0.998;
-			}
-
-			if (progress >= 1.0 && luminance <= 0.5) {
-				next.rgb = vec3(0.0);
-			}
-
-			gl_FragColor = next;
 		}
 		`;
 
@@ -412,19 +307,17 @@ const SimpleGLStory = () => {
 		const selectVariable = gpuCompute.addVariable("textureSelect", selectShader, dtSelect);
 		const toggleVariable = gpuCompute.addVariable("textureToggle", toggleShader, dtToggle);
 		const progressVariable = gpuCompute.addVariable("textureProgress", progressShader, dtProgress);
-		const colorVariable = gpuCompute.addVariable("textureColor", colorShader, dtColor);
 		const positionVariable = gpuCompute.addVariable("texturePosition", firePositionShader, dtPosition);
 		const completeVariable = gpuCompute.addVariable("textureComplete", completeShader, dtComplete);
 
-		variables.push(selectVariable, toggleVariable, progressVariable, colorVariable, positionVariable, completeVariable);
-		clearTargets.current.variable.push(selectVariable, toggleVariable, progressVariable, colorVariable, positionVariable, completeVariable)
+		variables.push(selectVariable, toggleVariable, progressVariable, positionVariable, completeVariable);
+		clearTargets.current.variable.push(selectVariable, toggleVariable, progressVariable, positionVariable, completeVariable)
 
 		gpuCompute.setVariableDependencies(selectVariable, [selectVariable, progressVariable]);
 		gpuCompute.setVariableDependencies(toggleVariable, [selectVariable, toggleVariable, progressVariable, completeVariable]);
 		gpuCompute.setVariableDependencies(progressVariable, [toggleVariable, progressVariable, completeVariable]);
 		gpuCompute.setVariableDependencies(completeVariable, [completeVariable, toggleVariable, selectVariable, progressVariable]);
-		gpuCompute.setVariableDependencies(positionVariable, [positionVariable, progressVariable, toggleVariable, colorVariable]);
-		gpuCompute.setVariableDependencies(colorVariable, [colorVariable, progressVariable, completeVariable]);
+		gpuCompute.setVariableDependencies(positionVariable, [positionVariable, progressVariable, toggleVariable]);
 
 		Object.assign(selectVariable.material.uniforms, {
 			touch: { value: touch },
@@ -448,19 +341,6 @@ const SimpleGLStory = () => {
 			position_reset_count: { value: POSITION_RESET_COUNT },
 		})
 
-		Object.assign(colorVariable.material.uniforms, {
-			progress_on_fire: { value: TIMING_ON_FIRE / BURNING_DURATION },
-			progress_on_dead: { value: TIMING_ON_DEAD / BURNING_DURATION },
-			progress_on_dying: { value: TIMING_ON_DYING / BURNING_DURATION },
-			position_reset_count: { value: POSITION_RESET_COUNT },
-			soot_color: { value: SOOT_COLOR },
-			burning_color: { value: BURNING_COLOR },
-			fire_color: { value: FIRE_COLOR },
-			weak_fire_color: { value: WEAK_FIRE_COLOR },
-			weak_burn_color: { value: WEAK_BURN_COLOR },
-			ash_color: { value: ASH_COLOR },
-		})
-
 		gpuCompute.init();
 		variableTextures.forEach((t) => t.dispose);
 
@@ -469,102 +349,55 @@ const SimpleGLStory = () => {
 		const progressFBO = gpuCompute.getCurrentRenderTarget(progressVariable) as THREE.WebGLRenderTarget;
 		const positionFBO = gpuCompute.getCurrentRenderTarget(positionVariable) as THREE.WebGLRenderTarget;
 		const completeFBO = gpuCompute.getCurrentRenderTarget(completeVariable) as THREE.WebGLRenderTarget;
-		const colorFBO = gpuCompute.getCurrentRenderTarget(colorVariable) as THREE.WebGLRenderTarget;
 
-		const burnGeometry = new THREE.BufferGeometry();
+		const particleBaseGeometry = new THREE.PlaneGeometry(0.05, 0.05);
 
-		clearTargets.current.geometry.push(burnGeometry);
-
-		const burnPositionBuffer = [];
-		const burnReferenceBuffer = [];
-		const burnIndice = [];
-		const burnUvs = [];
-		// const size = [];
-
-		const segmentWidth = (gl.drawingBufferWidth / ROW_COUNT) / gl.drawingBufferWidth;
-		const segmentHeight = (gl.drawingBufferHeight / COLUMN_COUNT) / gl.drawingBufferHeight;
-
-		const planeGeometry = new THREE.PlaneGeometry(segmentWidth, segmentHeight);
-		const planeGeometryPositionBuffer = Array.from(planeGeometry.getAttribute("position").array);
-		const planeGeometryIndice = Array.from(planeGeometry.index?.array || []);
-		const planeGeometryVertexCount = planeGeometryPositionBuffer.length / 3.0;
-
-		if (BURN_SIZE * BURN_SIZE < ROW_COUNT * COLUMN_COUNT) console.error("too small fboSize");
-
-		for (let i = 0; i < SLICE_MAX_COUNT; i += 1) {
-			burnPositionBuffer.push(...planeGeometryPositionBuffer);
-			const rowIndex = Math.floor(i / COLUMN_COUNT);
-			const columnIndex = i % COLUMN_COUNT;
-
-			for (let j = 0; j < planeGeometryVertexCount; j += 1) {
-				const x = rowIndex / ROW_COUNT;
-				const y = (columnIndex + 0.5) / COLUMN_COUNT;
-				burnReferenceBuffer.push(x, y);
-			}
-
-			for (let j = 0; j < planeGeometryIndice.length; j += 1) {
-				const index = planeGeometryIndice[j];
-				burnIndice.push(index + i * planeGeometryVertexCount);
-			}
-
-			burnUvs.push(
-				(rowIndex + 0) / ROW_COUNT, (columnIndex + 1) / COLUMN_COUNT,
-				(rowIndex + 1) / ROW_COUNT, (columnIndex + 1) / COLUMN_COUNT,
-				(rowIndex + 0) / ROW_COUNT, (columnIndex + 0) / COLUMN_COUNT,
-				(rowIndex + 1) / ROW_COUNT, (columnIndex + 0) / COLUMN_COUNT,
-			)
-		}
-
-		burnGeometry.setIndex(burnIndice);
-		burnGeometry.setAttribute("position", new THREE.Float32BufferAttribute(burnPositionBuffer, 3));
-		burnGeometry.setAttribute("reference", new THREE.Float32BufferAttribute(burnReferenceBuffer, 2));
-		burnGeometry.setAttribute("uv", new THREE.Float32BufferAttribute(burnUvs, 2));
-		// geometry.setAttribute("size", new THREE.Float32BufferAttribute(size, 1));
-
-		const circleGeometry = new CircleGeometry(0.03);
-
-		const circleGeometryPositionBuffer = Array.from(circleGeometry.getAttribute("position").array);
-		const circleGeometryIndice = Array.from(circleGeometry.index?.array || []);
-		const circleGeometryVertexCount = circleGeometryPositionBuffer.length / 3.0;
+		const particleBaseGeometryPositionBuffer = Array.from(particleBaseGeometry.getAttribute("position").array);
+		const particleBaseGeometryIndice = Array.from(particleBaseGeometry.index?.array || []);
+		const particleBaseGeometryVertexCount = particleBaseGeometryPositionBuffer.length / 3.0;
+		const particleBaseGeometryUv = Array.from(particleBaseGeometry.getAttribute("uv").array);
 
 		const particlePositionBuffer = [];
 		const particleReferenceBuffer = [];
 		const particleIndice = [];
+		const uv = [];
 
 		const particleGeometry = new BufferGeometry();
 
-		const PARTICLE_TO_BURN_SCALE = BURN_SIZE / PARTICLE_SIZE;
+		const PARTICLE_TO_BURN_SCALE = GPGPU_TEXTURE_SIZE / PARTICLE_TEXTURE_SIZE;
 		const SCALED_ROW_COUNT = ROW_COUNT / PARTICLE_TO_BURN_SCALE;
 		const SCALED_COLUMN_COUNT = COLUMN_COUNT / PARTICLE_TO_BURN_SCALE;
 
 		for (let i = 0; i < PARITLCE_MAX_COUNT; i += 1) {
-			particlePositionBuffer.push(...circleGeometryPositionBuffer);
+			particlePositionBuffer.push(...particleBaseGeometryPositionBuffer);
 			const rowIndex = Math.floor(i / SCALED_COLUMN_COUNT);
 			const columnIndex = i % SCALED_COLUMN_COUNT;
 
-			for (let j = 0; j < circleGeometryVertexCount; j += 1) {
+			for (let j = 0; j < particleBaseGeometryVertexCount; j += 1) {
 				const x = rowIndex / SCALED_ROW_COUNT;
 				const y = (columnIndex + 0.5) / SCALED_COLUMN_COUNT;
 				particleReferenceBuffer.push(x, y);
+				uv.push(...particleBaseGeometryUv);
 			}
 
-			for (let j = 0; j < circleGeometryIndice.length; j += 1) {
-				const index = circleGeometryIndice[j];
-				particleIndice.push(index + i * circleGeometryVertexCount);
+			for (let j = 0; j < particleBaseGeometryIndice.length; j += 1) {
+				const index = particleBaseGeometryIndice[j];
+				particleIndice.push(index + i * particleBaseGeometryVertexCount);
 			}
 		}
 
 		particleGeometry.setIndex(particleIndice);
 		particleGeometry.setAttribute("position", new THREE.Float32BufferAttribute(particlePositionBuffer, 3));
 		particleGeometry.setAttribute("reference", new THREE.Float32BufferAttribute(particleReferenceBuffer, 2));
+		particleGeometry.setAttribute("uv", new THREE.Float32BufferAttribute(uv, 2));
+		particleGeometry.scale(1, TEXTURE_ASPECT_RATIO, 1);
 
-		const burnMaterial = new THREE.ShaderMaterial({
-			transparent: true,
-			blending: THREE.AdditiveBlending,
+		const baseGeometry = new THREE.PlaneGeometry(2, 2);
+
+		const paperMaskShader = {
 			uniforms: {
-				textureProgress: { value: progressFBO.texture },
-				textureColor: { value: colorFBO.texture },
-				textureDiffuse: { value: textures[0] },
+				tDiffuse: { value: null },
+				textureProgress: { value: null },
 				progress_on_fire: { value: TIMING_ON_FIRE / BURNING_DURATION },
 				progress_on_dead: { value: TIMING_ON_DEAD / BURNING_DURATION },
 				progress_on_dying: { value: TIMING_ON_DYING / BURNING_DURATION },
@@ -572,108 +405,48 @@ const SimpleGLStory = () => {
 			},
 			vertexShader: `
 			uniform sampler2D textureProgress;
+			varying vec2 v_uv;
+			
+			void main() {
+				v_uv = uv;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+			}
+			`,
+			fragmentShader: `
+			uniform sampler2D textureProgress;
 
 			uniform float progress_on_fire;
 			uniform float progress_on_dying;
 			uniform float progress_on_dead;
-			uniform float position_reset_count;
 
-			attribute vec2 reference;
-
-			varying vec2 v_reference;
-			varying vec2 v_uv;
-
-			float random(vec2 st) {
-				return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43257.5453123);
-			}
-
-			float easeOutCubic(float x) {
-				return 1.0 - pow(1.0 - x, 3.0);
-			}
-
-			float easeInCubic(float x) {
-				return x * x * x;
-			}
-
-			void updateVarying() {
-				v_uv = uv;
-				v_reference = reference;
-			}
-
-			float interpolate(float t, float tMin, float tMax, float value1, float value2) {
-				if (t <= tMin) return value1;
-				if (t >= tMax) return value2;
-				float progress = (t - tMin) / (tMax - tMin);
-				return value1 + (value2 - value1) * progress;
-			}
-
-			void main() {
-				updateVarying();
-				float progress = texture(textureProgress, reference).x;
-
-				vec2 scale = vec2(1.0);
-
-				if (progress < progress_on_fire) {
-					float p = interpolate(progress, 0.0, progress_on_fire, 0.0, 1.0);
-				} else if (progress < progress_on_dying) {
-					float p = interpolate(progress, progress_on_fire, progress_on_dying, 0.0, 1.0);
-				} else if (progress < progress_on_dead) {
-					float p = interpolate(progress, progress_on_dying, progress_on_dead, 0.0, 1.0);
-
-					float interval = (progress_on_dead - progress_on_dying) / (1.0 + position_reset_count);
-
-					for (float i=0.0; i<1.0 + position_reset_count; i += 1.0) {
-						float from = progress_on_dying + interval * i;
-						float to1 = from + interval / 3.0 * 1.0;
-						float to2 = to1 + interval / 3.0 * 2.0;
-						if (progress >= from && progress < to1) {
-							float p = interpolate(progress, from, to1, 0.0, 1.0);
-							scale.xy = mix(vec2(1.0), vec2(1.0), easeInCubic(p));
-						} else if (progress >= to1 && progress < to2) {
-							float p = interpolate(progress, to1, to2, 0.0, 1.0);
-							scale.xy = mix(vec2(1.0), vec2(1.0), easeOutCubic(p));
-						}
-					}
-				}
-
-				vec4 next = vec4(position, 1.0);
-				next.xy *= scale;
-				next.xy *= 2.0;
-				next.xy += reference * 2.0;
-				next.xy -= 1.0;
-
-				gl_Position = projectionMatrix * modelViewMatrix * next;
-			}
-			`,
-			fragmentShader: `
-			uniform sampler2D textureColor;
-			uniform sampler2D textureProgress;
-			uniform sampler2D textureDiffuse;
-
-			varying vec2 v_reference;
 			varying vec2 v_uv;
 			
 			void main() {
-				float progress = texture(textureProgress, v_reference).x;
-				vec4 tOrigin = texture(textureDiffuse, v_uv);
-				vec4 tColor = texture(textureColor, v_reference);
+				float progress = texture(textureProgress, v_uv).x;
+				float alpha = 0.0;
+				vec3 color = vec3(0.0);
 
-				vec4 color = mix(tOrigin, tColor, tColor.a);
+				if (progress >= progress_on_dying) {
+					color = vec3(1.0);
+					alpha = 1.0;
+				}
 
-				gl_FragColor = color;
+				gl_FragColor = vec4(color, alpha);
 			}
 			`,
-		})
+		}
 
 		const fireMaterial = new THREE.ShaderMaterial({
 			transparent: true,
+			blending: THREE.AdditiveBlending,
 			uniforms: {
 				textureProgress: { value: progressFBO.texture },
-				texturePosition: {value: positionFBO.texture},
+				texturePosition: { value: positionFBO.texture },
 				progress_on_fire: { value: TIMING_ON_FIRE / BURNING_DURATION },
 				progress_on_dead: { value: TIMING_ON_DEAD / BURNING_DURATION },
 				progress_on_dying: { value: TIMING_ON_DYING / BURNING_DURATION },
 				position_reset_count: { value: POSITION_RESET_COUNT },
+				textureFire: {value: fireTexture},
 			},
 			vertexShader: `
 			uniform sampler2D textureProgress;
@@ -719,40 +492,51 @@ const SimpleGLStory = () => {
 				vec3 translate = texture(texturePosition, reference).xyz;
 
 				float scale = 1.0;
+				float rotate = 0.0;
 
 				if (progress < progress_on_fire) {
-					float p = interpolate(progress, 0.0, progress_on_fire, 0.0, 1.0);
+					// float p = interpolate(progress, 0.0, progress_on_fire, 0.0, 1.0);
 				} else if (progress < progress_on_dying) {
-					float p = interpolate(progress, progress_on_fire, progress_on_dying, 0.0, 1.0);
+					// float p = interpolate(progress, progress_on_fire, progress_on_dying, 0.0, 1.0);
 				} else if (progress < progress_on_dead) {
-
 					float interval = (progress_on_dead - progress_on_dying) / (1.0 + position_reset_count);	
 					for (float i=0.0; i<1.0 + position_reset_count; i += 1.0) {
 						float from = progress_on_dying + interval * i;
 						float to1 = from + interval / 2.0;
 						float to2 = to1 + interval / 2.0;
+
+						float maxScale = 0.5 + random(reference) * 3.0;
+
 						if (progress >= from && progress < to1) {
 							float p = interpolate(progress, from, to1, 0.0, 1.0);
-							scale = mix(0.0, 0.5, easeOutCubic(p));
+							scale = mix(0.0, maxScale, easeOutCubic(p));
 						} else if (progress >= to1 && progress < to2) {
 							float p = interpolate(progress, to1, to2, 0.0, 1.0);
-							scale = mix(0.5, 0.0, easeInCubic(p));
+							scale = mix(maxScale, 0.0, easeInCubic(p));
 						}
 					}
 				}
 
 				vec4 next = vec4(position, 1.0);
+
+				next.xy *= mat2(
+					cos(rotate), -sin(rotate),
+					sin(rotate), cos(rotate)
+				);
+
 				next.xy *= scale;
 				next.xy *= 2.0;
 				next.xy += reference * 2.0;
 				next.xy -= 1.0;
 				next.xy += translate.xy;
 
+
 				gl_Position = projectionMatrix * modelViewMatrix * next;
 			}
 			`,
 			fragmentShader: `
 			uniform sampler2D textureProgress;
+			uniform sampler2D textureFire;
 
 			uniform float progress_on_fire;
 			uniform float progress_on_dying;
@@ -762,6 +546,14 @@ const SimpleGLStory = () => {
 			varying vec2 v_reference;
 			varying vec2 v_uv;
 			
+			float easeOutCubic(float x) {
+				return 1.0 - pow(1.0 - x, 3.0);
+			}
+
+			float easeInCubic(float x) {
+				return x * x * x;
+			}
+
 			float interpolate(float t, float tMin, float tMax, float value1, float value2) {
 				if (t <= tMin) return value1;
 				if (t >= tMax) return value2;
@@ -772,6 +564,87 @@ const SimpleGLStory = () => {
 			float random(vec2 st) {
 				return fract(sin(dot(st, vec2(12.9898, 78.233))) * 43758.5453123);
 			}
+
+			void drawCircle(vec2 center, float radius, vec3 color, float alpha, float feather) {
+				float distance = length(v_uv - center);
+				float opacity;
+				if (distance < radius - feather) {
+					opacity = 1.0;
+				} else {
+					opacity = 1.0 - smoothstep(radius-feather, radius, distance);
+				}
+				gl_FragColor = vec4(color, alpha * opacity);
+			}
+
+			vec3 rgbToHsl(float r, float g, float b){
+				float maxColor = max(max(r, g), b);
+				float minColor = min(min(r, g), b);
+				float h, s, l = (maxColor + minColor) / 2.0;
+		
+				if (maxColor == minColor) {
+					h = s = 0.0;
+				} else {
+					float d = maxColor - minColor;
+		
+					if (l > 0.5) {
+						s = d / (2.0 - maxColor - minColor);
+					} else {
+						s = d / (maxColor + minColor);
+					}
+		
+					if (maxColor == r) {
+						float constant;
+						if (g < b) {
+							constant = 6.0;
+						} else {
+							constant = 0.0;
+						}
+						h = (g-b)/d + constant;
+					} else if (maxColor == g) {
+						h = (b-r)/d + 2.0;
+					} else if (maxColor == b) {
+						h = (r-g)/d + 4.0;
+					}
+			
+					h /= 6.0;
+				}
+		
+				return vec3(h, s, l);
+			}
+		
+			float hueToRgb(float p, float q, float t) {
+				if (t < 0.0) t += 1.0;
+				if (t > 1.0) t -= 1.0;
+				if (t < 1.0/6.0) return p + (q-p) * 6.0 * t;
+				if (t < 1.0/2.0) return q;
+				if (t < 2.0/3.0) return p + (q-p) * (2.0/3.0 - t) * 6.0;
+				return p;
+			}
+		
+			vec3 hslToRgb(float h, float s, float l) {
+				float r, g, b;
+		
+				if (s == 0.0) {
+					r = g = b = l;
+				} else {
+					float q;
+		
+					if (l < 0.5) {
+						q = l * (1.0 + s);
+					} else {
+						q = l + s - l * s;
+					}
+		
+					float p = 2.0 * l - q;
+		
+					r = hueToRgb(p, q, h + 1.0/3.0);
+					g = hueToRgb(p, q, h);
+					b = hueToRgb(p, q, h - 1.0/3.0);
+				}
+		
+				return vec3(r, g, b);
+			}
+			
 
 			void main() {
 				float progress = texture(textureProgress, v_reference).x;
@@ -814,6 +687,109 @@ const SimpleGLStory = () => {
 					alpha = 1.0;
 				} else {
 					color = vec3(0.0);
+				}
+
+				vec4 fireTex = texture(textureFire, v_uv);
+				fireTex.a = alpha;
+
+				vec3 fireHsl = rgbToHsl(fireTex.r, fireTex.g, fireTex.b);
+				vec3 hsl = rgbToHsl(color.r, color.g, color.b);
+
+				fireTex.rgb = hslToRgb(hsl.r, hsl.g, fireHsl.b);
+
+				drawCircle(vec2(0.5, 0.5), 0.5, color, alpha, 0.5);
+
+				// gl_FragColor = fireTex;
+			}
+			`,
+		})
+
+
+		const paperGeometry = baseGeometry.clone()
+		const paperMaterial = new THREE.ShaderMaterial({
+			transparent: true,
+			blending: THREE.AdditiveBlending,
+			uniforms: {
+				textureProgress: { value: progressFBO.texture },
+				textureDiffuse: { value: textures[0] },
+				textureMask: { value: paperMaskFBO.texture },
+				progress_on_fire: { value: TIMING_ON_FIRE / BURNING_DURATION },
+				progress_on_dead: { value: TIMING_ON_DEAD / BURNING_DURATION },
+				progress_on_dying: { value: TIMING_ON_DYING / BURNING_DURATION },
+				position_reset_count: { value: POSITION_RESET_COUNT },
+				soot_color: { value: SOOT_COLOR },
+			},
+			vertexShader: `
+			uniform sampler2D textureProgress;
+			varying vec2 v_uv;
+			
+			void main() {
+				v_uv = uv;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+			}
+			`,
+			fragmentShader: `
+			uniform sampler2D textureProgress;
+			uniform sampler2D textureDiffuse;
+			uniform sampler2D textureMask;
+			uniform vec3 soot_color;
+
+			uniform float progress_on_fire;
+			uniform float progress_on_dying;
+			uniform float progress_on_dead;
+			uniform float position_reset_count;
+
+			varying vec2 v_uv;
+
+			const float thresholdFire = 0.8;
+			const float thresholdAsh = 0.9;
+			const float thresholdDead = 0.97;
+
+			float interpolate(float t, float tMin, float tMax, float value1, float value2) {
+				if (t <= tMin) return value1;
+				if (t >= tMax) return value2;
+				float progress = (t - tMin) / (tMax - tMin);
+				return value1 + (value2 - value1) * progress;
+			}
+
+			float random(vec2 st) {
+				return fract(sin(dot(st, vec2(12.9898, 78.233))) * 43758.5453123);
+			}
+
+			float easeOutCubic(float x) {
+				return 1.0 - pow(1.0 - x, 3.0);
+			}
+
+			void main() {
+				float progress = texture(textureProgress, v_uv).x;
+				vec4 tMask = texture(textureMask, v_uv);
+				vec4 tOrigin = texture(textureDiffuse, v_uv);
+
+				float alpha = 1.0;
+				vec3 color = vec3(tOrigin.rgb);
+				vec3 colorMultiply = vec3(1.0);
+
+				if (tMask.a <= 0.0) {
+
+				} else {
+					if (tMask.a < thresholdFire) {
+						float p = interpolate(tMask.a, 0.0, thresholdFire, 0.0, 1.0);
+						colorMultiply = mix(
+							vec3(1.0),
+							soot_color,
+							easeOutCubic(p)
+						);
+						color *= colorMultiply;
+					} else if (tMask.a < thresholdAsh) {
+						float r = 0.2 + random((v_uv + progress) / 100.0) * 0.8;
+						float g = 0.1 + random((v_uv + progress + 0.123) / 100.0) * 0.1;
+						float b = 0.0;
+						color = vec3(r, g, b);
+					} else if (tMask.a < thresholdDead) {
+						color = vec3(1.0) * random(v_uv) * 0.05 + vec3(0.3);
+					} else {
+						alpha = 0.0;
+					}
 				}	
 
 				gl_FragColor = vec4(color, alpha);
@@ -821,64 +797,70 @@ const SimpleGLStory = () => {
 			`,
 		})
 
-		
-		
-		clearTargets.current.material.push(burnMaterial);
+		clearTargets.current.material.push(paperMaterial);
 		clearTargets.current.material.push(fireMaterial);
-		
-		const burnMesh = new THREE.Mesh(burnGeometry, burnMaterial);
+
+		const paperMesh = new THREE.Mesh(paperGeometry, paperMaterial);
+		const paperScene = scene.clone();
+		const paperCamera = camera.clone();
+
 		const fireMesh = new THREE.Mesh(particleGeometry, fireMaterial);
 		const fireScene = scene.clone();
 		const fireCamera = camera.clone();
 
 		let scaleX = 1;
 		let scaleY = 1;
-		// scaleY *= SCREEN_ASPECT_RATIO;
-		// scaleY /= TEXTURE_ASPECT_RATIO;
+		scaleY *= SCREEN_ASPECT_RATIO;
+		scaleY /= TEXTURE_ASPECT_RATIO;
 		scaleX *= SCALE;
 		scaleY *= SCALE;
-		burnMesh.scale.set(scaleX, scaleY, SCALE);
+		paperMesh.scale.set(scaleX, scaleY, SCALE);
 		fireMesh.scale.set(scaleX, scaleY, SCALE);
-		scene.add(burnMesh);
-		// scene.add(fireMesh);
 
+		paperScene.add(paperMesh);
 		fireScene.add(fireMesh);
 
 		const composer = new EffectComposer(renderer);
 
-		const fireFBO = new THREE.WebGLRenderTarget(gl.drawingBufferWidth, gl.drawingBufferHeight);
 		const fireSavePass = new SavePass(fireFBO);
 		const fireRenderPass = new RenderPass(fireScene, fireCamera);
-		const afterImagePass = new CustomAfterimagePass();
+		const afterImagePass = new CustomAfterimagePass(0.90);
 		const simpleChokerPass = new ShaderPass(SimpleChokerShader);
-		simpleChokerPass.uniforms.threshold = {value: 0.5};
+		simpleChokerPass.uniforms.threshold = { value: 0.5 };
 		const bloomPass = new UnrealBloomPass(
 			new THREE.Vector2(gl.drawingBufferWidth, gl.drawingBufferHeight),
 			1.0,
 			1.0,
 			0.2,
 		)
-		const renderPass = new RenderPass(scene, camera);
+		const paperRenderPass = new RenderPass(paperScene, paperCamera);
+		const paperMaskRenderPass = new ShaderPass(paperMaskShader);
+		paperMaskRenderPass.uniforms.textureProgress.value = progressFBO.texture;
+		const paperMaskSavePass = new SavePass(paperMaskFBO);
+
 		const fireAppendPass = new ShaderPass(AppendShader);
-		fireAppendPass.uniforms.map = {value: fireFBO.texture};
-		
+		fireAppendPass.uniforms.map = { value: fireFBO.texture };
+
+		// TODO: should find a way to remove all the other passes and remain only renderPass.
+		composer.addPass(paperMaskRenderPass);
+		appendBlurPass(composer, 1.0);
+		composer.addPass(paperMaskSavePass);
+
 		composer.addPass(fireRenderPass);
-		composer.addPass(afterImagePass);
-		appendBlurPass(composer, 0.3);
 		composer.addPass(simpleChokerPass);
-		composer.addPass(bloomPass);
 		composer.addPass(fireSavePass);
-		composer.addPass(renderPass);
+
+		composer.addPass(paperRenderPass);
 		composer.addPass(fireAppendPass);
 
 		function tick(time: number) {
 			gpuCompute.compute();
 			composer.render();
 
-			variables.forEach((v) => {
-				const t = gpuCompute.getAlternateRenderTarget(v) as THREE.WebGLRenderTarget;
-				t.dispose();
-			});
+			// variables.forEach((v) => {
+			// 	const t = gpuCompute.getAlternateRenderTarget(v) as THREE.WebGLRenderTarget;
+			// 	t.dispose();
+			// });
 
 			gl.endFrameEXP();
 			animation.current = requestAnimationFrame(tick);
@@ -917,12 +899,13 @@ const SimpleGLStory = () => {
 			})
 			clearTargets.current.texture.forEach((t) => t.dispose)
 		}
-	});
+	}, []);
 
 	return (
 		<ScrollView>
 			<GLView
-				onLayout={(e) => { layout.current = e.nativeEvent.layout }}
+				msaaSamples={4}
+				onLayout={(e: LayoutChangeEvent) => { layout.current = e.nativeEvent.layout }}
 				style={{
 					width: "100%",
 					height: undefined,
@@ -940,7 +923,7 @@ const SimpleGLStory = () => {
 					padding: 10,
 					marginTop: 10
 				}}>
-				touch area to generate particles.
+				touch photo to light a fire.
 			</Text>
 		</ScrollView>
 	)

@@ -10,6 +10,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { TexturePass } from 'three/examples/jsm/postprocessing/TexturePass';
 import { PlaneGeometry, ShaderMaterial } from 'three';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { Responsive } from '@monthem/muix/src';
 
 storiesOf("Test/WebGL", module)
 	.add("GPGPU-Test", () => <SimpleGLStory />);
@@ -18,7 +19,7 @@ storiesOf("Test/WebGL", module)
 global.THREE = global.THREE || THREE
 
 const SimpleGLStory = () => {
-	const animation = React.useRef({stop() {}});
+	const animation = React.useRef({ stop() { } });
 	async function onContextCreate(gl: ExpoWebGLRenderingContext) {
 		const { drawingBufferHeight: height, drawingBufferWidth: width } = gl
 
@@ -115,7 +116,7 @@ const SimpleGLStory = () => {
 		const velocityVariable = gpuCompute.addVariable("textureVelocity", fragmentShaderVelocity, dtVelocity)
 		const directionVariable = gpuCompute.addVariable("textureDirection", fragmentShaderDirection, dtDirection)
 		const accVariable = gpuCompute.addVariable("textureAcc", fragmentShaderAcc, dtAcc)
-		
+
 		gpuCompute.setVariableDependencies(positionVariable, [positionVariable, directionVariable, velocityVariable]);
 		gpuCompute.setVariableDependencies(velocityVariable, [velocityVariable, accVariable, directionVariable]);
 		gpuCompute.setVariableDependencies(directionVariable, [positionVariable, directionVariable]);
@@ -168,7 +169,7 @@ const SimpleGLStory = () => {
 
 		const myMaterial = new THREE.ShaderMaterial({
 			uniforms: {
-				texturePosition: {value: positionRenderTarget.texture}
+				texturePosition: { value: positionRenderTarget.texture }
 			},
 			vertexShader: `
 			uniform sampler2D texturePosition;
@@ -189,7 +190,7 @@ const SimpleGLStory = () => {
 
 		const myMesh = new THREE.Mesh(myGeometry, myMaterial);
 		scene.add(myMesh);
-		
+
 		const composer = new EffectComposer(renderer);
 		const renderPass = new RenderPass(scene, camera);
 		const positionPass = new TexturePass(positionRenderTarget.texture);
@@ -198,10 +199,10 @@ const SimpleGLStory = () => {
 		// composer.addPass(positionPass);
 
 		let shouldStop = false;
-		animation.current.stop = () => {shouldStop = true};
+		animation.current.stop = () => { shouldStop = true };
 
 		function tick(time: number) {
-			accVariable.material.uniforms["time"] = {value: time}
+			accVariable.material.uniforms["time"] = { value: time }
 
 			if (shouldStop) return;
 			gpuCompute.compute();
@@ -222,10 +223,12 @@ const SimpleGLStory = () => {
 	return (
 		<ScrollView>
 			<GLView
+				msaaSamples={4}
 				style={{
 					width: "100%",
 					height: undefined,
 					aspectRatio: 1 / 1,
+					backgroundColor: "black",
 				}}
 				onContextCreate={onContextCreate}
 			/>
@@ -276,7 +279,7 @@ function fillDirectionTexture(texture: THREE.Texture) {
 
 function fillAccTexture(texture: THREE.Texture) {
 	const array = texture.image.data;
-	for(let i = 0; i < array.length; i += 4) {
+	for (let i = 0; i < array.length; i += 4) {
 		array[i + 0] = 0.5;
 		array[i + 0] = 0.5;
 		array[i + 0] = 0.5;
