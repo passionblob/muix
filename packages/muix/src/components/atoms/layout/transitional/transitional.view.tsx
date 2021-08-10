@@ -1,7 +1,6 @@
 import React from "react"
 import { StyleSheet, ViewProps, ViewStyle, StyleProp, TransformsStyle, TextStyle } from "react-native"
-import { Interpolation, InterpolatorConfig, SpringConfig, useSpring } from "react-spring"
-import { animated, SpringValue } from "@react-spring/native"
+import { Interpolation, InterpolatorConfig, SpringConfig, useSpring, animated, SpringValue } from "@react-spring/native"
 import { getRange, viewStyleProperties, wholeStyleProperties } from "@monthem/utils"
 import {
   FlatTransform,

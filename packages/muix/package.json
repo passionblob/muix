@@ -1,6 +1,6 @@
 {
   "name": "@monthem/muix",
-  "version": "1.14.1",
+  "version": "1.14.2",
   "dependencies": {
     "@monthem/web-color": "^1.0.3",
     "@react-spring/native": "^9.2.4",

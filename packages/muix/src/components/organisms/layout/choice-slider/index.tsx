@@ -1,10 +1,8 @@
 import { textStyleProperties } from '@monthem/utils'
 import React, { forwardRef } from 'react'
-import { TextStyle, View, ViewProps, Text, ViewStyle } from 'react-native'
-import { animated, Interpolation } from "@react-spring/native"
-import { SpringConfig, useChain, useSpring, useSpringRef, useSprings, useTrail } from "react-spring"
+import { TextStyle, View, ViewStyle } from 'react-native'
+import { SpringConfig, animated, Interpolation, useTrail } from "@react-spring/native"
 import { CarouselBase, CarouselBaseInterpolatorInfo, CarouselBaseProps, CarouselBaseRenderItemInfo } from "@monthem/muix"
-import { Easing } from 'react-native'
 
 const defaultMicroChunkInterpolator: MicronChunkInterpolatorFn<any> = ({ info, chunkIndex, chunks, item, props }) => {
   return {

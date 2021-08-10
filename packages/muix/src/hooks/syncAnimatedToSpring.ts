@@ -1,6 +1,6 @@
 import React from "react"
 import { Animated } from "react-native"
-import {SpringValue} from "react-spring"
+import {SpringValue} from "@react-spring/native"
 import {useListener} from "./useListener"
 
 export const syncAnimatedToSpring = (params: SpringAnimatedHookParams) => {

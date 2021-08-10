@@ -1,6 +1,6 @@
 import { anyOf, makeRecords, viewStyleProperties } from "@monthem/utils"
 import { Animated, TextStyle, TransformsStyle, ViewStyle } from "react-native"
-import { Interpolation } from "react-spring"
+import { Interpolation } from "@react-spring/native"
 
 export type FlatTransform = {
   perspective: number

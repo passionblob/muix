@@ -1,5 +1,5 @@
 import React from "react"
-import { SpringConfig, SpringValue, useSpring } from "react-spring"
+import { SpringConfig, SpringValue, useSpring } from "@react-spring/native"
 import { useListener } from "./useListener"
 
 /**

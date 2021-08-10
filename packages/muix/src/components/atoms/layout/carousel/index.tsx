@@ -1,7 +1,6 @@
 import React, { forwardRef } from 'react'
 import { ViewStyle } from 'react-native'
-import { to, InterpolatorConfig } from "react-spring"
-import { animated } from "@react-spring/native"
+import { animated, to, InterpolatorConfig } from "@react-spring/native"
 import { CarouselBase, CarouselBaseProps, CarouselBaseRef } from "./base"
 
 export * from "./base"

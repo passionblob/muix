@@ -1,7 +1,6 @@
 import React, { forwardRef } from 'react'
 import { View, ViewStyle, LayoutChangeEvent, PanResponder, ViewProps, Text } from 'react-native'
-import { animated, Interpolation } from "@react-spring/native"
-import { useSpring, to, InterpolatorConfig, SpringValue } from "react-spring"
+import { animated, Interpolation, useSpring, to, InterpolatorConfig, SpringValue } from "@react-spring/native"
 import { anyOf, isAllTrue } from "@monthem/utils"
 import { WebColors } from "@monthem/web-color"
 import chroma from "chroma-js"
