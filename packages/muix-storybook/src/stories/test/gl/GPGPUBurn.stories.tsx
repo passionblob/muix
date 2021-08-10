@@ -841,12 +841,16 @@ const SimpleGLStory = () => {
 		const fireAppendPass = new ShaderPass(AppendShader);
 		fireAppendPass.uniforms.map = { value: fireFBO.texture };
 
+		// TODO: should find a way to remove all the other passes and remain only renderPass.
 		composer.addPass(paperMaskRenderPass);
 		appendBlurPass(composer, 1.0);
 		composer.addPass(paperMaskSavePass);
 
 		composer.addPass(fireRenderPass);
+		// composer.addPass(afterImagePass);
+		// appendBlurPass(composer, 1.0);
 		composer.addPass(simpleChokerPass);
+		// composer.addPass(bloomPass);
 		composer.addPass(fireSavePass);
 
 		composer.addPass(paperRenderPass);

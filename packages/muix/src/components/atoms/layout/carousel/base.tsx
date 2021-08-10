@@ -114,7 +114,7 @@ export const CarouselBase
     const containerRef = React.useRef<View>(null);
     const slicer = React.useRef(getSlicer(initialIndex))
     const initialized = React.useRef(false)
-    const timer = React.useRef<number>();
+    const timer = React.useRef<NodeJS.Timeout>();
     const shouldScrollImmediately = React.useRef(false);
     const [newDestination, setNewDestination] = React.useState(0)
     const [dummyState, setDummyState] = React.useState(0)

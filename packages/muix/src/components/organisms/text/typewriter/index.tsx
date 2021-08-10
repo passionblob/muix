@@ -31,7 +31,7 @@ export const Typewriter = (props: TypewriterProps) => {
 	})()
 
 	const shouldWait = React.useRef(false);
-	const timeout = React.useRef<number>()
+	const timeout = React.useRef<NodeJS.Timeout>()
 
 	const charCounter = React.useRef(0)
 	charCounter.current = 0
